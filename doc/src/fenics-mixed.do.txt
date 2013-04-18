@@ -411,9 +411,9 @@ The search and poll steps are both implemented in Python but are mainly wrappers
 The search step is implemented as follows:
 
 @@@CODE src-fenics-mixed/opt-flow/optimize_flow_by_SMF.py fromto: def search@def refine
-Here, `dsmerge` and `krig_min_find_MADS_kent` are functions
+Here, `dsmerge` and `krig_min_find_MADS_oct` are functions
 available in the MATLAB/Octave
-files `dsmerge.m` and `krig_min_find_MADS_kent.m`. We need to notify
+files `dsmerge.m` and `krig_min_find_MADS_oct.m`. We need to notify
 Octave about the directory (`SMF`) where these files can be found:
 
 !bc pycod
@@ -1178,8 +1178,9 @@ Finally, the module is built using a "`setup.py`": "${src_path}/ODEFieldSolver/c
 
 
 
-
-__Acknowledgment.__ The first author want to thank Alison L. Marsden,
+!split
+======== Acknowledgment ======== 
+The first author want to thank Alison L. Marsden,
 Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
 Example 2 and 3, and for hosting the first author during the summer
 2012. Furthermore, Dag Sverre Seljebotn provided the code for the
