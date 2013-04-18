@@ -227,7 +227,7 @@ The equations read</p>
 <div class="math">
 \[\rho (\frac{ \partial v}{\partial t} +
 (v \cdot \nabla) v) =
--\nabla p + \mu \Delta u + f
+-\nabla p + \mu \Delta v + f
 \mbox{ in }\Omega\]</div>
 <div class="math">
 \[\nabla \cdot v =  0    \mbox{ in } \Omega\]</div>
@@ -244,7 +244,7 @@ f(P_i, v, p, \ldots)  \mbox{ on } \partial \Omega_o .\]</div>
 <p>These ODEs are coupled to the Navier-Stokes equations through the
 inlet or outlet boundary condition</p>
 <div class="math">
-\[\mu \frac{\partial u}{\partial n} + p n =  P_o
+\[\mu \frac{\partial v}{\partial n} + p n =  P_o
 \mbox{ on } \partial \Omega_o\]</div>
 <div class="section" id="the-fenics-solver">
 <h2>The FEniCS solver<a class="headerlink" href="#the-fenics-solver" title="Permalink to this headline">¶</a></h2>
@@ -266,7 +266,7 @@ The typical usage of the class goes as follows:</p>
 <tt class="docutils literal"><span class="pre">P1</span></tt> and <tt class="docutils literal"><span class="pre">P2</span></tt> are the pressures at the two outlets at time <tt class="docutils literal"><span class="pre">t</span></tt>.
 The implementation details of class <tt class="docutils literal"><span class="pre">NSSolver</span></tt> are not essential to
 this document, so we just refer the reader to the relatively short
-<a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/NSSolver.py">NSSolver.py</a> file.</p>
+<a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ns/NSSolver.py">NSSolver.py</a> file.</p>
 </div>
 <div class="section" id="the-fortran-code-for-modeling-boundary-conditions">
 <h2>The FORTRAN code for modeling boundary conditions<a class="headerlink" href="#the-fortran-code-for-modeling-boundary-conditions" title="Permalink to this headline">¶</a></h2>
@@ -300,7 +300,7 @@ value at time <span class="math">\(t+\Delta t\)</span>).</p>
 specific model is a simple one; the problem setting is that another
 research group is continuously developing such models, and their software
 is in FORTRAN.) The solver in FORTRAN is implemented in a file
-<a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/f77/PMODEL.f">PMODEL.f</a> with the content</p>
+<a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ns/f77/PMODEL.f">PMODEL.f</a> with the content</p>
 <div class="highlight-fortran"><div class="highlight"><pre>      <span class="k">SUBROUTINE </span><span class="nv">PMODEL</span><span class="p">(</span><span class="nv">P</span><span class="p">,</span> <span class="nv">P_1</span><span class="p">,</span> <span class="nv">R_D</span><span class="p">,</span> <span class="nv">Q</span><span class="p">,</span> <span class="nv">C</span><span class="p">,</span> <span class="nv">N</span><span class="p">,</span> <span class="nv">T</span><span class="p">)</span>
 <span class="nv">C</span>     <span class="nv">Integrate</span> <span class="nv">P</span> <span class="nv">in</span> <span class="nv">N</span> <span class="nv">steps</span> <span class="nv">from</span> <span class="mi">0</span> <span class="nv">to</span> <span class="nv">T</span><span class="p">,</span> <span class="nv">given</span> <span class="nv">start</span> <span class="k">value </span><span class="nv">P_1</span>
       <span class="kt">INTEGER </span><span class="nv">N</span>
@@ -346,7 +346,7 @@ a shared library <tt class="docutils literal"><span class="pre">bcmodelf77.so</s
 the FORTRAN file to analyze and compile. Our convention is to
 compile F2PY modules in a subdirectory of the FORTRAN code,
 which explains why the file here has name <tt class="docutils literal"><span class="pre">../PMODEL.f</span></tt>.</p>
-<p>A little <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/f77/f2py/test.py">test code</a> can compare
+<p>A little <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ns/f77/f2py/test.py">test code</a> can compare
 the FORTRAN ODE solver with a couple of manual lines in Python:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nose.tools</span> <span class="kn">as</span> <span class="nn">nt</span>
 
@@ -380,7 +380,7 @@ we wrap a class around the function such that the syntax of each call
 to compute <span class="math">\(P\)</span> becomes simpler. The idea is to let parameters that are
 constant through the fluid flow simulation be attributes in the class
 so that it is sufficient to provide the varying parameters in the call
-to <tt class="docutils literal"><span class="pre">PMODEL</span></tt>. The <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/BCModel.py">Python code</a> hopefully
+to <tt class="docutils literal"><span class="pre">PMODEL</span></tt>. The <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ns/BCModel.py">Python code</a> hopefully
 explains this idea clearly:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">BCModel</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">R_d</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
@@ -409,7 +409,7 @@ outlet boundary where we want to use the ODE model. Then we invoke a
 time loop where new <span class="math">\(u\)</span> and <span class="math">\(p\)</span> are computed, then we compute the flux
 <span class="math">\(Q\)</span>, and finally we compute new outlet pressures by calling up each
 ODE solver in turn. All this code is collected in the file
-<a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/CoupledSolver.py">CoupledSolver.py</a>:</p>
+<a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ns/CoupledSolver.py">CoupledSolver.py</a>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">NSSolver</span>
 <span class="kn">from</span> <span class="nn">BCModel</span> <span class="kn">import</span> <span class="n">BCModel</span>
 

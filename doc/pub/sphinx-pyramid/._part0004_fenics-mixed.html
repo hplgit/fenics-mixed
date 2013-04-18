@@ -83,7 +83,7 @@ s^n &amp;= s^{n-1} + \Delta t g(u^n, s^{n-1}) ,\end{split}\]</div>
 the ODE solver is implemented in a homemade C++ code. We will glue
 these two different solvers together using Python. The C++ code consists
 basically of the class <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> declared in a file
-<a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/ODEFieldSolver.h">ODEFieldSolver.h</a>:</p>
+<a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ODEFieldSolver/ODEFieldSolver.h">ODEFieldSolver.h</a>:</p>
 <div class="highlight-c++"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ODEFieldSolver</span> <span class="p">{</span>
   <span class="kt">int</span> <span class="n">n</span><span class="p">;</span>                <span class="c1">// no of points (or regions)</span>
   <span class="kt">double</span><span class="o">*</span> <span class="n">s</span><span class="p">;</span>            <span class="c1">// discrete values of unknown s)</span>
@@ -110,7 +110,7 @@ basically of the class <tt class="docutils literal"><span class="pre">ODEFieldSo
 <tt class="docutils literal"><span class="pre">set_u</span></tt> provides the <span class="math">\(u\)</span> field (the &#8220;environment&#8221;) to the ODE system.
 Note that there are two versions of <tt class="docutils literal"><span class="pre">set_IC</span></tt> and <tt class="docutils literal"><span class="pre">set_u</span></tt>: one for
 a constant value one for spatial variations. We refer to
-the <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/ODEFieldSolver.cpp">ODEFieldSolver.cpp</a>
+the <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ODEFieldSolver/ODEFieldSolver.cpp">ODEFieldSolver.cpp</a>
 file for implementational details.</p>
 <p>The mathematics behind the shown class is to have <span class="math">\(n\)</span> regional or pointwise
 values of <span class="math">\(u\)</span> and <span class="math">\(s\)</span>, and then solve <span class="math">\(s_t = g(s,u)\)</span> in each region
@@ -173,7 +173,7 @@ in the <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt>
 </div></blockquote>
 <p>These functions must make use of a global variable holding a
 <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> object and interact with this object as appropriate.
-The <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-cpp/capi2cpp.cpp">complete code of the C API</a> then becomes</p>
+The <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-cpp/capi2cpp.cpp">complete code of the C API</a> then becomes</p>
 <div class="highlight-c++"><div class="highlight"><pre><span class="cp">#include &quot;ODEFieldSolver.h&quot;</span>
 
 <span class="n">ODEFieldSolver</span> <span class="n">solver</span> <span class="o">=</span> <span class="n">ODEFieldSolver</span><span class="p">();</span>
@@ -527,7 +527,7 @@ the C++ code.)</p>
 <p>By writing the corresponding FORTRAN 77 signatures, F2PY can generate
 a FORTRAN 90 module specification of the extension module, and this
 code can be compiled as explained above.
-We refer to the files in the <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-c">f2py-c</a>
+We refer to the files in the <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-c">f2py-c</a>
 directory for details.</p>
 </div>
 <div class="section" id="wrapping-with-swig">
@@ -751,7 +751,7 @@ library with name <tt class="docutils literal"><span class="pre">_ODEFieldSolver
 is the module to use from Python and this is nothing but a Python
 class wrapper to <tt class="docutils literal"><span class="pre">_ODEFieldSolver.so</span></tt> module.  Building the shared
 library is most conveniently done via a standard <tt class="docutils literal"><span class="pre">setup.py</span></tt>
-script. The following <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/swig/setup.py">setup.py</a> file provides an
+script. The following <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ODEFieldSolver/swig/setup.py">setup.py</a> file provides an
 appropriate recipe for writing this kind of files:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">numpy</span>
 <span class="kn">from</span> <span class="nn">distutils.core</span> <span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">Extension</span>
@@ -821,7 +821,7 @@ the ODE solver:</p>
     &lt;call the ODE solver&gt;
 </pre></div>
 </div>
-<p>A <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/swig/test_coupled_solver.py">complete code</a> goes as follows:</p>
+<p>A <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ODEFieldSolver/swig/test_coupled_solver.py">complete code</a> goes as follows:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">dolfin</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 
@@ -913,7 +913,7 @@ the ODE solver:</p>
 <div class="section" id="wrapping-with-cython">
 <h2>Wrapping with Cython<a class="headerlink" href="#wrapping-with-cython" title="Permalink to this headline">¶</a></h2>
 <p>Cython can also be used to wrap C/C++ code.
-To this end we define the C++ class in a  <tt class="docutils literal"><span class="pre">.pyx</span></tt> <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/cython/ODEFieldSolver.pyx">file</a>:</p>
+To this end we define the C++ class in a  <tt class="docutils literal"><span class="pre">.pyx</span></tt> <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ODEFieldSolver/cython/ODEFieldSolver.pyx">file</a>:</p>
 <div class="highlight-cython"><div class="highlight"><pre><span class="k">cimport</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">cnp</span>
 <span class="k">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -979,7 +979,7 @@ the C++ object&#8217;s <tt class="docutils literal"><span class="pre">get_s</spa
     <span class="k">return</span> <span class="n">out</span>
 </pre></div>
 </div>
-<p>Finally, the module is built using a <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/cython/setup.py">setup.py</a> script for mixing Python, Cython, and C++ code:</p>
+<p>Finally, the module is built using a <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ODEFieldSolver/cython/setup.py">setup.py</a> script for mixing Python, Cython, and C++ code:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">distutils.core</span> <span class="kn">import</span> <span class="n">setup</span>
 <span class="kn">from</span> <span class="nn">distutils.extension</span> <span class="kn">import</span> <span class="n">Extension</span>
 <span class="kn">from</span> <span class="nn">Cython.Distutils</span> <span class="kn">import</span> <span class="n">build_ext</span>

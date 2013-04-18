@@ -163,7 +163,7 @@ new sample points.</p>
 <p class="caption"><em>The flow chart of the surrogate management method</em></p>
 </div>
 <p>The main algorithm is implemented in Python (file
-<a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/opt-flow/optimize_flow_by_SMF.py">opimize_flow_by_SMF.py</a>) and listed below.  It
+<a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/opt-flow/optimize_flow_by_SMF.py">opimize_flow_by_SMF.py</a>) and listed below.  It
 calls three key Python functions: <tt class="docutils literal"><span class="pre">search</span></tt>, <tt class="docutils literal"><span class="pre">poll</span></tt>, and <tt class="docutils literal"><span class="pre">refine</span></tt>,
 which make calls to the MATLAB/Octave package.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># main loop</span>
@@ -242,7 +242,7 @@ Octave about the directory (<tt class="docutils literal"><span class="pre">SMF</
 </div>
 <div class="section" id="the-fenics-pde-solver">
 <h2>The FEniCS PDE solver<a class="headerlink" href="#the-fenics-pde-solver" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/opt-flow/flow_problem.py">FEniCS solver</a> first
+<p>The <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/opt-flow/flow_problem.py">FEniCS solver</a> first
 defines the inflow condition (class <tt class="docutils literal"><span class="pre">EssentialBC</span></tt>), the <tt class="docutils literal"><span class="pre">K</span></tt>
 coefficient in the PDEs, and the Dirichlet boundary:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">EssentialBC</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>

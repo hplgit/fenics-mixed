@@ -77,7 +77,7 @@ downloads all the files:
         Terminal> git clone https://github.com/hplgit/fenics-mixed.git
 
 The source code for the examples are located in the
-subdirectory `doc/src/src-fenics-mixed <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed>`_.
+subdirectory `doc/src/src-fenics-mixed <https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed>`_.
 The code examples are tested with FEniCS version 1.2.
 
 
