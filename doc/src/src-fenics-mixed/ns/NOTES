@@ -1,0 +1,17 @@
+
+120 mm HG = 16 000 Pa 
+
+1 ml = 1000 mm^3 / s 
+
+1 mm Hg = 133 Pa 
+
+R = 0.05 mm HG s / ml = 0.005 * 133 Pa s /  1000 mm^3  = 0.000665 Pa s / (mm^3 / s)  
+C = 0.02 ml / mm Hg = 0.02 * (1000 mm^3 / s) / 133 Pa =  0.15 (mm^3 / s) / Pa 
+
+Alastruey et al 2007, ECA 
+R = 5.43 10^9 Pa s m^-3 = 5.43 Pa s    
+C = 1.27 10^-10 m^3 / Pa = 0.127  (mm^3 / s) / Pa 
+ 
+
+
+

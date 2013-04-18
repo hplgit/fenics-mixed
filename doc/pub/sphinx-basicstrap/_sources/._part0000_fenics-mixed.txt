@@ -1,0 +1,70 @@
+.. Automatically generated reST file from Doconce source
+   (http://code.google.com/p/doconce/)
+
+
+
+Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB
+==========================================================================
+
+:Author: Kent-Andre Mardal (kent-and at simula.no), Hans Petter Langtangen (hpl at simula.no)
+:Date: Apr 18, 2013
+
+Introduction
+============
+
+FEniCS is an easy-to-use tool for solving partial differential
+equations (PDEs) and enables very flexible specifications of PDE
+problems.  However, many scientific problems require (much) more than
+solving PDEs, and in those cases a FEniCS solver must be coupled to
+other types of software.  This is usually easy and convenient if the
+FEniCS solver is coded in Python and the other software is either
+written in Python or easily accessible from Python.
+
+Coupling of FEniCS solvers in Python with MATLAB, FORTRAN, C, or C++
+codes is possible, and in principle straightforward, but there might
+be a lot of technical details in practice. Many potential FEniCS users
+already have substantial pieces of software in other more traditional
+scientific computing languages, and the new solvers they write in FEniCS
+may need to communicate with this existing and well-tested software.
+Unfortunately, the world of gluing computer code in very different
+languages with the aid of tools like F2PY, SWIG, Cython, and Instant
+is seldom the focal point of a computational scientist.
+We have therefore written this document to provide some examples and
+associated detailed explanations on how the mentioned tools can be used to
+combine FEniCS solvers in Python with other code written in MATLAB,
+FORTRAN, C, and C++. We believe that even if the examples are
+short and limited in complexity, the couplings are technically
+complicated and broad enough to cover a range of different situations
+in the real world.
+
+To illustrate the tools and techniques, we focus on four specific
+case studies:
+
+ 1. *A flow problem with boundary conditions depending on a system of
+    ODEs*. The ODE solver and the ODE system are implemented in
+    FORTRAN, and we use F2PY to generate wrapper code such that
+    the ODE solver is accessible from Python.
+
+ 2. *A flow optimization problem*. The goal here is to compute the
+    optimal placement, permeability and size of a porous medium within
+    a flow field such that certain flow properties are minimized in a
+    given region.  A FEniCS flow solver is coupled to sophisticated
+    MATLAB/Octave code for steps in the optimization process (kriging
+    and surrogate modeling).
+
+ 3. *DOLFIN library-level programming in C++*.  A new C++ utility,
+    based on DOLFIN, for fast repeated evaluations of finite element
+    functions on parallel computers is developed. We glue C++ code,
+    DOLFIN, and Python with the aid of the FEniCS JIT compiler
+    Instant.
+
+ 4. *A parabolic FEniCS solver in Python coupled to a C++ ODE solver at
+    each node*.  In this example we illustrate F2PY, SWIG, and Cython
+    as alternative ways for coupling C++ and Python codes.
+
+This tutorial is meant for FEniCS users. For introductions to FEniCS,
+see the gentle tutorial [Ref01]_, the paper
+[Ref02]_, or the more comprehensive book about the FEniCS
+project [Ref03]_.
+
+

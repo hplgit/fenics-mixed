@@ -1,0 +1,38 @@
+
+Check if your octave-headers package is properly installed by running 
+compiling test.cc as described in make.sh. 
+
+These packages where needed on my Ubuntu machine:
+libtool automake libboost-python-dev libopenmpi-dev  octave  octave3.2-headers
+
+When octave-headers is properly installed it is fairly easy to 
+install pytave as described in e.g. install-pytave. But 
+there is a bug in the most recent changeset so revert to changeset
+51.      
+
+bzr branch lp:pytave
+cd pytave
+bzr revert -r 51
+autoreconf --install
+./configure
+sudo python setup.py install
+
+
+
+If you have trouble with MPI when running make.sh, you may   
+
+bzr branch lp:pytave 
+cd pytave 
+bzr revert -r 51
+export CC=mpicc 
+export CXX=mpic++ 
+autoreconf --install
+./configure 
+sudo python setup.py install 
+
+
+
+
+
+
+

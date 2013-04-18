@@ -1,0 +1,1106 @@
+.. !split
+
+.. _fext:pdeode:cpp:
+
+FEniCS solver coupled with ODE solver in C++
+============================================
+
+In this final example we will consider a solver for a reaction-diffusion
+equation described by a parabolic PDE coupled to a set of ODEs. The
+equation can be written as
+
+
+.. math::
+        
+        u_t &= \Delta u + f(u, s),
+        & \forall x \in\Omega,\ t>0, \\ 
+        s_t &= g(u, s),
+        & \forall x \in \Omega,\ t>0.
+        
+
+Here, :math:`u` is a scalar function, subscript :math:`t` means differentiation with
+respect to time, :math:`s` is a scalar field (governed pointwise by an ODE),
+and :math:`\Delta u` is a Laplace term.
+The problem is usually solved using a first order operator splitting scheme,
+where we at a time level first solve the PDE with :math:`f` evaluated at
+the previous time level, and thereafter we update the ODEs using
+the most recent value of :math:`u`. More precisely,
+
+
+.. math::
+        
+        u^n &= u^{n-1} + \Delta t (\Delta u^n + f(u^{n-1}, s^{n-1})),  \\ 
+        s^n &= s^{n-1} + \Delta t g(u^n, s^{n-1}) ,
+        
+
+The superscript :math:`n` denotes the time level, and :math:`\Delta t` is the time step.
+
+The solver for the parabolic problem is implemented in FEniCS, while
+the ODE solver is implemented in a homemade C++ code. We will glue
+these two different solvers together using Python. The C++ code consists
+basically of the class ``ODEFieldSolver`` declared in a file ``ODEFieldSolver.h``:
+
+
+.. code-block:: c++
+
+        class ODEFieldSolver {
+          int n;                // no of points (or regions)
+          double* s;            // discrete values of unknown s)
+          double* s_1;          // s at the previous time level
+          double* u;            // discrete values of external field u
+          double dt;            // time step size
+        
+          public:
+          ODEFieldSolver();
+         ~ODEFieldSolver();
+          void redim(int n);    // allocate data structures
+          int size();           // return the no of points/regions
+          virtual double g(double s, double u);
+          void set_dt(double dt);
+          void set_IC(int n, double* in_array);
+          void set_u (int n, double* in_array);
+          void set_IC(double const_value);
+          void set_u (double const_value);
+          void advance_one_timestep();
+        };
+
+The ``set_IC`` functions set the initial condition of the ODE system, and
+``set_u`` provides the :math:`u` field (the "environment") to the ODE system.
+Note that there are two versions of ``set_IC`` and ``set_u``: one for
+a constant value one for spatial variations.
+
+The mathematics behind the shown class is to have :math:`n` regional or pointwise
+values of :math:`u` and :math:`s`, and then solve :math:`s_t = g(s,u)` in each region
+or at each point. In the present case we will solve for :math:`s` at
+the nodes in the finite element mesh used to compute :math:`u`.
+The :math:`s` and :math:`u` functions are in the C++ code represented by
+plain C arrays holding nodal values. The usage of the C++ code typically
+goes like this:
+
+
+.. code-block:: c++
+
+        ODEFieldSolver solver = ODEFieldSolver();
+        solver.redim(n);               // allocate data
+        solver.set_dt(dt);             // set time step
+        solver.set_IC(n, s0);          // set initial conditions
+        t = 0
+        while (t <= T) {
+            solver.set_u(n, u);        // give access to PDE solution
+            solver.advance_one_timestep();
+            // plot solver.s
+        }
+
+A subclass must be written to specify the desired ``g`` function.
+
+We need to wrap the C++ class in Python such that
+the FEniCS Python solver can call the C++ code.
+We would then need to transfer the computed
+:math:`s` back to Python. To this end, we add a member function ``get_s``
+to the class so that we can fill some array on the user's side with
+the most recently computed ``s`` values:
+
+
+.. code-block:: c++
+
+        class ODEFieldSolver {
+          ...
+          void get_s  (int& n, double* out_array);
+        };
+
+
+Wrapping with F2PY
+------------------
+
+The easiest way to interface FORTRAN, C, and C++ code is to use F2PY.
+Although F2PY was made for interfacing FORTRAN and most of the documentation
+is written with FORTRAN codes in mind, it is convenient to interface
+C and C++ too. Or more precisely, F2PY can interface a pure C API, not
+C++ classes. The idea is then to construct a set of C functions on top
+of the C++ classes for accessing high-level operations using the those classes.
+The example involving class ``ODEFieldSolver`` will illustrate the elements
+in this technique.
+
+C API to C++ code
+~~~~~~~~~~~~~~~~~
+
+The first step is to decide on the C API. The exposed functions in
+Python must do essentially the same as the main program. A possible
+set of functions is
+
+  * ``set_ic_and_dt(int n, double* s0, double dt)`` for initializing
+    the class object and setting the initial conditions
+    and the time step. Also a variant ``set_const_ic_and_dt`` for
+    constant initial condition ``s0`` is handy.
+
+  * ``set_u(int n, double* u)`` for assigning the ``u`` function to the class.
+
+  * ``advance_one_timestep()`` for computing the solution at a time step.
+
+  * ``get_s(int n, double* s)`` for getting access to the computed array ``s``
+    in the ``ODEFieldSolver`` class.
+
+These functions must make use of a global variable holding a
+``ODEFieldSolver`` object and interact with this object as appropriate.
+The complete code of the C API then becomes
+
+
+.. code-block:: c++
+
+        #include "ODEFieldSolver.h"
+        
+        ODEFieldSolver solver = ODEFieldSolver();
+        
+        extern "C" {
+        
+        void set_ic_and_dt(int n, double* s0, double dt)
+        {
+          solver.redim(n);
+          solver.set_dt(dt);
+          solver.set_IC(n, s0);
+        }
+        
+        void set_const_ic_and_dt(int n, double s0, double dt)
+        {
+          solver.redim(n);
+          solver.set_dt(dt);
+          solver.set_const_IC(s0);
+        }
+        
+        void set_u(int n, double* u)
+        {
+          solver.set_u(n, u);
+        }
+        
+        void advance_one_timestep()
+        {
+          solver.advance_one_timestep();
+        }
+        
+        void get_s(int n, double* s)
+        {
+          solver.get_s(n, s);
+        }
+        
+        }
+
+
+Writing corresponding FORTRAN signatures
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The nice thing about F2PY is that it can automatically make a Python
+interface to this C code, where NumPy arrays can be passed to the
+functions taking plain C arrays as arguments. For this to work, F2PY
+needs a specification of all the C functions in terms of FORTRAN 90
+module syntax. However, F2PY can generate this module for us if we
+specify the function signatures in plain FORTRAN 77. This is done as
+follows:
+
+
+.. code-block:: fortran
+
+              subroutine set_ic_and_dt(n, s0, dt)
+        Cf2py intent(c) set_ic_and_dt
+              integer n
+              real*8 s0(0:n-1), dt
+        Cf2py intent(c) n, s0, dt
+              return
+              end
+        
+              subroutine set_const_ic_and_dt(n, s0, dt)
+        Cf2py intent(c) set_const_ic_and_dt
+              integer n
+              real*8 s0, dt
+        Cf2py intent(c) n, s0, dt
+              return
+              end
+        
+              subroutine set_u(n, u)
+        Cf2py intent(c) set_u
+              integer n
+              real*8 u(0:n-1)
+        Cf2py intent(c) n, u
+              return
+              end
+        
+              subroutine advance_one_timestep()
+        Cf2py intent(c) advance_one_timestep
+              return
+              end
+        
+              subroutine get_s(n, s)
+        Cf2py intent(c) get_s
+              integer n
+        Cf2py intent(c) n
+              real*8 s(0:n-1)
+        Cf2py intent(c, in, out) s
+              return
+              end
+
+
+For each C function we
+
+  * write the corresponding FORTRAN subroutine or function header,
+
+  * insert an F2PY-specific comment (``CF2PY``) that tells that the
+    function is in C: ``intent(c)``,
+
+  * specify that all variables are in C: ``intent(c)`` (FORTRAN treats
+    all arguments as pointers, so the specification of C variables is
+    strictly needed only for non-pointers),
+
+  * specify if we want the Python interface to return one or more output
+    arguments.
+
+Regarding the last point, we specify ``s`` in ``get_s`` as ``intent(c,in,out)``,
+meaning that we in Python can call this function as ``s = get_s(s)``.
+The ``s`` argument is needed for the function to avoid
+reallocating the returned array every time the function is call. Instead
+we reuse the storage provied in the ``s`` array.
+
+If the FORTRAN 77 signatures are in a file ``signatures_capi2cpp.f`` we
+can get F2PY to generate a FORTRAN 90 module in a file ``ODEFieldSolvercpp.pyf``
+by the command
+
+
+.. code-block:: console
+
+        Terminal> F2PY -m ODEFieldSolvercpp -h ODEFieldSolvercpp.pyf \ 
+                  --overwrite-signature signatures_capi2cpp.f
+
+The ``-m`` option specifies the name of the extension module that contains
+the Python interfaces to the C API.
+
+The module typically looks like
+
+.. code-block:: fortran
+
+        !    -*- f90 -*-
+        ! Note: the context of this file is case sensitive.
+        
+        python module ODEFieldSolvercpp ! in
+            interface  ! in :ODEFieldSolvercpp
+                subroutine set_ic_and_dt(n,s0,dt)
+                    intent(c) set_ic_and_dt
+                    integer, optional,intent(c),check(len(s0)>=n),depend(s0) :: n=len(s0)
+                    real*8 dimension(n),intent(c) :: s0
+                    real*8 intent(c) :: dt
+                end subroutine set_ic_and_dt
+                subroutine set_const_ic_and_dt(n,s0,dt)
+                    intent(c) set_const_ic_and_dt
+                    integer intent(c) :: n
+                    real*8 intent(c) :: s0
+                    real*8 intent(c) :: dt
+                end subroutine set_const_ic_and_dt
+                subroutine set_u(n,u)
+                    intent(c) set_u
+                    integer, optional,intent(c),check(len(u)>=n),depend(u) :: n=len(u)
+                    real*8 dimension(n),intent(c) :: u
+                end subroutine set_u
+                subroutine advance_one_timestep ! in :ODEFieldSolvercpp:signatures_capi2cpp.f
+                    intent(c) advance_one_timestep
+                end subroutine advance_one_timestep
+                subroutine get_s(n,s)
+                    intent(c) get_s
+                    integer, optional,intent(c),check(len(s)>=n),depend(s) :: n=len(s)
+                    real*8 dimension(n),intent(c,in,out) :: s
+                end subroutine get_s
+            end interface
+        end python module ODEFieldSolvercpp
+        
+        ! This file was auto-generated with f2py (version:2).
+        ! See http://cens.ioc.ee/projects/f2pye/
+
+Those who are familiar with FORTRAN 90 modules can write such
+code by hand instead of first writing FORTRAN 77 headers and letting
+F2PY generate the module.
+
+Building the extension module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+With the aid of the FORTRAN 90 specification of the C functions, F2PY
+can compile and link the extension module by a command like
+
+
+.. code-block:: console
+
+        Terminal> F2PY -c --fcompiler=gfortran -I.. --build-dir tmp1 \ 
+                 -DF2PY_REPORT_ON_ARRAY_COPY=1 \ 
+                  ODEFieldSolvercpp.pyf ../ODEFieldSolver.cpp capi2cpp.cpp
+
+The ``-DF2PY_REPORT_ON_ARRAY_COPY=1`` option is handy for letting F2PY
+notify us if arrays are copied when transferred from Python to C,
+as we want to avoid time-consuming copies. The C++ class is assumed
+to be in the parent directory (note ``-I..`` and the ``../`` prefix
+in the filename). All the files generated
+and built by F2PY will reside in the ``tmp1`` directory for later
+inspection if run into build problems.
+
+The result of the above compile command is a C/C++ extension module
+in the file ``ODEFieldSolvercpp.so``. The module can be loaded
+into Python and examined for content:
+
+
+        >>> import ODEFieldSolvercpp
+        >>> dir(ODEFieldSolvercpp)
+        ['__doc__', '__file__', '__name__', '__package__', '__version__',
+         'advance_one_timestep', 'get_s', 'set_const_ic_and_dt',
+         'set_ic_and_dt', 'set_u']
+        >>> print ODEFieldSolvercpp.__doc__
+        This module 'ODEFieldSolvercpp' is auto-generated with F2PY (version:2).
+        Functions:
+          set_ic_and_dt(s0,dt,n=len(s0))
+          set_const_ic_and_dt(n,s0,dt)
+          set_u(u,n=len(u))
+          advance_one_timestep()
+          s = get_s(s,n=len(s))
+
+A word of caution is required for newcomers to F2PY: it is extremely
+important to *study the doc strings* of the various functions before
+trying to call them from Python. The reason is that F2PY drops
+unnecessary arguments, such as array lengths (since these are
+contained in NumPy array objects), and all output arguments are
+returned and removed from the subroutine's argument list.
+The function arguments and return values are therefore different
+in Python and C!
+For example, the ``set_ic_and_dt`` function only needs ``s0`` transferred
+from Python since ``n`` can be deduced from the F2PY-generated
+interface. The signature of this function, as seen from Python,
+is then
+
+
+        >>> print ODEFieldSolvercpp.set_ic_and_dt.__doc__
+        set_ic_and_dt - Function signature:
+          set_ic_and_dt(s0,dt,[n])
+        Required arguments:
+          s0 : input rank-1 array('d') with bounds (n)
+          dt : input float
+        Optional arguments:
+          n := len(s0) input int
+
+Furthermore, the ``get_s`` function has specified its ``s``
+argument as input and output (``intent(c,in,out)``) and the
+doc string shows the correct call syntax:
+
+
+        >>> print ODEFieldSolvercpp.get_s.__doc__
+        get_s - Function signature:
+          s = get_s(s,[n])
+        Required arguments:
+          s : input rank-1 array('d') with bounds (n)
+        Optional arguments:
+          n := len(s) input int
+        Return objects:
+          s : rank-1 array('d') with bounds (n)
+
+
+Main program in Python
+~~~~~~~~~~~~~~~~~~~~~~
+
+The Python code for calling the C++ functions in the ``ODEFieldSolvercpp``
+module can take the following form:`
+
+
+.. code-block:: python
+
+        import ODEFieldSolvercpp as cpp
+        import numpy
+        
+        s0 = numpy.array([0, 1, 4], float)
+        u  = numpy.array([0, 1, 1], float)
+        n  = s0.size
+        s  = numpy.zeros(n)
+        
+        cpp.set_ic_and_dt(s0, dt=0.1)
+        for n in range(1, 8):
+            cpp.set_u(u)
+            cpp.advance_one_timestep()
+            s = cpp.get_s(s)
+            print n, s
+
+
+A pure C version of the C++ class
+---------------------------------
+
+It may be illustrative to also see a pure C code that implements
+the same type of actions as the C++ class.
+The class variables are here global variables in a library and
+all the class functions are stand-alone C functions working with
+these global variables. A bit more sophisticated implementation
+would collect the global variables in a global struct instead, so
+that the functions work with the struct.
+The advantage of a pure C code is that F2PY can interface all parts
+of this code directly without any need to make a C API to C++ code.
+(Having said that, we should add that making a C API to C++ codes
+is often a good exercise as it tends to emphasize faster computing with
+arrays rather than with special (potentially small) C++ objects.
+Python interfacing of C++ this way may lead to sound redesign of
+the C++ code.)
+
+The pure C implementation goes as follows:
+
+
+.. code-block:: c
+
+        #include <stdlib.h>
+        #include <stdio.h>
+        
+        /* global variables */
+        double* s;
+        double* s_1;
+        double* u;
+        double dt;
+        int n;
+        
+        void redim(int n_)
+        {
+          n = n_;
+          s =   malloc(sizeof(double)*n);
+          s_1 = malloc(sizeof(double)*n);
+          u =   malloc(sizeof(double)*n);
+        }
+        
+        void deallocate()
+        {
+          free(s); free(s_1); free(u);
+        }
+        
+        /* Note: do not mix upper and lower case letters as in set_IC_...
+           This leads to undefined symbols when f2py compiles the code.
+        */
+        
+        void set_ic_and_dt(int n_, double* s0, double dt_)
+        {
+          int i;
+          redim(n_);
+          dt = dt_;
+          for (i=0; i<n; i++) {
+            s_1[i] = s0[i];
+          }
+        }
+        
+        void set_const_ic_and_dt(int n_, double s0, double dt_)
+        {
+          int i;
+          redim(n_);
+          dt = dt;
+          for (i=0; i<n; i++) {
+            s_1[i] = s0;
+          }
+        }
+        
+        void set_u(int n_, double* u_)
+        {
+          int i;
+          for (i=0; i<n; i++) {
+            u[i] = u_[i];
+          }
+        }
+        
+        double g(double s_, double u_) {
+          /* return s_*u_*(1 - s_); */
+          return s_;
+        }
+        
+        void advance_one_timestep()
+        {
+          /* Use the Forward Euler time integration for simplicity */
+          int i;
+          for (i=0; i<n; i++) {
+            s[i] = s_1[i] + dt*g(s_1[i], u[i]);
+            /* For debugging: */
+            /* printf("i=%d, s_1=%g, dt=%g, g=%g, s=%g\n",
+               i, s_1[i], dt, g(s_1[i], u[i]), s[i]); */
+          }
+          /* Update for next time step */
+          for (i=0; i<n; i++) { s_1[i] = s[i]; }
+        
+        }
+        
+        void get_s(int n_, double* s_)
+        {
+          int i;
+          for (i=0; i<n; i++) {
+            s_[i] = s[i];
+          }
+        }
+
+
+By writing the corresponding FORTRAN 77 signatures, F2PY can generate
+a FORTRAN 90 module specification of the extension module, and this
+code can be compiled as explained above.
+We refer to the files in the `f2py-c <https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/ODEFieldSolver/f2py-c>`_
+directory for details.
+
+
+Wrapping with SWIG
+------------------
+
+Next, we emply the tool `SWIG <http://www.swig.org>`_ to wrap the C++ class
+directly and make it available as a Python class.
+SWIG is also used in DOLFIN and Instant, as demonstrated
+in the section :ref:`fext:dolfin:cpp`.
+Useful references on SWIG in a FEniCS context
+are [Ref02]_ [Ref11]_ [Ref12]_ [Ref13]_.
+
+.. NOTE: when using mako (as we do) as preprocessor, % at the beginning
+
+.. of lines becomes problematic. That is why we in the SWIG code
+
+.. replace % by %% in the first column.
+
+
+To use SWIG, you must first write an *interface file* (ending in ``.i``)
+that tells SWIG about the parts of the C++ code you want to access
+from Python. The next step is to run SWIG to generate (a lot of) wrapper
+code in C. The final step is to compile the wrapper code and your C++ code
+and link with required libraries.
+
+A first attempt to write an interface for our ``ODEFieldSolver`` class
+consists in listing just the class declaration:
+
+
+.. code-block:: c++
+
+        %module ODEFieldSolver
+        %{
+        #include <arrayobject.h>
+        #include <sstream>
+        #include "ODEFieldSolver.h"
+        %}
+        
+        
+        %init %{
+        import_array();
+        %}
+        
+        class ODEFieldSolver {
+          int n;                // no of points (or regions)
+          double* s;            // discrete values of unknown s)
+          double* s_1;          // s at the previous time level
+          double* u;            // discrete values of external field u
+          double dt;            // time step size
+        
+          public:
+          ODEFieldSolver();
+         ~ODEFieldSolver();
+          void redim(int n);    // allocate data structures
+          int size();           // return the no of points/regions
+          virtual double g(double s, double u);
+          void set_dt(double dt);
+          void set_IC(int n, double* in_array);
+          void set_u (int n, double* in_array);
+          void set_IC(double const_value);
+          void set_u (double const_value);
+          void advance_one_timestep();
+        
+          void get_s  (int& n, double* out_array);
+        };
+
+
+All SWIG commands start with ``%``. The ``%module`` command defines the
+name of the module. Following this command comes a list of header files
+needed by the module. The ``%init`` command includes code that should be
+executed when the module is imported in Python. When using NumPy arrays
+in C++ code we always need to call the ``import_array`` function to
+initialize the NumPy package (removal of this statement will
+result in a segmentation fault!).  The rest of the code defines the
+interface that should be wrapped, that is; the declaration of the
+class ``ODEFieldSolver``.
+
+SWIG is meant to automate interfacing of C and C++ code, and there is
+mainly only one thing that needs to be addressed manually: the
+handling of pointers to arrays. Consider for instance the ``set_IC``
+function. Here, ``in_array`` is a pointer to the first element of a
+double precision array of length ``n``.  However, the fact that
+``in_array`` is an array is not explicitly stated in C++, and therefore
+SWIG simply by default handles the pointer as a plain pointer, and
+this is not what we want. SWIG does, however, offer typemaps for
+changing this default behavior.  With typemaps we can specify that the
+pointer ``in_array`` is a NumPy array object (``PyObject``) when it comes
+from Python, and we can extract the underlying data pointer
+(``double*``) and communicate it to C.
+
+To enable NumPy arrays to be passed to the functions ``set_IC`` and
+``set_u`` we provide the following typemap.
+
+
+.. code-block:: c++
+
+        %typemap(in) (int n, double* array){
+          if (!PyArray_Check($input)) {
+            PyErr_SetString(PyExc_TypeError, "Not a NumPy array");
+            return NULL; ;
+          }
+          PyArrayObject* pyarray;
+          pyarray = (PyArrayObject*)$input;
+          if (!(PyArray_TYPE(pyarray) == NPY_DOUBLE)) {
+            PyErr_SetString(PyExc_TypeError, "Not a NumPy array of doubles");
+            return NULL; ;
+          }
+          $1 = int(pyarray->dimensions[0]);
+          $2 = (double*)pyarray->data;
+        }
+
+
+Typemap code often looks complicated, at least when viewed for the
+first time. The logic is straightforward, though, once some basic
+knowledge of the C API of Python and NumPy is acquired. The idea
+with the typemap is to recognize a set of arguments in C/C++, here
+``n`` and ``in_array``, and then execute some C/C++ code to transform
+a Python object to the C/C++ arguments.
+In the present example we want to map a NumPy array object
+to an integer ``n`` (the array size) and a plain C array ``in_array``
+(the array data). All Python objects, when viewed in C, are of type
+``PyObject``. We can think of ``PyObject`` as a superclass for all the different
+object types in Python. The special NumPy array object type is
+``PyArrayObject``.
+
+SWIG has some special variables prefixed with ``$``, which in the
+present example are ``$input`` for the incoming NumPy array object, and
+``$1`` and ``$2`` for the outgoing C/C++ arguments ``n`` and ``in_array``.
+The first ``if`` statement checks that the incoming array is of right
+type, and if not, a ``TypeError`` exception is raised.  The ``return
+NULL`` statement is essential for this exception to work.  The next
+step is to cast the ``PyObject`` pointer in ``$input`` to the correct
+array object type, ``PyArrayObject``, because we need this object to
+call C functionality in the NumPy object to extract the data and the
+array size.  For safety reasons, we insert a test that the array data
+are of type ``NPY_DOUBLE`` so that the array element types in Python and
+C match.  Then we come to the final and most essential point:
+extracting data from the NumPy array object and storing them in ``n``
+(``$1``) and ``in_array`` (``$2``):
+
+
+.. code-block:: c
+
+          $1 = int(pyarray->dimensions[0]);
+          $2 = (double*)pyarray->data;
+
+
+(**hpl 2**: Kent, I don't understand this ``typecheck`` stuff - can you explain
+a bit more??)
+
+Because we have overloaded the ``set_IC`` function, we also need to provide
+SWIG with a ``typecheck`` to determine which of the C++ functions to use.
+A suitable typecheck is:
+
+.. code-block:: c++
+
+        %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (int n, double* array) {
+        $1 = PyArray_Check($input) ? 1 : 0;
+        }
+
+
+The function
+
+.. code-block:: c++
+
+        void get_s(int n, double *array);
+
+should return NumPy arrays when called from Python as
+
+.. code-block:: c++
+
+        s = odesolver.get_s()
+
+That is, we would like to be able to call this function from Python
+without providing and input array, and instead get an output
+array. This means that an array must be created before being passed to
+C++ and then returned to Python. To accomplish this we hide the
+function by calling it ``_get_s``. Then we extend the interface using
+the ``%extend`` and ``%pythoncode`` directives with a Python function
+``get_s``.  The Python function ``get_s`` allocate an array before passing
+it to the hidden ``_get_s`` function and thereafter it
+returns the array. The code is
+
+
+.. code-block:: c++
+
+        /* Wrap ODEFieldSolver::get_s in a Python function */
+        %rename (_get_s) ODEFieldSolver::get_s;
+        
+        %extend ODEFieldSolver{
+         %pythoncode%{
+            def get_s(self):
+              import numpy as np
+              a = np.zeros(self.size())
+              self._get_s(a)
+              return a
+         %}
+        }
+
+
+To summarize, the complete
+SWIG interface file for wrapping the ``ODEFieldSolver`` class is
+listed next.
+
+
+.. code-block:: c++
+
+        %module ODEFieldSolver
+        %{
+        #include <arrayobject.h>
+        #include <sstream>
+        #include "ODEFieldSolver.h"
+        %}
+        
+        
+        %init %{
+        import_array();
+        %}
+        
+        %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (int n, double* array) {
+        $1 = PyArray_Check($input) ? 1 : 0;
+        }
+        
+        %typemap(in) (int n, double* array){
+          if (!PyArray_Check($input)) {
+            PyErr_SetString(PyExc_TypeError, "Not a NumPy array");
+            return NULL; ;
+          }
+          PyArrayObject* pyarray;
+          pyarray = (PyArrayObject*)$input;
+          if (!(PyArray_TYPE(pyarray) == NPY_DOUBLE)) {
+            PyErr_SetString(PyExc_TypeError, "Not a NumPy array of doubles");
+            return NULL; ;
+          }
+          $1 = int(pyarray->dimensions[0]);
+          $2 = (double*)pyarray->data;
+        }
+        
+        /* Wrap ODEFieldSolver::get_s in a Python function */
+        %rename (_get_s) ODEFieldSolver::get_s;
+        
+        %extend ODEFieldSolver{
+         %pythoncode%{
+            def get_s(self):
+              import numpy as np
+              a = np.zeros(self.size())
+              self._get_s(a)
+              return a
+         %}
+        }
+        
+        %include std_string.i
+        %include "ODEFieldSolver.h"
+
+
+To make SWIG generate the wrapper code, we run
+
+
+.. code-block:: console
+
+        swig -python -c++  -I. -I.. ODEFieldSolver.i
+
+SWIG supports many languages and we therefore specify what languages
+we need wrapper code for by the ``-python`` and ``-c++`` flags. Further,
+``-I`` is used to specify where SWIG should look for interface files
+(with extension ``.i``).  The C++ class files are located in
+the parent directory.
+SWIG will from this command generate two files
+``ODEFieldSolver.py`` and ``ODEFieldSolver_wrap.cxx``. The latter
+needs to be compiled and
+linked with the ``ODEFieldSolver`` code to form a shared library
+with name ``_ODEFieldSolver.so``. The ``ODEFieldSolver.py`` file
+is the module to use from Python and this is nothing but
+a Python class wrapper to ``_ODEFieldSolver.so`` module.
+Building the shared library is most conveniently done
+via a standard ``setup.py`` script. The following ``setup.py`` file provides
+an appropriate recipe for writing this kind of files:
+
+
+.. code-block:: python
+
+        import os, numpy
+        from distutils.core import setup, Extension
+        name = 'ODEFieldSolver'
+        swig_cmd ='swig -python   -c++  -I.. -I.  %s.i' % name
+        os.system(swig_cmd)
+        sources = ['../%s.cpp' % name, '%s_wrap.cxx' % name]
+        setup(name=name,
+              ext_modules= [
+                  Extension('_' + name,
+                            sources,
+                            include_dirs=['..',
+                                          numpy.get_include() + "/numpy"])])
+
+
+To create and install the extension module
+locally in the current working directory (``.``),
+we run
+
+
+.. code-block:: bash
+
+        python setup.py install --install-platlib=.
+
+Now we can do ``import ODEFieldSolver`` in Python and access the
+C++ class as a Python class.
+
+The FEniCS solver for the parabolic PDE can be implemented as
+a class:
+
+
+.. code-block:: python
+
+        class ParabolicSolver:
+          def __init__(self, N, dt):
+            """Set up PDE problem for NxN mesh and time step dt."""
+            from dolfin import UnitSquareMesh, FunctionSpace, TrialFunction, \ 
+                 TestFunction, Function, dx, dot, grad
+        
+            mesh = UnitSquareMesh(N,N)
+            self.V = V = FunctionSpace(mesh, "Lagrange", 1)
+        
+            u = TrialFunction(V)
+            v = TestFunction(V)
+        
+            a = u*v*dx + dt*dot(grad(u), grad(v))*dx
+        
+            self.a = a
+            self.dt = dt
+            self.mesh = mesh
+            self.U = Function(V)
+        
+          def advance_one_timestep(self, f, u_1):
+            """
+            Solve the PDE for one time step.
+            f: the source term in the PDE.
+            u_1: solution at the previous time step.
+            """
+            from dolfin import TestFunction, dx, solve
+        
+            V, a, dt = self.V, self.a, self.dt  # strip off self prefix
+            v = TestFunction(V)
+            L = (u_1 + dt*f)*v*dx
+        
+            solve(self.a == L, self.U)
+            return self.U
+
+
+The following pseudo code illustrates how to work with this code and
+the ODE solver:
+
+.. code-block:: text
+
+
+        for i in range(num_time_steps):   # time loop
+            <compute f>
+            <call ParabolicSolver's advance_one_time_step>
+            <compute g>
+            <call the ODE solver>
+
+A complete code goes as follows:
+
+
+.. code-block:: python
+
+        import dolfin
+        import numpy
+        
+        def F(S, U):
+          if isinstance(S, dolfin.Function) and isinstance(U, dolfin.Function):
+            from dolfin import *
+            f = sin(S)*exp(U)
+            return f
+          if isinstance(S, numpy.ndarray) and isinstance(U, numpy.ndarray):
+            from numpy import *
+            f = sin(S)*exp(U)
+            return f
+        
+        class ParabolicSolver:
+          def __init__(self, N, dt):
+            """Set up PDE problem for NxN mesh and time step dt."""
+            from dolfin import UnitSquareMesh, FunctionSpace, TrialFunction, \ 
+                 TestFunction, Function, dx, dot, grad
+        
+            mesh = UnitSquareMesh(N,N)
+            self.V = V = FunctionSpace(mesh, "Lagrange", 1)
+        
+            u = TrialFunction(V)
+            v = TestFunction(V)
+        
+            a = u*v*dx + dt*dot(grad(u), grad(v))*dx
+        
+            self.a = a
+            self.dt = dt
+            self.mesh = mesh
+            self.U = Function(V)
+        
+          def advance_one_timestep(self, f, u_1):
+            """
+            Solve the PDE for one time step.
+            f: the source term in the PDE.
+            u_1: solution at the previous time step.
+            """
+            from dolfin import TestFunction, dx, solve
+        
+            V, a, dt = self.V, self.a, self.dt  # strip off self prefix
+            v = TestFunction(V)
+            L = (u_1 + dt*f)*v*dx
+        
+            solve(self.a == L, self.U)
+            return self.U
+        
+        import dolfin
+        import numpy
+        
+        N = 12     # mesh partition
+        dt = 0.01  # time step
+        parabolicsolver = ParabolicSolver(N, dt)
+        U1 = dolfin.Function(parabolicsolver.V)
+        U0 = dolfin.Function(parabolicsolver.V)
+        U0.vector()[:] = numpy.random.random(parabolicsolver.V.dim())
+        
+        Q = dolfin.FunctionSpace(parabolicsolver.mesh, "DG", 0)
+        S0_ex = dolfin.Expression("x[0]")
+        S0 = dolfin.interpolate(S0_ex, Q)
+        S1 = dolfin.Function(Q)
+        
+        import ODEFieldSolver  # import module wrapping the ODE solver
+        odesolver = ODEFieldSolver.ODEFieldSolver()
+        odesolver.redim(S0.vector().size(0))
+        odesolver.set_IC(S0.vector().array())
+        plot = True
+        
+        for i in range(0, 23):  # time loop
+          f = F(S0, U0)
+          U1 = parabolicsolver.advance_one_timestep(f, U0)
+        
+          U1c = dolfin.project(U1, Q)
+        
+          odesolver.set_u(U1c.vector().array())
+          odesolver.advance_one_timestep()
+          S1.vector()[:] = odesolver.get_s()
+        
+          U0 = U1
+          S0 = S1
+        
+          if plot:
+            dolfin.plot(U1, title="U")
+            dolfin.plot(S1, title="S")
+            dolfin.interactive()
+
+
+
+Wrapping with Cython
+--------------------
+
+Cython can also be used to wrap C/C++ code.
+To this end we define the C++ class in a  ``.pyx`` file:
+
+
+.. code-block:: cython
+
+        cimport numpy as cnp
+        import numpy as np
+        
+        cdef extern from "ODEFieldSolver.h":
+        
+            cppclass ODEFieldSolver_ "ODEFieldSolver":
+                ODEFieldSolver()
+                void redim(int n)
+                int size()
+                double g(double s, double u)
+                void set_dt(double dt)
+                void set_IC(int n, double* array)
+                void set_const_IC(double s0)
+                void set_u (int n, double* array)
+                void set_IC(double val)
+                void set_u (double const_value)
+                void advance_one_timestep()
+                void get_s  (int n, double* array)
+
+
+Here, we redefine the name to ``ODEFieldSolver_`` such that we may shadow the
+underlying class with the following Python class.
+
+
+.. code-block:: cython
+
+        cdef class ODEFieldSolver:
+            cdef ODEFieldSolver_  *wrapped
+        
+            def __init__(self):
+                self.wrapped = new ODEFieldSolver_()
+        
+            def __dealloc__(self):
+                if self.wrapped != NULL:
+                    del self.wrapped
+
+
+We have a pointer called ``wrapped`` to the underlying SWIG-generated
+C interface to the C++ code.
+Simple functions like e.g. ``redim`` are straightforward to wrap,
+
+
+.. code-block:: cython
+
+            def redim(self, n):
+                self.wrapped.redim(n)
+
+
+For the ``set_IC`` function we need to check that the input argument is a contiguous 1-dimensional numpy array
+of type ``double``. This is spesified as ``cnp.ndarray[double, ndim=1, mode='c']``. Further, we check that
+the length of the input array is the same as ``self.wrapped.size`` before we pass the input array to the
+underlying C++ object.
+
+
+
+.. code-block:: cython
+
+            def set_IC(self, cnp.ndarray[double, ndim=1, mode='c'] array):
+                if array.shape[0] != self.wrapped.size():
+                    raise ValueError('incorrect dimension on array')
+                self.wrapped.set_IC(array.shape[0], &array[0])
+
+
+We allow the user to employ the ``get_s`` function both with and without an input
+argument, refered to as ``out``. If the user does not supply any input,
+i.e., ``if out is None`` then we create an array of appropriate type and size. Otherwise,
+we check that ``out`` has the appropriate type and size before the array is passed to
+the C++ object's ``get_s`` function. At the end, we simply return ``out``.
+
+
+.. code-block:: cython
+
+            def get_s(self,
+                      cnp.ndarray[double, ndim=1, mode='c'] out=None):
+                if out is None:
+                    out = np.empty(self.wrapped.size(), dtype=np.double)
+                elif out.shape[0] != self.wrapped.size():
+                    raise ValueError('incorrect dimension on out')
+                self.wrapped.get_s(out.shape[0], &out[0])
+                return out
+
+
+Finally, the module is built as
+
+
+.. code-block:: python
+
+        from distutils.core import setup
+        from distutils.extension import Extension
+        from Cython.Distutils import build_ext
+        
+        setup(
+            cmdclass = {'build_ext': build_ext},
+            ext_modules = [Extension("ODEFieldSolver", 
+                                     ["ODEFieldSolver.pyx", "../ODEFieldSolver.cpp"],
+                                     include_dirs=['..'],
+                                     language='c++')]
+        )
+
+
+
+
+
+*Acknowledgment.* The first author want to thank Alison L. Marsden,
+Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
+Example 2 and 3, and for hosting the first author during the summer
+2012. Furthermore, Dag Sverre Seljebotn provided the code for the
+Cython wrapping in example 3. Mikael Mortensen provided the code for
+the Probe in Example 1.
+
+

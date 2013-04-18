@@ -1,0 +1,4 @@
+journal: Journal of Biomechanics
+journal: Journal of Neurosurgery
+journal: Optimization and Engineering
+journal: American Journal of Neuroradiology

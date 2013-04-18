@@ -1,0 +1,14 @@
+
+#sudo apt-get install libtool automake libboost-python-dev octave3.2-headers libopenmpi-dev   
+bzr branch lp:pytave 
+cd pytave 
+bzr revert -r 51
+export CC=mpicc 
+export CXX=mpic++ 
+autoreconf --install
+./configure --prefix=$HOME/local
+
+sudo python setup.py install --prefix=$HOME/local 
+ 
+
+

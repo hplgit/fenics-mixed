@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>FEniCS solver with boundary conditions in FORTRAN &mdash; Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
+    <link rel="next" title="FEniCS solver with optimization in Octave" href="._part0002_fenics-mixed.html" />
+    <link rel="prev" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="._part0000_fenics-mixed.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="._part0002_fenics-mixed.html" title="FEniCS solver with optimization in Octave"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="._part0000_fenics-mixed.html" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fenics-solver-with-boundary-conditions-in-fortran">
+<h1>FEniCS solver with boundary conditions in FORTRAN<a class="headerlink" href="#fenics-solver-with-boundary-conditions-in-fortran" title="Permalink to this headline">¶</a></h1>
+<p>FORTRAN programs are usually easy to interface in Python
+by using the wrapper code
+generator <a class="reference external" href="http://www.scipy.org/f2py">F2PY</a>.
+F2PY supports FORTRAN 77, FORTRAN 90, and even C (and thereby C++,
+see the section <a class="reference internal" href="._part0004_fenics-mixed.html#fext-pdeode-cpp"><em>FEniCS solver coupled with ODE solver in C++</em></a>). It is our experience
+that F2PY is much more straightforward to use than
+the other tools we describe for interfacing Python with compiled languages.
+F2PY is therefore a natural starting point for our examples.</p>
+<div class="figure" id="fext-ex2-fig1">
+<img alt="_images/Cerebral_aneurysm_NIH.jpg" src="_images/Cerebral_aneurysm_NIH.jpg" style="width: 400px;" />
+<p class="caption"><em>An illustration of a cerebral aneurysm</em></p>
+</div>
+<p>The present worked example involves solving the Navier-Stokes equations by
+a FEniCS solver, but calling up a FORTRAN 77 code for modeling the
+boundary conditions.
+The physical problem concerns blood flow in a cerebral aneurysm. An
+aneurysm is a balloon-shaped deformation of a cerebral artery, see
+Figure <a class="reference internal" href="#fext-ex2-fig1"><em>An illustration of a cerebral aneurysm</em></a>.  Some aneurysms rupture and cause stroke, while
+other remain stable for long periods of time, and it is currently not
+possible to determine the rupture risk in a patient-specific manner.
+Computational studies have recently
+demonstrated that fluid dynamics simulations can be used to discriminate ruptured from non-ruptured aneurysms <a class="reference internal" href="._part0005_fenics-mixed.html#ref04">[Ref04]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref05">[Ref05]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref06">[Ref06]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref07">[Ref07]</a>,
+retrospectively, and have therefore demonstrated the potential of simulations to many clinicians.</p>
+<div class="figure" id="fext-ex2-fig2">
+<img alt="_images/aneurysm.png" src="_images/aneurysm.png" style="width: 400px;" />
+<p class="caption"><em>A DOLFIN mesh illustrating a patient-specific aneurysm geometry</em></p>
+</div>
+<p>To model blood flow we assume that blood is Newtonian and incompressible with a viscosity of 0.0035 Pa s and density similar to water.
+The equations read</p>
+<div class="math">
+\[\rho (\frac{ \partial v}{\partial t} +
+(v \cdot \nabla) v) =
+-\nabla p + \mu \Delta u + f
+\mbox{ in }\Omega\]</div>
+<div class="math">
+\[\nabla \cdot v =  0    \mbox{ in } \Omega\]</div>
+<p>Here, <span class="math">\(v\)</span> and <span class="math">\(p\)</span> are the unknown blood velocity and pressure,
+respectively, while <span class="math">\(\mu\)</span> is the viscosity and <span class="math">\(\rho\)</span> the density.</p>
+<p>Quite often the outlet boundary conditions are unknown. It is therefore
+common to model the boundary conditions using differential equations
+of lower dimension.  In our case, we assume that the pressure at the
+inlet or outlet boundaries can be
+modeled by a system of ODEs:</p>
+<div class="math">
+\[\frac{\partial P_i}{\partial t} =
+f(P_i, v, p, \ldots)  \mbox{ on } \partial \Omega_o .\]</div>
+<p>These ODEs are coupled to the Navier-Stokes equations through the
+inlet or outlet boundary condition</p>
+<div class="math">
+\[\mu \frac{\partial u}{\partial n} + p n =  P_o
+\mbox{ on } \partial \Omega_o\]</div>
+<div class="section" id="the-fenics-solver">
+<h2>The FEniCS solver<a class="headerlink" href="#the-fenics-solver" title="Permalink to this headline">¶</a></h2>
+<p>The Navier-Stokes solver is implemented in FEniCS as a
+class <tt class="docutils literal"><span class="pre">NSSolver</span></tt>.
+The typical usage of the class goes as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solver</span> <span class="o">=</span> <span class="n">NSSolver</span><span class="p">()</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">setIC</span><span class="p">()</span>
+<span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">T</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">P1</span><span class="p">,</span> <span class="n">P2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="n">t</span> <span class="o">+=</span> <span class="n">dt</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">advance_one_time_step</span><span class="p">((</span><span class="n">P1</span><span class="p">,</span> <span class="n">P2</span><span class="p">),</span> <span class="n">t</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">setIC()</span></tt> function sets the initial conditions. Futhermore,
+<tt class="docutils literal"><span class="pre">P1</span></tt> and <tt class="docutils literal"><span class="pre">P2</span></tt> are the pressures at the two outlets at time <tt class="docutils literal"><span class="pre">t</span></tt>.
+The implementation details of class <tt class="docutils literal"><span class="pre">NSSolver</span></tt> are not essential to
+this document, so we just refer the reader to the relatively short
+<a class="reference external" href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/ns/NSSolver.py">NSSolver.py</a> file.</p>
+</div>
+<div class="section" id="the-fortran-code-for-modeling-boundary-conditions">
+<h2>The FORTRAN code for modeling boundary conditions<a class="headerlink" href="#the-fortran-code-for-modeling-boundary-conditions" title="Permalink to this headline">¶</a></h2>
+<p>The <tt class="docutils literal"><span class="pre">NSSolver</span></tt> class sets Dirichlet condition for the pressure on
+inlet and outlet boundaries in terms of prescribed constants in a list
+<tt class="docutils literal"><span class="pre">P</span></tt> (one for each prescribed outlet or inlet). Our aim now is to use a
+lower-dimensional flow model for computing the Dirichlet values in <tt class="docutils literal"><span class="pre">P</span></tt>
+based on physics and the current velocity and pressure fields. One
+such model is formulated in terms of ODEs. For an outlet boundary, let
+<span class="math">\(P\)</span> be the pressure at the boundary. Then the model for <span class="math">\(P\)</span> is</p>
+<div class="math">
+\[C \frac{\partial P} {\partial t} = Q - P / R_d,\]</div>
+<p>where</p>
+<div class="math">
+\[Q = \int_{\partial \Omega_o} v \cdot n  ds\]</div>
+<p>is the volume flux throught the boundary <span class="math">\(\partial\Omega_o\)</span>
+(easily computed in the FEniCS
+solver). The parameters <span class="math">\(C\)</span> and <span class="math">\(R_d\)</span> must be prescribed along with
+the initial value of <span class="math">\(P\)</span>.</p>
+<p>The differential equation for <span class="math">\(P\)</span> can be discretized by a very simple
+Forward Euler scheme. With <span class="math">\(i\)</span> denoting the time level corresponding
+to small time steps <span class="math">\(\delta t\)</span> in the fluid solver time step <span class="math">\(\Delta t\)</span>,
+we can write</p>
+<div class="math">
+\[P^{i+1} = P^i + \delta t (Q - P/R_d)/C,\]</div>
+<p>for <span class="math">\(i=0,\ldots, N-1\)</span>, where <span class="math">\(\Delta t = N\delta t\)</span>, and then
+the new pressure outlet condition is <span class="math">\(P=P^{N}\)</span> for the next time step.
+<span class="math">\(P^0\)</span> is taken as <span class="math">\(P\)</span> at time <span class="math">\(t\)</span> (<span class="math">\(P\)</span> is the outlet pressure
+value at time <span class="math">\(t+\Delta t\)</span>).</p>
+<p>The computational model for <span class="math">\(P\)</span> is implemented in FORTRAN. (Our
+specific model is a simple one; the problem setting is that another
+research group is continuously developing such models, and their software
+is in FORTRAN.) The solver in FORTRAN is implemented in a file
+<tt class="docutils literal"><span class="pre">PMODEL.f</span></tt> with the content</p>
+<div class="highlight-fortran"><div class="highlight"><pre>      <span class="k">SUBROUTINE </span><span class="nv">PMODEL</span><span class="p">(</span><span class="nv">P</span><span class="p">,</span> <span class="nv">P_1</span><span class="p">,</span> <span class="nv">R_D</span><span class="p">,</span> <span class="nv">Q</span><span class="p">,</span> <span class="nv">C</span><span class="p">,</span> <span class="nv">N</span><span class="p">,</span> <span class="nv">T</span><span class="p">)</span>
+<span class="nv">C</span>     <span class="nv">Integrate</span> <span class="nv">P</span> <span class="nv">in</span> <span class="nv">N</span> <span class="nv">steps</span> <span class="nv">from</span> <span class="mi">0</span> <span class="nv">to</span> <span class="nv">T</span><span class="p">,</span> <span class="nv">given</span> <span class="nv">start</span> <span class="k">value </span><span class="nv">P_1</span>
+      <span class="kt">INTEGER </span><span class="nv">N</span>
+      <span class="kt">REAL</span><span class="o">*</span><span class="mi">8</span> <span class="nv">P</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="nv">N</span><span class="p">),</span> <span class="nv">P_1</span><span class="p">,</span> <span class="nv">R_D</span><span class="p">,</span> <span class="nv">Q</span><span class="p">,</span> <span class="nv">C</span><span class="p">,</span> <span class="nv">T</span>
+      <span class="kt">REAL</span><span class="o">*</span><span class="mi">8</span> <span class="nv">DT</span>
+      <span class="kt">INTEGER </span><span class="nv">I</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">in</span><span class="p">)</span> <span class="nv">P0</span><span class="p">,</span> <span class="nv">R</span><span class="p">,</span> <span class="nv">Q</span><span class="p">,</span> <span class="nv">C</span><span class="p">,</span> <span class="nv">N</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">out</span><span class="p">)</span> <span class="nv">P</span>
+
+      <span class="nv">DT</span> <span class="o">=</span> <span class="nv">T</span><span class="o">/</span><span class="nv">N</span>
+      <span class="nv">P</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="nv">P_1</span>
+      <span class="k">DO </span><span class="nv">I</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nv">N</span><span class="o">-</span><span class="mi">1</span>
+        <span class="nv">P</span><span class="p">(</span><span class="nv">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="nv">P</span><span class="p">(</span><span class="nv">i</span><span class="p">)</span> <span class="o">+</span> <span class="nv">DT</span><span class="o">*</span><span class="p">(</span><span class="nv">Q</span> <span class="o">-</span> <span class="nv">P</span><span class="p">(</span><span class="nv">i</span><span class="p">)</span><span class="o">/</span><span class="nv">R_D</span><span class="p">)</span><span class="o">/</span><span class="nv">C</span>
+      <span class="k">END DO</span>
+<span class="k">      END SUBROUTINE </span><span class="nv">PMODEL</span>
+</pre></div>
+</div>
+<p>Given <tt class="docutils literal"><span class="pre">P_1</span></tt> as the value of <tt class="docutils literal"><span class="pre">P</span></tt> at time <tt class="docutils literal"><span class="pre">t</span></tt>, the subroutine computes
+<span class="math">\(P\)</span> at all the <tt class="docutils literal"><span class="pre">N</span></tt> local time steps (of length <tt class="docutils literal"><span class="pre">DT</span></tt>) up to time <tt class="docutils literal"><span class="pre">t+T</span></tt>,
+with <tt class="docutils literal"><span class="pre">P(N)</span></tt> as the final value at that time.  We shall call <tt class="docutils literal"><span class="pre">PMODEL</span></tt>
+at every time step in the flow solver and let <tt class="docutils literal"><span class="pre">T</span></tt> correspond to the
+fluid solver time step <span class="math">\(\Delta t\)</span>.</p>
+<p>The subroutine is plain FORTRAN 77 except for some special comment
+lines starting with <tt class="docutils literal"><span class="pre">CF2PY</span></tt>. These are needed because in
+FORTRAN, subroutine arguments are both input and output,
+but in Python one normally takes all input as arguments to a function
+and <em>returns</em> all output arguments. This is technically not
+possible in FORTRAN (or C or C++). With the <tt class="docutils literal"><span class="pre">CF2PY</span></tt> comment lines
+we can help the F2PY translater to make the FORTRAN subroutine look
+more &#8220;Pythonic&#8221; from the Python side. To this end, we need to specify
+what arguments that are input and output. All arguments are
+input by default, but here we still list them to have complete
+specification of every argument in this function. The output
+argument, to be returned to Python, <em>must</em> be specified, here <tt class="docutils literal"><span class="pre">P</span></tt>.</p>
+<p>Creating a shared library of the FORTRAN code that we can call from
+Python as an ordinary module is easy:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">Terminal&gt; F2PY -c -m bcmodelf77 ../PMODEL.f</span>
+</pre></div>
+</div>
+<p>Here, <tt class="docutils literal"><span class="pre">-m</span> <span class="pre">bcmodelf77</span></tt> tells F2PY that the module name is
+be <tt class="docutils literal"><span class="pre">bcmodelf77</span></tt>, the <tt class="docutils literal"><span class="pre">-c</span></tt> instructs F2PY to compile and create
+a shared library <tt class="docutils literal"><span class="pre">bcmodelf77.so</span></tt>, and <tt class="docutils literal"><span class="pre">PMODEL.f</span></tt> is the name of
+the FORTRAN file to analyze and compile. Our convention is to
+compile F2PY modules in a subdirectory of the FORTRAN code,
+which explains why the file here has name <tt class="docutils literal"><span class="pre">../PMODEL.f</span></tt>.</p>
+<p>A little test code can compare the FORTRAN ODE solver with a couple
+of manual lines in Python:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nose.tools</span> <span class="kn">as</span> <span class="nn">nt</span>
+
+<span class="k">def</span> <span class="nf">test_bcmodelf77</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">bcmodelf77</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="mf">0.127</span>
+    <span class="n">R_d</span> <span class="o">=</span> <span class="mf">5.43</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">P_1</span> <span class="o">=</span> <span class="mi">16000</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="n">P_</span> <span class="o">=</span> <span class="n">bcmodelf77</span><span class="o">.</span><span class="n">pmodel</span><span class="p">(</span><span class="n">P_1</span><span class="p">,</span> <span class="n">R_d</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+
+    <span class="c"># Manual formula:</span>
+    <span class="n">P1_</span> <span class="o">=</span> <span class="n">P_1</span> <span class="o">+</span> <span class="n">T</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">P_1</span><span class="o">/</span><span class="n">R_d</span><span class="p">)</span><span class="o">/</span><span class="n">C</span>
+    <span class="n">P1_</span> <span class="o">=</span> <span class="n">P1_</span> <span class="o">+</span> <span class="n">T</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">P1_</span><span class="o">/</span><span class="n">R_d</span><span class="p">)</span><span class="o">/</span><span class="n">C</span>
+    <span class="n">nt</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span>
+        <span class="n">P_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">P1_</span><span class="p">,</span> <span class="n">places</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s">&#39;F77: </span><span class="si">%g</span><span class="s">, manual coding: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+        <span class="p">(</span><span class="n">P_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">P1_</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">test_bcmodelf77</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note that F2PY turns all upper case letters into lower case when
+viewed from Python.  Also note that this test function is created as a
+nose unit test. Running <tt class="docutils literal"><span class="pre">nosetests</span></tt> in that directory finds all
+<tt class="docutils literal"><span class="pre">test_*</span></tt> functions in all files and executes these functions.</p>
+<p>Instead of calling the FORTRAN function directly with many parameters,
+we wrap a class around the function such that the syntax of
+each call to compute <span class="math">\(P\)</span> becomes simpler. The idea is to let
+parameters that are constant through the fluid flow simulation
+be attributes in the class so that it is sufficient to provide the varying
+parameters in the call to <tt class="docutils literal"><span class="pre">PMODEL</span></tt>. The Python code hopefully
+explains this idea clearly:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">BCModel</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">R_d</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">C</span><span class="p">,</span> <span class="n">R_d</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">T</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">):</span>
+        <span class="n">P_</span> <span class="o">=</span> <span class="n">bcmodelf77</span><span class="o">.</span><span class="n">pmodel</span><span class="p">(</span>
+             <span class="n">P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">P_</span>
+</pre></div>
+</div>
+<p>We can now set all constant parameters at once,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pmodel</span> <span class="o">=</span> <span class="n">BCModel</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mf">0.127</span><span class="p">,</span> <span class="n">R_d</span><span class="o">=</span><span class="mf">5.43</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and there after call the FORTRAN subroutine <tt class="docutils literal"><span class="pre">PMODEL</span></tt> by
+<tt class="docutils literal"><span class="pre">pmodel(P,</span> <span class="pre">Q)</span></tt>, i.e., with only the arguments that change
+from time step to time step in the fluid solver.</p>
+</div>
+<div class="section" id="coupling-the-python-fenics-solver-with-the-fortran-routine">
+<h2>Coupling the Python FEniCS solver with the FORTRAN routine<a class="headerlink" href="#coupling-the-python-fenics-solver-with-the-fortran-routine" title="Permalink to this headline">¶</a></h2>
+<p>It remains to make the final glue between the FEniCS solver and
+the FORTRAN subroutine. In the FEniCS solver, we import the
+<tt class="docutils literal"><span class="pre">BCModel</span></tt> class and make a list of such objects, with one element
+for each outlet boundary where we want to use the ODE model. Then
+we invoke a time loop where new <span class="math">\(u\)</span> and <span class="math">\(p\)</span> are computed, then
+we compute the flux <span class="math">\(Q\)</span>, and finally we compute new outlet
+pressures by calling up each ODE solver in turn.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">NSSolver</span>
+<span class="kn">from</span> <span class="nn">BCModel</span> <span class="kn">import</span> <span class="n">BCModel</span>
+
+<span class="n">solver</span> <span class="o">=</span> <span class="n">NSSolver</span><span class="o">.</span><span class="n">NSSolver</span><span class="p">()</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">setIC</span><span class="p">()</span>
+<span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.01</span>   <span class="c"># fluid solver time step</span>
+<span class="n">T</span> <span class="o">=</span> <span class="mf">5.0</span>     <span class="c"># end time of simulation</span>
+
+<span class="n">C</span> <span class="o">=</span> <span class="mf">0.127</span>
+<span class="n">R</span> <span class="o">=</span> <span class="mf">5.43</span>
+<span class="n">N</span> <span class="o">=</span> <span class="mi">1000</span>    <span class="c"># use N steps in the ODE solver in [t,t+dt]</span>
+
+<span class="n">num_outlets</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c"># no out outflow boundaries</span>
+
+<span class="c"># Create an ODE model for the pressure at each outlet boundary</span>
+<span class="n">pmodels</span> <span class="o">=</span> <span class="p">[</span><span class="n">BCModel</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">num_outlets</span><span class="p">)]</span>
+
+<span class="n">P_</span> <span class="o">=</span> <span class="p">[</span><span class="mi">16000</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>   <span class="c"># start values for outlet pressures</span>
+
+<span class="k">while</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="n">t</span> <span class="o">+=</span> <span class="n">dt</span>
+
+    <span class="c"># Compute u_ and p_ using known outlet pressures P_</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">advance_one_time_step</span><span class="p">(</span><span class="n">P_</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+    <span class="c"># Compute the flux at outlet boundaries</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">flux</span><span class="p">()</span>
+
+    <span class="c"># Advance outlet pressure boundary condition to the</span>
+    <span class="c"># next time step (for each outlet boundary)</span>
+    <span class="c"># (pmodels returns a vector of size N containg the</span>
+    <span class="c"># the solution between [t, t+dt].</span>
+    <span class="c"># We take the last one with [-1])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_outlets</span><span class="p">):</span>
+        <span class="n">P_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pmodels</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">P_</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/cbc_logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FEniCS solver with boundary conditions in FORTRAN</a><ul>
+<li><a class="reference internal" href="#the-fenics-solver">The FEniCS solver</a></li>
+<li><a class="reference internal" href="#the-fortran-code-for-modeling-boundary-conditions">The FORTRAN code for modeling boundary conditions</a></li>
+<li><a class="reference internal" href="#coupling-the-python-fenics-solver-with-the-fortran-routine">Coupling the Python FEniCS solver with the FORTRAN routine</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="._part0000_fenics-mixed.html"
+                        title="previous chapter">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="._part0002_fenics-mixed.html"
+                        title="next chapter">FEniCS solver with optimization in Octave</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/._part0001_fenics-mixed.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="._part0002_fenics-mixed.html" title="FEniCS solver with optimization in Octave"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="._part0000_fenics-mixed.html" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB"
+             >previous</a> |</li>
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="wrapper">
+  <div class="footer">
+  <a href="http://cbc.simula.no"><img src="_static/cbc_banner.png" width="100%"><a>
+  </div>
+</div>
+
+  </body>
+</html>

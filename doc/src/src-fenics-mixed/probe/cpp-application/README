@@ -1,0 +1,4 @@
+This directory contains copies of ../Probe/Probe.* with additional
+C++ files for illustrating how one can make (larger) C++ applications
+based on DOLFIN.
+

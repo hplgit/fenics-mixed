@@ -1,0 +1,475 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>FEniCS solver with optimization in Octave &mdash; Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+    
+    <link rel="stylesheet" href="_static/fenics.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
+    <link rel="next" title="How to interface a C++/DOLFIN code from Python" href="._part0003_fenics-mixed.html" />
+    <link rel="prev" title="FEniCS solver with boundary conditions in FORTRAN" href="._part0001_fenics-mixed.html" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+<link rel="stylesheet" href="_static/featured.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+<script src="_static/slides.min.jquery.js"></script>
+  <script>
+	$(function(){
+		$('#products').slides({
+			preload: true,
+			preloadImage: 'img/loading.gif',
+			effect: 'slide, fade',
+			crossfade: true,
+			slideSpeed: 350,
+			fadeSpeed: 500,
+			generateNextPrev: false,
+			generatePagination: false,
+	                play: 5000,
+                        hoverPause: false,
+                        animationStart: function(current){
+				$('.caption').animate({
+					bottom:-35
+				},100);
+				if (window.console && console.log) {
+					// example return of current slide number
+					console.log('animationStart on slide: ', current);
+				};
+			},
+			animationComplete: function(current){
+				$('.caption').animate({
+					bottom:0
+				},200);
+				if (window.console && console.log) {
+					// example return of current slide number
+					console.log('animationComplete on slide: ', current);
+				};
+			},
+			slidesLoaded: function() {
+				$('.caption').animate({
+					bottom:0
+				},200);
+			}
+		});
+	});
+  </script>
+
+
+<link rel="shortcut icon" href="_static/fenics.ico" />
+
+
+  </head>
+  <body>
+<div class="wrapper">
+  <a href="http://fenicsproject.org/"><img src="_static/fenics_banner.png" width="900px" alt="FEniCS Project Banner" /></a>
+  <div id="access">
+    <div class="menu">
+      <ul>
+	<li class="page_item"><a href="http://fenicsproject.org/about/" title="Find out more about the FEniCS project">About</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/download/" title="Obtain the FEniCS project">Download</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/documentation/" title="Learn how to use the FEniCS project">Documentation</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/applications/" title="Learn how others are using the FEniCS project">Applications</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/contributing/" title="Learn how to contribute to the FEniCS project">Contributing</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/citing/" title="Learn how to cite the FEniCS project">Citing</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/support/" title="Where to go for more help">Support</a></li>
+      </ul>
+    </div><!-- .menu -->
+  </div><!-- #access -->
+</div><!-- #wrapper -->
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fenics-solver-with-optimization-in-octave">
+<h1>FEniCS solver with optimization in Octave<a class="headerlink" href="#fenics-solver-with-optimization-in-octave" title="Permalink to this headline">¶</a></h1>
+<p>While Python has gained significant momentum in scientific computing
+in recent years, Matlab and its open source counterpart Octave are
+still much more dominating tools in the community.  There are tons
+of MATLAB/Octave code around that FEniCS users may like to take
+advantage of. Fortunately,
+MATLAB and Octave both have Python interfaces so it is straightforward
+to call MATLAB/Octave from FEniCS simulators implemented in Python.
+The technical details of such coupling is the presented with the
+aid of an example.</p>
+<div class="section" id="basic-use-of-pytave">
+<h2>Basic use of Pytave<a class="headerlink" href="#basic-use-of-pytave" title="Permalink to this headline">¶</a></h2>
+<p>First we show how to operate Octave from Python.
+Our focus is on the Octave interface named <a class="reference external" href="http://launchpad.net/pytave">Pytave</a>.
+The basic Pytave command is</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">result</span> <span class="o">=</span> <span class="n">pytave</span><span class="o">.</span><span class="n">feval</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s">&quot;func&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>for running the function <tt class="docutils literal"><span class="pre">func</span></tt> in the Octave engine with arguments
+<tt class="docutils literal"><span class="pre">A</span></tt>, <tt class="docutils literal"><span class="pre">B</span></tt>, and so forth, resulting in <tt class="docutils literal"><span class="pre">n</span></tt> returned objects to Python.
+For example, computing the eigenvalues of a matrix is done by</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span><span class="o">,</span> <span class="nn">pytave</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">pytave</span><span class="o">.</span><span class="n">feval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;eig&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&#39;Eigenvalues:&#39;</span><span class="p">,</span> <span class="n">e</span>
+</pre></div>
+</div>
+<p>The eigenvalues <em>and</em> eigenvectors of a generalized eigenvalue
+problem <span class="math">\(A v = \lambda B v\)</span> is computed by
+obtain both the eigenvalues and the eigenvectors, we do</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">A</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">e</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">pytave</span><span class="o">.</span><span class="n">feval</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;eig&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&#39;Eigenvalues:&#39;</span><span class="p">,</span> <span class="n">e</span>
+<span class="k">print</span> <span class="s">&#39;Eigenvectors:&#39;</span><span class="p">,</span> <span class="n">v</span>
+</pre></div>
+</div>
+<p>Note that we here have two input arguments, <tt class="docutils literal"><span class="pre">A</span></tt> and <tt class="docutils literal"><span class="pre">B</span></tt>, and two output arguments, <tt class="docutils literal"><span class="pre">e</span></tt> and <tt class="docutils literal"><span class="pre">v</span></tt> (and because of the latter the first argument to
+<tt class="docutils literal"><span class="pre">feval</span></tt> is <tt class="docutils literal"><span class="pre">2</span></tt>).</p>
+<p>We could equally well solved these eigenvalue problems directly in
+<tt class="docutils literal"><span class="pre">numpy</span></tt> without any need for Octave, but the next example shows
+how to take advantage of a package with many MATLAB/Octave files
+offering functionality that is not available in Python.</p>
+</div>
+<div class="section" id="calling-the-matlab-octave-software">
+<h2>Calling the MATLAB/Octave software<a class="headerlink" href="#calling-the-matlab-octave-software" title="Permalink to this headline">¶</a></h2>
+<p>The following scientific application involves the coupling of our
+FEniCS flow solver with a MATLAB/Octave toolbox for solving
+optimization problems based on Kriging and the surrogate managment
+method.  Our task is to minimize the fluid velocity in a certain
+region by placing a porous media within the domain. We can choose the
+size, placement and permability of the porous media, but are not
+allowed to affect the pressure drop from the inlet to the outlet
+much. Figures <a class="reference internal" href="#fext-ex3-fig1"><em>Velocity problem around a porous media with </em></a> and <a class="reference internal" href="#fext-ex3-fig2"><em>Velocity problem around a porous media with near optimal values: </em></a> show the flow
+velocity with two different placements of two different porous media.</p>
+<div class="figure" id="fext-ex3-fig1">
+<img alt="_images/opt_flow.png" src="_images/opt_flow.png" style="width: 500px;" />
+<p class="caption">Velocity problem around a porous media with <span class="math">\(K_0=1000, x_0 = 0.4, c=0.1\)</span></p>
+</div>
+<div class="figure" id="fext-ex3-fig2">
+<img alt="_images/opt_flow2.png" src="_images/opt_flow2.png" style="width: 500px;" />
+<p class="caption">Velocity problem around a porous media with near optimal values: <span class="math">\(K_0=564, x_0 = 0.92, c=0.10\)</span></p>
+</div>
+<p>For this particular application we assume that the Reynolds number is
+low such that the flow can be modeled by the Stokes problem.
+Furthermore, the additional resistance caused by the porous medium is
+modeled by a positive lower order term <span class="math">\(K u\)</span> resulting in the
+Brinkman model.  The equations then reads</p>
+<div class="math">
+\[-\Delta u + K u - \nabla p = 0,\quad
+\mbox{ in }\Omega\]</div>
+<div class="math">
+\[\nabla \cdot  u = 0,\quad
+\mbox{ in } \Omega\]</div>
+<div class="math">
+\[ u = (0,0),\quad
+\mbox{ on } y=0,1\]</div>
+<div class="math">
+\[u = (y(1-y),0),\quad
+\mbox{ on } x=0\]</div>
+<div class="math">
+\[\frac{\partial u}{\partial n} + p n  =  0,\quad
+\mbox{ on } x=1\]</div>
+<p>with</p>
+<div class="math">
+\[K = K_0 \mbox{ if } |x - x_0 | \leq  c,\ | y - 0.5 | \leq c,\]</div>
+<p>while <span class="math">\(K=0\)</span> outside this rectangular region.</p>
+<p>When <span class="math">\(K=0\)</span> we have viscous Stokes flow while inside the porous medium,
+<span class="math">\(K=K_0\)</span>, and the <span class="math">\(K u\)</span> term in the equation dominates over the viscous
+term <span class="math">\(\Delta u\)</span>.</p>
+<p>The goal functional that we seek to minimize is</p>
+<div class="math">
+\[J(K_0, x_0, c) = u_x|_{(x=1,y=0.5)} + \int_\Omega (\nabla p)^2 \, dx\]</div>
+<p>Here, <span class="math">\(u\)</span> and <span class="math">\(p\)</span> are functions of <span class="math">\(K_0\)</span>, <span class="math">\(x_0\)</span>, and <span class="math">\(c\)</span>, and
+<span class="math">\(u_x\)</span> is the <span class="math">\(x\)</span> component of <span class="math">\(u\)</span>.</p>
+<p>The MATLAB/Octave code for the surrogate management and Kriging is
+based on <a class="reference external" href="http://www2.imm.dtu.dk/~hbn/dace/">Dace</a>, but has been
+extended by Alison Marsden et. al. <a class="reference internal" href="._part0005_fenics-mixed.html#ref08">[Ref08]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref09">[Ref09]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref10">[Ref10]</a>
+to implement surrogate management.
+This algorithm
+consists of four main steps 1) search, 2) poll, 3) refine and 4) run
+simulations, with a flow chart appearing in Figure <a class="reference internal" href="#fext-ex3-fig3"><em>The flow chart of the surrogate managment method</em></a>.
+The two first steps find new sample points <span class="math">\(K_0\)</span>,
+<span class="math">\(x_0\)</span>, and <span class="math">\(c\)</span>, while refine increases the resolution in the
+parameter space, and finally the fourth step runs simulations with the new
+sample points.</p>
+<div class="figure" id="fext-ex3-fig3">
+<img alt="_images/SMF.png" src="_images/SMF.png" style="width: 600px;" />
+<p class="caption"><em>The flow chart of the surrogate managment method</em></p>
+</div>
+<p>The main algorithm is implemented in Python and listed below.
+It calls three key Python functions: <tt class="docutils literal"><span class="pre">search</span></tt>, <tt class="docutils literal"><span class="pre">poll</span></tt>, and <tt class="docutils literal"><span class="pre">refine</span></tt>,
+which make calls to the MATLAB/Octave package.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># main loop</span>
+<span class="k">while</span> <span class="n">nit</span> <span class="o">&lt;=</span> <span class="n">max_nit</span> <span class="ow">and</span> <span class="n">refine_ok</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">converged</span><span class="p">:</span>
+   <span class="c"># search step</span>
+   <span class="k">if</span> <span class="n">cost_improve</span><span class="p">:</span>
+       <span class="n">Ai_new</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">Aall</span><span class="p">,</span> <span class="n">Jall</span><span class="p">,</span> <span class="n">curr_bestA</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span>
+                       <span class="n">upb</span><span class="p">,</span> <span class="n">lob</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="p">,</span> <span class="n">spc</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+       <span class="n">prev_it</span> <span class="o">=</span> <span class="s">&quot;search&quot;</span>
+       <span class="n">Ai_new</span> <span class="o">=</span> <span class="n">coarsen</span><span class="p">(</span><span class="n">Ai_new</span><span class="p">)</span>
+   <span class="k">else</span><span class="p">:</span>
+       <span class="c"># poll step</span>
+       <span class="k">if</span> <span class="n">prev_it</span> <span class="o">==</span> <span class="s">&quot;search&quot;</span><span class="p">:</span>
+           <span class="n">Ai_new</span> <span class="o">=</span> <span class="n">poll</span><span class="p">(</span><span class="n">Aall</span><span class="p">,</span> <span class="n">Jall</span><span class="p">,</span> <span class="n">curr_bestA</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span>
+                         <span class="n">delta</span><span class="p">,</span> <span class="n">spc</span><span class="p">,</span> <span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="p">)</span>
+           <span class="n">prev_it</span> <span class="o">=</span> <span class="s">&quot;poll&quot;</span>
+       <span class="c"># refine if previous poll did not lead to cost improvement</span>
+       <span class="k">if</span> <span class="n">prev_it</span> <span class="o">==</span> <span class="s">&quot;poll&quot;</span><span class="p">:</span>
+           <span class="n">refine_ok</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">spc</span> <span class="o">=</span> <span class="n">refine</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">deltamin</span><span class="p">,</span> <span class="n">spc</span><span class="p">)</span>
+           <span class="k">if</span> <span class="n">refine_ok</span><span class="p">:</span>
+               <span class="n">Ai_new</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">Aall</span><span class="p">,</span> <span class="n">Jall</span><span class="p">,</span> <span class="n">curr_bestA</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span>
+                               <span class="n">upb</span><span class="p">,</span> <span class="n">lob</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="p">,</span> <span class="n">spc</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+               <span class="n">prev_it</span> <span class="o">=</span> <span class="s">&quot;search&quot;</span>
+           <span class="k">else</span><span class="p">:</span>
+               <span class="n">Ai_new</span> <span class="o">=</span> <span class="bp">None</span>
+   <span class="n">nit</span> <span class="o">+=</span> <span class="mi">1</span>
+
+   <span class="c"># run simulations on the new parameters</span>
+   <span class="k">if</span> <span class="ow">not</span> <span class="n">Ai_new</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+       <span class="n">Ai_new</span><span class="p">,</span> <span class="n">J_new</span> <span class="o">=</span> <span class="n">run_simulations</span><span class="p">(</span><span class="n">Ai_new</span><span class="p">)</span>
+
+       <span class="c"># stack the new runs to the previous</span>
+       <span class="n">Jall</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">Jall</span><span class="p">,</span> <span class="n">J_new</span><span class="p">))</span>
+       <span class="n">Aall</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">Aall</span><span class="p">,</span> <span class="n">Ai_new</span><span class="p">))</span>
+
+       <span class="c"># monitor convergence (write to files)</span>
+       <span class="n">monitor</span><span class="p">(</span><span class="n">Aall</span><span class="p">,</span> <span class="n">Jall</span><span class="p">,</span> <span class="n">nit</span><span class="p">,</span> <span class="n">curr_bestA</span><span class="p">,</span> <span class="n">curr_bestJ</span><span class="p">,</span>
+               <span class="n">delta</span><span class="p">,</span> <span class="n">prev_it</span><span class="p">,</span> <span class="n">improve</span><span class="p">,</span> <span class="n">spc</span><span class="p">)</span>
+
+       <span class="c"># check convergence</span>
+       <span class="n">cost_improve</span><span class="p">,</span> <span class="n">curr_bestA</span><span class="p">,</span> <span class="n">curr_bestJ</span> <span class="o">=</span> <span class="n">check</span><span class="p">(</span>
+           <span class="n">Ai_new</span><span class="p">,</span> <span class="n">J_new</span><span class="p">,</span> <span class="n">nit</span><span class="p">,</span> <span class="n">curr_bestJ</span><span class="p">,</span> <span class="n">curr_bestA</span><span class="p">)</span>
+   <span class="k">else</span><span class="p">:</span>
+       <span class="n">cost_improve</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>The search and poll steps are both implemented in Python but are mainly wrappers around MATLAB/Octave functions.
+The search step is implemented as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">Aall</span><span class="p">,</span> <span class="n">Jall</span><span class="p">,</span> <span class="n">curr_bestA</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">upb</span><span class="p">,</span>
+           <span class="n">lob</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="p">,</span> <span class="n">spc</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Search step.&quot;&quot;&quot;</span>
+     <span class="c"># make sure that all points are unique</span>
+    <span class="p">(</span><span class="n">Am</span><span class="p">,</span> <span class="n">Jm</span><span class="p">)</span> <span class="o">=</span> <span class="n">pytave</span><span class="o">.</span><span class="n">feval</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s">&quot;dsmerge&quot;</span><span class="p">,</span> <span class="n">Aall</span><span class="p">,</span> <span class="n">Jall</span><span class="p">)</span>
+
+    <span class="n">next_ptsall</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">next_pts</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">max_no_searches</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">no_searches</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">next_pts</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">no_searches</span> <span class="o">&lt;</span> <span class="n">max_no_searches</span><span class="p">:</span>
+        <span class="n">next_ptsall</span><span class="p">,</span> <span class="n">min_est</span><span class="p">,</span> <span class="n">max_mse_pt</span> <span class="o">=</span> <span class="n">pytave</span><span class="o">.</span><span class="n">feval</span><span class="p">(</span>
+            <span class="mi">3</span><span class="p">,</span> <span class="s">&quot;krig_min_find_MADS_oct&quot;</span><span class="p">,</span>
+            <span class="n">Am</span><span class="p">,</span> <span class="n">Jm</span><span class="p">,</span> <span class="n">curr_bestA</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">upb</span><span class="p">,</span> <span class="n">lob</span><span class="p">,</span>
+            <span class="n">N</span><span class="p">,</span> <span class="n">amin</span><span class="p">,</span> <span class="n">amax</span><span class="p">,</span> <span class="n">spc</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="n">next_pts</span> <span class="o">=</span> <span class="n">check_for_new_points</span><span class="p">(</span><span class="n">next_ptsall</span><span class="p">,</span> <span class="n">Aall</span><span class="p">)</span>
+        <span class="n">no_searches</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">next_pts</span>
+</pre></div>
+</div>
+<p>Here, <tt class="docutils literal"><span class="pre">dsmerge</span></tt> and <tt class="docutils literal"><span class="pre">krig_min_find_MADS_kent</span></tt> are functions
+available in the MATLAB/Octave
+files <tt class="docutils literal"><span class="pre">dsmerge.m</span></tt> and <tt class="docutils literal"><span class="pre">krig_min_find_MADS_kent.m</span></tt>. We need to notify
+Octave about the directory (<tt class="docutils literal"><span class="pre">SMF</span></tt>) where these files can be found:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pytave</span><span class="o">.</span><span class="n">feval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;addpath&quot;</span><span class="p">,</span> <span class="s">&quot;SMF&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-fenics-pde-solver">
+<h2>The FEniCS PDE solver<a class="headerlink" href="#the-fenics-pde-solver" title="Permalink to this headline">¶</a></h2>
+<p>The FEniCS solver first defines the inflow condition (class <tt class="docutils literal"><span class="pre">EssentialBC</span></tt>),
+the <tt class="docutils literal"><span class="pre">K</span></tt> coefficient in the PDEs, and the Dirichlet boundary:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">EssentialBC</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">DOLFIN_EPS</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">y</span><span class="p">);</span>  <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">value_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)</span>
+
+<span class="k">class</span> <span class="nc">K</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c</span>
+
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x0</span><span class="p">,</span> <span class="n">K0</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">c</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">c</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">K0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="k">def</span> <span class="nf">dirichlet_boundary</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">DOLFIN_EPS</span> <span class="ow">or</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">DOLFIN_EPS</span> <span class="ow">or</span> \
+                <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">DOLFIN_EPS</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The core of the solver is the following class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FlowProblem2Optimize</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">plot</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">K0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">plot</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">K0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span>
+
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">UnitSquareMesh</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">VectorFunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s">&quot;Lagrange&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s">&quot;Lagrange&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">MixedFunctionSpace</span><span class="p">([</span><span class="n">V</span><span class="p">,</span><span class="n">Q</span><span class="p">])</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">TrialFunctions</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
+        <span class="n">v</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">TestFunctions</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">K</span><span class="p">(</span><span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+
+        <span class="n">u_inflow</span> <span class="o">=</span> <span class="n">EssentialBC</span><span class="p">()</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="n">DirichletBC</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">u_inflow</span><span class="p">,</span> <span class="n">dirichlet_boundary</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">inner</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">*</span><span class="n">dx</span> <span class="o">+</span> <span class="n">k</span><span class="o">*</span><span class="n">inner</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span> <span class="o">+</span> \
+            <span class="n">div</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="o">*</span><span class="n">q</span><span class="o">*</span><span class="n">dx</span> <span class="o">+</span> <span class="n">div</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">dx</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">f</span><span class="o">*</span><span class="n">q</span><span class="o">*</span><span class="n">dx</span>
+
+        <span class="n">w</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
+        <span class="n">solve</span><span class="p">(</span><span class="n">a</span> <span class="o">==</span> <span class="n">L</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">bc</span><span class="p">)</span>
+
+        <span class="n">u</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">u1</span><span class="p">,</span> <span class="n">u2</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="n">goal1</span> <span class="o">=</span> <span class="n">assemble</span><span class="p">(</span><span class="n">inner</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">grad</span><span class="p">(</span><span class="n">p</span><span class="p">))</span><span class="o">*</span><span class="n">dx</span><span class="p">)</span>
+        <span class="n">goal2</span> <span class="o">=</span> <span class="n">u</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">1000</span>
+        <span class="n">goal</span> <span class="o">=</span> <span class="n">goal1</span> <span class="o">+</span> <span class="n">goal2</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">:</span>
+            <span class="n">plot</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="n">key_variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">K0</span><span class="o">=</span><span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">goal1</span><span class="o">=</span><span class="n">goal1</span><span class="p">,</span>
+                             <span class="n">goal2</span><span class="o">=</span><span class="n">goal2</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="n">goal</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">key_variables</span>
+        <span class="k">return</span> <span class="n">goal1</span><span class="p">,</span> <span class="n">goal2</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="coupling-fenics-and-the-matlab-octave-software">
+<h2>Coupling FEniCS and the MATLAB/Octave software<a class="headerlink" href="#coupling-fenics-and-the-matlab-octave-software" title="Permalink to this headline">¶</a></h2>
+<p>It now remains to do the coupling of the optimization algorithm that makes
+use of MATLAB/Octave files and the FEniCS flow solver. The following
+function performs the task:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">run_simulations</span><span class="p">(</span><span class="n">Ai</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run a sequence of simulations with input parameters Ai.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">flow_problem</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ai</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># only one set of parameters</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">Ai</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">flow_problem</span><span class="o">.</span><span class="n">FlowProblem2Optimize</span><span class="p">(</span><span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">plot</span><span class="p">)</span>
+        <span class="n">goal1</span><span class="p">,</span> <span class="n">goal2</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="n">J</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span>  <span class="n">goal1</span> <span class="o">+</span> <span class="n">goal2</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c"># several sets of parameters</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Ai</span><span class="p">))</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">Ai</span><span class="p">:</span>
+            <span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">a</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">flow_problem</span><span class="o">.</span><span class="n">FlowProblem2Optimize</span><span class="p">(</span><span class="n">K0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">plot</span><span class="p">)</span>
+            <span class="n">goal1</span><span class="p">,</span> <span class="n">goal2</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+            <span class="n">J</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">goal1</span> <span class="o">+</span> <span class="n">goal2</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">Ai</span><span class="p">,</span> <span class="n">J</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-pytave">
+<h2>Installing Pytave<a class="headerlink" href="#installing-pytave" title="Permalink to this headline">¶</a></h2>
+<p>Obviously, Pytave depends on Octave,
+which can be somewhat challenging to install.
+Prebuilt binaries are available
+for Linux (Debian/Ubuntu, Fedora, Gentoo, SuSE, and FreeBSD), Mac OS X
+(via MacPorts or Homebrew), and Windows (requires Cygwin).
+On Debian-based systems (including Ubuntu)
+you are recommended to run these commands</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Install Octave</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">libtool</span> <span class="n">automake</span> <span class="n">libboost</span><span class="o">-</span><span class="n">python</span><span class="o">-</span><span class="n">dev</span> <span class="n">libopenmpi</span><span class="o">-</span><span class="n">dev</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">octave</span>  <span class="n">octave3</span><span class="o">.</span><span class="mi">2</span><span class="o">-</span><span class="n">headers</span>
+
+<span class="c"># Install Pytave</span>
+<span class="n">bzr</span> <span class="n">branch</span> <span class="n">lp</span><span class="p">:</span><span class="n">pytave</span>
+<span class="n">cd</span> <span class="n">pytave</span>
+<span class="n">bzr</span> <span class="n">revert</span> <span class="o">-</span><span class="n">r</span> <span class="mi">51</span>
+<span class="n">autoreconf</span> <span class="o">--</span><span class="n">install</span>
+<span class="o">./</span><span class="n">configure</span>
+<span class="n">sudo</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Pytave has not yet been officially released, but it is quite stable
+and has a rather complete interface to Octave. Unfortunately, the
+latest changeset has a bug and that is why we need to revert
+to a previous revision (<tt class="docutils literal"><span class="pre">bzr</span> <span class="pre">revert</span> <span class="pre">-r</span> <span class="pre">51</span></tt>).</p>
+<p>There are at least two Python modules that interface MATLAB:
+<a class="reference external" href="http://code.google.com/p/pymat2/">pymat2</a> and
+<a class="reference external" href="http://pypi.python.org/pypi/pymatlab">pymatlab</a>, but the authors do
+not have MATLAB installed and were unable to test these packages.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<div class="wrapper">
+  <div class="footer">
+    <div class="footer-nav">
+      <div class="span-6">
+	<h4>Usage documentation</h4>
+	<ul>
+	  <li><a href="http://fenicsproject.org/documentation/tutorial/">Tutorial</a></li>
+	  <li><a href="http://fenicsproject.org/documentation/dolfin/dev/python/">Python API</a></li>
+	  <li><a href="http://fenicsproject.org/documentation/dolfin/dev/cpp/">C++ API</a></li>
+          <li><a href="http://fenicsproject.org/releases/">Release notes</a></li>
+	</ul>
+      </div>
+      <div class="span-6">
+	<h4>Developer resources</h4>
+	<ul>
+	  <li><a href="http://fenicsproject.org/buildbot/">Buildbot</a></li>
+	  <li><a href="http://fenicsproject.org/benchbot/">Benchbot</a></li>
+	  <li><a href="http://fenicsproject.org/support/launchpad_pages.html">FEniCS on Launchpad</a></li>
+	</ul>
+      </div>
+      <div class="span-6 last">
+	<h4>Search this site</h4>
+	<div id="searchbox">
+	  <form class="search" action="/search.html" method="get">
+	    <input type="text" name="q" size="18" />
+	    <input type="submit" value="Go" />
+	    <input type="hidden" name="check_keywords" value="yes" />
+	    <input type="hidden" name="area" value="default" />
+	  </form>
+	</div>
+      </div>
+    </div>
+    &copy; <a href="http://fenicsproject.org/">The FEniCS Project</a>. (<a href="http://fenicsproject.org/disclaimer.html">Disclaimer</a>)
+  </div>
+</div>
+
+  </body>
+</html>

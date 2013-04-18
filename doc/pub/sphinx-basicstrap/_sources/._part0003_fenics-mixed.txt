@@ -1,0 +1,278 @@
+.. !split
+
+.. _fext:dolfin:cpp:
+
+How to interface a C++/DOLFIN code from Python
+==============================================
+
+Although FEniCS can easily and flexibly be extended by Python code,
+the need for speed in scientific computing occasionally makes
+a demand to implement new finite element functionality in C++.
+The present example shows how one can extend DOLFIN's finite
+element functionality through a new piece of C++ code and call
+this functionality from a Python FEniCS solver.
+
+FEniCS finite element functions can be evaluated at an arbitrary
+point in the mesh. In a parallel computing setting, however,
+the evaluation point must be in the part of the mesh that belongs
+to the current process and the searching for the element containing
+the point is not optimally efficient. Therefore, one may want to
+have a utility for fast evaluation of finite element functions
+at prescribed points on parallel computers.
+We can write a class ``Probe`` for this purpose. The constructor takes a spatial
+point ``x`` and precomputes which element that
+contains the point and other data useful for later
+fast evaluation of functions at ``x``.
+A member function ``eval(u)`` takes any ``Function`` object ``u`` and
+stores its value(s) at the point ``x``. With ``get_values(i)`` we
+can retrieve all values component ``i`` of the function computed in
+previous calls to ``eval``.
+For a scalar function there is only one component (``i=0``), but
+the class supports vector and tensor functions too.
+
+The name ``Probe`` reflects the use of such a class: we insert a
+probe, as in a physical experiment, and measure the response
+at that point through time. In FEniCS simulators it means that we
+want to record the evolution in time of some field at a given spatial
+point. For long time series there can be a lot of evaluations of
+the field at this point, and class ``Probe`` will be much more
+efficient than the standard FEniCS point evaluation of fields (which
+performs a lot of searching to find the element containing the point).
+
+(**hpl 1**: I did some renaming of the interface: ``like_.py``
+``num_components`` instead
+of ``value_size``, ``get_value`` instead of ``get_probe``, ``num_eval_calls``
+instead of ``number_of_evaluations``, ``get_point`` instead of
+``coordinates``, and the argument ``i`` is now ``component``. Check if
+the meaning is correct. The C++ .cpp file is not changed except
+for the function names.)
+
+The C++ class
+-------------
+
+Class ``Probe`` is a fairly short C++ code that makes use of various
+DOLFIN C++ classes and programming conventions. The header file
+reads
+
+
+.. code-block:: c++
+
+        #include <dolfin/function/FunctionSpace.h>
+        #include <dolfin/function/Function.h>
+        
+        namespace dolfin
+        {
+          class Function;
+          class FunctionSpace;
+          template<typename T> class Array;
+        
+          class Probe
+          {
+          public:
+            Probe(const Array<double>& point, const FunctionSpace& V);
+            void eval(const Function& u);
+            std::vector<double> get_values(std::size_t component);
+        
+            std::size_t num_components() {return value_size_loc;};
+            std::size_t number_of_eval_calls() {return _probes[0].size();};
+            std::vector<double> get_point();
+            void erase(std::size_t i);
+            void clear();
+        
+          private:
+            std::vector<std::vector<double> > basis_matrix;
+            std::vector<double> coefficients;
+            double _x[3];
+            boost::shared_ptr<const FiniteElement> _element;
+            Cell* dolfin_cell;
+            UFCCell* ufc_cell;
+            std::size_t value_size_loc;
+            std::vector<std::vector<double> > _probes;
+          };
+        }
+
+The most important functionality for users
+lies in the constructor and the ``eval`` and ``get_values`` functions, while the
+rest of the class contains short convenience functions and data
+structures for help with fast function evaluations.
+Note that ``eval`` does not return any value, it just records the
+value.
+
+The reader may consult the corresponding `Probe.cpp <https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/Probe/Probe.cpp>`_ file for all implementation details. Obviously, this type
+of code requires familiarity with the DOLFIN classes, but looking at
+the DOLFIN code itself is a good starting point for learning about
+those classes, the associated implementation conventions, and other
+programming tools that the DOLFIN library makes use of.
+
+Compiling and linking at the Python DOLFIN level
+------------------------------------------------
+
+The next, and often more technically challenging, step is to compile
+the C++ code, link it to DOLFIN, and make it callable from a FEniCS
+solver in Python.  Fortunately, this is not so difficult if we use the
+FEniCS Just-in-time (JIT) compiler Instant, which is already the
+compiler that DOLFIN applies when compiling variational forms. Instant
+employs SWIG in its JIT compiling, and some knowledge of SWIG is
+therefore required to understand how Instant works.  However, hardly
+any SWIG knowledge is needed if we use the convenience function
+``compile_extension_module`` found in the Python package ``dolfin``
+package. This function is a high-level interface to Instant
+functionality.
+
+Basically, the ``compile_extension_module`` function
+requires a declaration of our C++ code to be interfaced, a list
+of ``.cpp`` source code files, and some information on where files
+are found. Compilation and linking are then taken care of automatically.
+The C++ code to be interfaced in this example
+is contained in the ``Probe.h`` header file.
+The call to the ``compile_extension_module`` function is then
+
+
+.. code-block:: python
+
+        from dolfin import *
+        import numpy
+        import os
+        
+        header_file = open("Probe/Probe.h", "r")
+        code = header_file.read()
+        header_file.close()
+        probe_module = compile_extension_module(
+            code=code, source_directory="Probe", sources=["Probe.cpp"],
+            include_dirs=[".", os.path.abspath("Probe")])
+
+We can now import ``probe_module`` in the forthcoming code and use it
+for fast evaluations at some point ``x``:
+
+
+.. code-block:: python
+
+        mesh = UnitCubeMesh(10, 10, 10)
+        V = FunctionSpace(mesh, 'CG', 1)
+        
+        x = numpy.array((0.5, 0.5, 0.5))
+        probe = probe_module.Probe(x, V)
+        
+        u0 = interpolate(Expression('x[0]'), V)
+        # Fast evaluation of U0 at x:
+        probe.eval(u0)
+        print "The value at ", x, " is ", probe.get_probe(0)
+
+To summarize, with ``compile_extension_module`` the compilation and
+linking of C++ and DOLFIN code to make accessible in Python is a matter
+of one function call.
+
+Compiling and linking at the Instant level
+------------------------------------------
+
+We shall now go into details how the steps above would be done by
+using basic Instant only, as this explains how to use Instant for
+interfacing C++ code in general.  Instant provides the ``build_module``
+function for building a Python module out of the C++ code:
+
+
+.. code-block:: python
+
+        compiled_module = instant.build_module(
+            code=code,
+            source_directory=source_dir,
+            additional_declarations=additional_decl,
+            system_headers=system_headers,
+            include_dirs=include_dirs,
+            swigargs=swigargs,
+            sources=sources,
+            cmake_packages=cmake_packages)
+
+Here,
+
+ * ``code`` is the C++ code that is to be wrapped,
+
+ * ``source_directory`` is the directory where the C++ ``.cpp`` files are found,
+
+ * ``additional_declarations`` are additional declaration needed to
+    make SWIG behave properly,
+
+ * ``system_headers`` is a list of the additional header files needed
+   for compilation,
+
+ * ``include_dirs`` is a list of
+   additional include directories required for compilation,
+
+ * ``swigargs`` is the arguments that shall be passed to SWIG on the
+   command line,
+
+ * ``sources`` is
+   a list of C++ files that shall be compiled into the Pyhton module, and
+
+ * ``cmake_packages`` is a list of packages that the CMake compilation
+   depend on.
+
+The following code illustrates the setting of these variables:
+
+
+.. code-block:: python
+
+        system_headers = ['numpy/arrayobject.h',
+                          'dolfin/function/Function.h',
+                          'dolfin/function/FunctionSpace.h']
+        swigargs = ['-c++', '-fcompact', '-O', '-I.', '-small']
+        cmake_packages = ['DOLFIN']
+        sources = ["Probe.cpp"]
+        source_dir = "Probe"
+
+
+The ``Probe`` class employs several DOLFIN classes. Hence, for this class
+to work properly it is crucial that the JIT compiler and SWIG are told
+how to relate to the DOLFIN classes. Instant provides the hook
+``additional_declarations`` for providing additional declarations to
+SWIG. Such declarations require knowledge of how to write
+SWIG interface files. In the current example, the additional
+declarations look like the following string:
+
+
+.. code-block:: python
+
+        additional_decl = """
+        %init%{
+        import_array();
+        %}
+        
+        // Include global SWIG interface files:
+        // Typemaps, shared_ptr declarations, exceptions, version
+        %include <boost_shared_ptr.i>
+        
+        // Global typemaps and forward declarations
+        %include "dolfin/swig/typemaps/includes.i"
+        %include "dolfin/swig/forwarddeclarations.i"
+        
+        // Global exceptions
+        %include <exception.i>
+        
+        // Local shared_ptr declarations
+        %shared_ptr(dolfin::Function)
+        %shared_ptr(dolfin::FunctionSpace)
+        
+        // %import types from submodule function of SWIG module function
+        %import(module="dolfin.cpp.function") "dolfin/function/Function.h"
+        %import(module="dolfin.cpp.function") "dolfin/function/FunctionSpace.h"
+        
+        %feature("autodoc", "1");
+        """
+
+
+The ``init`` part containing ``import_array`` is always needed when NumPy
+arrays are involved.  Thereafter, we include various SWIG interface
+files (ending in ``.i``) that we need in DOLFIN-related code. We also
+need shared pointers for ``dolfin::Function`` and
+``dolfin::FunctionSpace``. In addition we need header files for
+``Function`` and ``FunctionSpace`` classes in DOLFIN. Note that the
+``import`` and ``include`` statements in SWIG may seem similar, but that
+whereas ``include`` makes SWIG generate wrappers for the code included,
+the ``import`` directive simply provides SWIG with the necessary type
+information.
+
+We refer to the complete file `instant_test_probe.py <https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/instant_test_probe.py>`_ for how all of the
+information about is put together and executed in order to build the
+extension module using plain Instant functionality.
+
+

@@ -1,0 +1,15 @@
+# Install Octave
+sudo apt-get update
+sudo apt-get install libtool automake libboost-python-dev libopenmpi-dev
+sudo apt-get install octave  octave3.2-headers
+
+# Install Pytave
+bzr branch lp:pytave
+cd pytave
+bzr revert -r 51
+autoreconf --install
+./configure
+sudo python setup.py install
+
+
+

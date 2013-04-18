@@ -1,0 +1,1192 @@
+
+<!DOCTYPE html>
+
+
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    
+    <title>FEniCS solver coupled with ODE solver in C++ &mdash; Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    
+<link rel="stylesheet" href="_static/css/basicstrap-base.css" type="text/css" />
+<link rel="stylesheet" href="_static/css/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" href="_static/css/font-awesome.min.css">
+<!--[if IE 7]>
+<link rel="stylesheet" href="_static/css/font-awesome-ie7.min.css">
+<![endif]-->
+<style type="text/css">
+  body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+  }
+}
+</style>
+<link rel="stylesheet" href="_static/basicstrap.css" type="text/css" />
+<link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+<link rel="stylesheet" href="_static/css/bootstrap-responsive.min.css" type="text/css" />
+    
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:    '',
+            VERSION:     '1.0',
+            COLLAPSE_INDEX: false,
+            FILE_SUFFIX: '.html',
+            HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="_static/js/jquery.min.js"></script>
+<script type="text/javascript" src="_static/underscore.js"></script>
+<script type="text/javascript" src="_static/doctools.js"></script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript" src="_static/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('.show-sidebar').click(function(e) {
+       e.preventDefault();
+       if ($(".show-sidebar").html() == "Open Table Of Contents") {
+          $('.for-mobile').removeClass('hidden-phone');
+          $(".show-sidebar").html("Close Table Of Contents");
+       } else {
+          $(".show-sidebar").html("Open Table Of Contents");
+       }
+    });
+  });
+</script>
+    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
+    <link rel="next" title="References" href="._part0005_fenics-mixed.html" />
+    <link rel="prev" title="How to interface a C++/DOLFIN code from Python" href="._part0003_fenics-mixed.html" /> 
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top ">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav pull-right">
+              
+                <li>
+                <a href="genindex.html" title="General Index" accesskey="I">index</a>
+                </li>
+                <li>
+                <a href="._part0005_fenics-mixed.html" title="References" accesskey="N">next</a>
+                </li>
+                <li>
+                <a href="._part0003_fenics-mixed.html" title="How to interface a C++/DOLFIN code from Python" accesskey="P">previous</a>
+                </li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+    <!-- container -->
+    <div class="container-fluid">
+
+
+      
+      <div class="row-fluid hidden-desktop hidden-tablet">
+      
+<div class="span3 ">
+  <a class="visible-phone btn btn-small show-sidebar" data-toggle="collapse" data-target=".for-mobile">Open Table Of Contents</a>
+  <div class="for-mobile sidebar hidden-phone">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FEniCS solver coupled with ODE solver in C++</a><ul>
+<li><a class="reference internal" href="#wrapping-with-f2py">Wrapping with F2PY</a><ul>
+<li><a class="reference internal" href="#c-api-to-c-code">C API to C++ code</a></li>
+<li><a class="reference internal" href="#writing-corresponding-fortran-signatures">Writing corresponding FORTRAN signatures</a></li>
+<li><a class="reference internal" href="#building-the-extension-module">Building the extension module</a></li>
+<li><a class="reference internal" href="#main-program-in-python">Main program in Python</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#a-pure-c-version-of-the-c-class">A pure C version of the C++ class</a></li>
+<li><a class="reference internal" href="#wrapping-with-swig">Wrapping with SWIG</a></li>
+<li><a class="reference internal" href="#wrapping-with-cython">Wrapping with Cython</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="._part0003_fenics-mixed.html"
+                        title="previous chapter">How to interface a C++/DOLFIN code from Python</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="._part0005_fenics-mixed.html"
+                        title="next chapter">References</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/._part0004_fenics-mixed.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox">
+  <h3>Quick search</h3>
+  <form class="search form-search" action="search.html" method="get">
+      <div class="input-append">
+        <input type="text" class="search-query" name="q">
+        <input type="submit" class="btn" value="Go" />
+      </div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+  </div>
+</div>
+      </div>
+      
+
+      <!-- row -->
+      <div class="row-fluid">
+         
+<div class="span3 visible-desktop visible-tablet">
+  <div class=" sidebar hidden-phone">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FEniCS solver coupled with ODE solver in C++</a><ul>
+<li><a class="reference internal" href="#wrapping-with-f2py">Wrapping with F2PY</a><ul>
+<li><a class="reference internal" href="#c-api-to-c-code">C API to C++ code</a></li>
+<li><a class="reference internal" href="#writing-corresponding-fortran-signatures">Writing corresponding FORTRAN signatures</a></li>
+<li><a class="reference internal" href="#building-the-extension-module">Building the extension module</a></li>
+<li><a class="reference internal" href="#main-program-in-python">Main program in Python</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#a-pure-c-version-of-the-c-class">A pure C version of the C++ class</a></li>
+<li><a class="reference internal" href="#wrapping-with-swig">Wrapping with SWIG</a></li>
+<li><a class="reference internal" href="#wrapping-with-cython">Wrapping with Cython</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="._part0003_fenics-mixed.html"
+                        title="previous chapter">How to interface a C++/DOLFIN code from Python</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="._part0005_fenics-mixed.html"
+                        title="next chapter">References</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/._part0004_fenics-mixed.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox">
+  <h3>Quick search</h3>
+  <form class="search form-search" action="search.html" method="get">
+      <div class="input-append">
+        <input type="text" class="search-query" name="q">
+        <input type="submit" class="btn" value="Go" />
+      </div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+  </div>
+</div> 
+        
+
+        <div class="span9">
+          <div class="document">
+            <div class="documentwrapper">
+              <div class="bodywrapper">
+                <div class="body">
+                  
+  <div class="section" id="fenics-solver-coupled-with-ode-solver-in-c">
+<span id="fext-pdeode-cpp"></span><h1>FEniCS solver coupled with ODE solver in C++<a class="headerlink" href="#fenics-solver-coupled-with-ode-solver-in-c" title="Permalink to this headline">¶</a></h1>
+<p>In this final example we will consider a solver for a reaction-diffusion
+equation described by a parabolic PDE coupled to a set of ODEs. The
+equation can be written as</p>
+<div class="math">
+\[\begin{split}u_t &amp;= \Delta u + f(u, s),
+&amp; \forall x \in\Omega,\ t&gt;0, \\
+s_t &amp;= g(u, s),
+&amp; \forall x \in \Omega,\ t&gt;0.\end{split}\]</div>
+<p>Here, <span class="math">\(u\)</span> is a scalar function, subscript <span class="math">\(t\)</span> means differentiation with
+respect to time, <span class="math">\(s\)</span> is a scalar field (governed pointwise by an ODE),
+and <span class="math">\(\Delta u\)</span> is a Laplace term.
+The problem is usually solved using a first order operator splitting scheme,
+where we at a time level first solve the PDE with <span class="math">\(f\)</span> evaluated at
+the previous time level, and thereafter we update the ODEs using
+the most recent value of <span class="math">\(u\)</span>. More precisely,</p>
+<div class="math">
+\[\begin{split}u^n &amp;= u^{n-1} + \Delta t (\Delta u^n + f(u^{n-1}, s^{n-1})),  \\
+s^n &amp;= s^{n-1} + \Delta t g(u^n, s^{n-1}) ,\end{split}\]</div>
+<p>The superscript <span class="math">\(n\)</span> denotes the time level, and <span class="math">\(\Delta t\)</span> is the time step.</p>
+<p>The solver for the parabolic problem is implemented in FEniCS, while
+the ODE solver is implemented in a homemade C++ code. We will glue
+these two different solvers together using Python. The C++ code consists
+basically of the class <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> declared in a file <tt class="docutils literal"><span class="pre">ODEFieldSolver.h</span></tt>:</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ODEFieldSolver</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">n</span><span class="p">;</span>                <span class="c1">// no of points (or regions)</span>
+  <span class="kt">double</span><span class="o">*</span> <span class="n">s</span><span class="p">;</span>            <span class="c1">// discrete values of unknown s)</span>
+  <span class="kt">double</span><span class="o">*</span> <span class="n">s_1</span><span class="p">;</span>          <span class="c1">// s at the previous time level</span>
+  <span class="kt">double</span><span class="o">*</span> <span class="n">u</span><span class="p">;</span>            <span class="c1">// discrete values of external field u</span>
+  <span class="kt">double</span> <span class="n">dt</span><span class="p">;</span>            <span class="c1">// time step size</span>
+
+  <span class="nl">public:</span>
+  <span class="n">ODEFieldSolver</span><span class="p">();</span>
+ <span class="o">~</span><span class="n">ODEFieldSolver</span><span class="p">();</span>
+  <span class="kt">void</span> <span class="nf">redim</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">);</span>    <span class="c1">// allocate data structures</span>
+  <span class="kt">int</span> <span class="nf">size</span><span class="p">();</span>           <span class="c1">// return the no of points/regions</span>
+  <span class="k">virtual</span> <span class="kt">double</span> <span class="nf">g</span><span class="p">(</span><span class="kt">double</span> <span class="n">s</span><span class="p">,</span> <span class="kt">double</span> <span class="n">u</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">set_dt</span><span class="p">(</span><span class="kt">double</span> <span class="n">dt</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">set_IC</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">in_array</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">set_u</span> <span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">in_array</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">set_IC</span><span class="p">(</span><span class="kt">double</span> <span class="n">const_value</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">set_u</span> <span class="p">(</span><span class="kt">double</span> <span class="n">const_value</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">advance_one_timestep</span><span class="p">();</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">set_IC</span></tt> functions set the initial condition of the ODE system, and
+<tt class="docutils literal"><span class="pre">set_u</span></tt> provides the <span class="math">\(u\)</span> field (the &#8220;environment&#8221;) to the ODE system.
+Note that there are two versions of <tt class="docutils literal"><span class="pre">set_IC</span></tt> and <tt class="docutils literal"><span class="pre">set_u</span></tt>: one for
+a constant value one for spatial variations.</p>
+<p>The mathematics behind the shown class is to have <span class="math">\(n\)</span> regional or pointwise
+values of <span class="math">\(u\)</span> and <span class="math">\(s\)</span>, and then solve <span class="math">\(s_t = g(s,u)\)</span> in each region
+or at each point. In the present case we will solve for <span class="math">\(s\)</span> at
+the nodes in the finite element mesh used to compute <span class="math">\(u\)</span>.
+The <span class="math">\(s\)</span> and <span class="math">\(u\)</span> functions are in the C++ code represented by
+plain C arrays holding nodal values. The usage of the C++ code typically
+goes like this:</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="n">ODEFieldSolver</span> <span class="n">solver</span> <span class="o">=</span> <span class="n">ODEFieldSolver</span><span class="p">();</span>
+<span class="n">solver</span><span class="p">.</span><span class="n">redim</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>               <span class="c1">// allocate data</span>
+<span class="n">solver</span><span class="p">.</span><span class="n">set_dt</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span>             <span class="c1">// set time step</span>
+<span class="n">solver</span><span class="p">.</span><span class="n">set_IC</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s0</span><span class="p">);</span>          <span class="c1">// set initial conditions</span>
+<span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">t</span> <span class="o">&lt;=</span> <span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">solver</span><span class="p">.</span><span class="n">set_u</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">u</span><span class="p">);</span>        <span class="c1">// give access to PDE solution</span>
+    <span class="n">solver</span><span class="p">.</span><span class="n">advance_one_timestep</span><span class="p">();</span>
+    <span class="c1">// plot solver.s</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>A subclass must be written to specify the desired <tt class="docutils literal"><span class="pre">g</span></tt> function.</p>
+<p>We need to wrap the C++ class in Python such that
+the FEniCS Python solver can call the C++ code.
+We would then need to transfer the computed
+<span class="math">\(s\)</span> back to Python. To this end, we add a member function <tt class="docutils literal"><span class="pre">get_s</span></tt>
+to the class so that we can fill some array on the user&#8217;s side with
+the most recently computed <tt class="docutils literal"><span class="pre">s</span></tt> values:</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ODEFieldSolver</span> <span class="p">{</span>
+  <span class="p">...</span>
+  <span class="kt">void</span> <span class="n">get_s</span>  <span class="p">(</span><span class="kt">int</span><span class="o">&amp;</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">out_array</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<div class="section" id="wrapping-with-f2py">
+<h2>Wrapping with F2PY<a class="headerlink" href="#wrapping-with-f2py" title="Permalink to this headline">¶</a></h2>
+<p>The easiest way to interface FORTRAN, C, and C++ code is to use F2PY.
+Although F2PY was made for interfacing FORTRAN and most of the documentation
+is written with FORTRAN codes in mind, it is convenient to interface
+C and C++ too. Or more precisely, F2PY can interface a pure C API, not
+C++ classes. The idea is then to construct a set of C functions on top
+of the C++ classes for accessing high-level operations using the those classes.
+The example involving class <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> will illustrate the elements
+in this technique.</p>
+<div class="section" id="c-api-to-c-code">
+<h3>C API to C++ code<a class="headerlink" href="#c-api-to-c-code" title="Permalink to this headline">¶</a></h3>
+<p>The first step is to decide on the C API. The exposed functions in
+Python must do essentially the same as the main program. A possible
+set of functions is</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">set_ic_and_dt(int</span> <span class="pre">n,</span> <span class="pre">double*</span> <span class="pre">s0,</span> <span class="pre">double</span> <span class="pre">dt)</span></tt> for initializing
+the class object and setting the initial conditions
+and the time step. Also a variant <tt class="docutils literal"><span class="pre">set_const_ic_and_dt</span></tt> for
+constant initial condition <tt class="docutils literal"><span class="pre">s0</span></tt> is handy.</li>
+<li><tt class="docutils literal"><span class="pre">set_u(int</span> <span class="pre">n,</span> <span class="pre">double*</span> <span class="pre">u)</span></tt> for assigning the <tt class="docutils literal"><span class="pre">u</span></tt> function to the class.</li>
+<li><tt class="docutils literal"><span class="pre">advance_one_timestep()</span></tt> for computing the solution at a time step.</li>
+<li><tt class="docutils literal"><span class="pre">get_s(int</span> <span class="pre">n,</span> <span class="pre">double*</span> <span class="pre">s)</span></tt> for getting access to the computed array <tt class="docutils literal"><span class="pre">s</span></tt>
+in the <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> class.</li>
+</ul>
+</div></blockquote>
+<p>These functions must make use of a global variable holding a
+<tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> object and interact with this object as appropriate.
+The complete code of the C API then becomes</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="cp">#include &quot;ODEFieldSolver.h&quot;</span>
+
+<span class="n">ODEFieldSolver</span> <span class="n">solver</span> <span class="o">=</span> <span class="n">ODEFieldSolver</span><span class="p">();</span>
+
+<span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="p">{</span>
+
+<span class="kt">void</span> <span class="n">set_ic_and_dt</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">s0</span><span class="p">,</span> <span class="kt">double</span> <span class="n">dt</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">solver</span><span class="p">.</span><span class="n">redim</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+  <span class="n">solver</span><span class="p">.</span><span class="n">set_dt</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span>
+  <span class="n">solver</span><span class="p">.</span><span class="n">set_IC</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s0</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="n">set_const_ic_and_dt</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span> <span class="n">s0</span><span class="p">,</span> <span class="kt">double</span> <span class="n">dt</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">solver</span><span class="p">.</span><span class="n">redim</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+  <span class="n">solver</span><span class="p">.</span><span class="n">set_dt</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span>
+  <span class="n">solver</span><span class="p">.</span><span class="n">set_const_IC</span><span class="p">(</span><span class="n">s0</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="n">set_u</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">u</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">solver</span><span class="p">.</span><span class="n">set_u</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">u</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="n">advance_one_timestep</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">solver</span><span class="p">.</span><span class="n">advance_one_timestep</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="n">get_s</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">s</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">solver</span><span class="p">.</span><span class="n">get_s</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="writing-corresponding-fortran-signatures">
+<h3>Writing corresponding FORTRAN signatures<a class="headerlink" href="#writing-corresponding-fortran-signatures" title="Permalink to this headline">¶</a></h3>
+<p>The nice thing about F2PY is that it can automatically make a Python
+interface to this C code, where NumPy arrays can be passed to the
+functions taking plain C arrays as arguments. For this to work, F2PY
+needs a specification of all the C functions in terms of FORTRAN 90
+module syntax. However, F2PY can generate this module for us if we
+specify the function signatures in plain FORTRAN 77. This is done as
+follows:</p>
+<div class="highlight-fortran"><div class="highlight"><pre>      <span class="k">subroutine </span><span class="nv">set_ic_and_dt</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">s0</span><span class="p">,</span> <span class="nv">dt</span><span class="p">)</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">set_ic_and_dt</span>
+      <span class="kt">integer </span><span class="nv">n</span>
+      <span class="kt">real</span><span class="o">*</span><span class="mi">8</span> <span class="nv">s0</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="nv">n</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="nv">dt</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">s0</span><span class="p">,</span> <span class="nv">dt</span>
+      <span class="k">return</span>
+<span class="k">      end</span>
+
+<span class="k">      subroutine </span><span class="nv">set_const_ic_and_dt</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">s0</span><span class="p">,</span> <span class="nv">dt</span><span class="p">)</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">set_const_ic_and_dt</span>
+      <span class="kt">integer </span><span class="nv">n</span>
+      <span class="kt">real</span><span class="o">*</span><span class="mi">8</span> <span class="nv">s0</span><span class="p">,</span> <span class="nv">dt</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">s0</span><span class="p">,</span> <span class="nv">dt</span>
+      <span class="k">return</span>
+<span class="k">      end</span>
+
+<span class="k">      subroutine </span><span class="nv">set_u</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">u</span><span class="p">)</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">set_u</span>
+      <span class="kt">integer </span><span class="nv">n</span>
+      <span class="kt">real</span><span class="o">*</span><span class="mi">8</span> <span class="nv">u</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="nv">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">n</span><span class="p">,</span> <span class="nv">u</span>
+      <span class="k">return</span>
+<span class="k">      end</span>
+
+<span class="k">      subroutine </span><span class="nv">advance_one_timestep</span><span class="p">()</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">advance_one_timestep</span>
+      <span class="k">return</span>
+<span class="k">      end</span>
+
+<span class="k">      subroutine </span><span class="nv">get_s</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">s</span><span class="p">)</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">get_s</span>
+      <span class="kt">integer </span><span class="nv">n</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">n</span>
+      <span class="kt">real</span><span class="o">*</span><span class="mi">8</span> <span class="nv">s</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="nv">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">,</span> <span class="nv">in</span><span class="p">,</span> <span class="nv">out</span><span class="p">)</span> <span class="nv">s</span>
+      <span class="k">return</span>
+<span class="k">      end</span>
+</pre></div>
+</div>
+<p>For each C function we</p>
+<blockquote>
+<div><ul class="simple">
+<li>write the corresponding FORTRAN subroutine or function header,</li>
+<li>insert an F2PY-specific comment (<tt class="docutils literal"><span class="pre">CF2PY</span></tt>) that tells that the
+function is in C: <tt class="docutils literal"><span class="pre">intent(c)</span></tt>,</li>
+<li>specify that all variables are in C: <tt class="docutils literal"><span class="pre">intent(c)</span></tt> (FORTRAN treats
+all arguments as pointers, so the specification of C variables is
+strictly needed only for non-pointers),</li>
+<li>specify if we want the Python interface to return one or more output
+arguments.</li>
+</ul>
+</div></blockquote>
+<p>Regarding the last point, we specify <tt class="docutils literal"><span class="pre">s</span></tt> in <tt class="docutils literal"><span class="pre">get_s</span></tt> as <tt class="docutils literal"><span class="pre">intent(c,in,out)</span></tt>,
+meaning that we in Python can call this function as <tt class="docutils literal"><span class="pre">s</span> <span class="pre">=</span> <span class="pre">get_s(s)</span></tt>.
+The <tt class="docutils literal"><span class="pre">s</span></tt> argument is needed for the function to avoid
+reallocating the returned array every time the function is call. Instead
+we reuse the storage provied in the <tt class="docutils literal"><span class="pre">s</span></tt> array.</p>
+<p>If the FORTRAN 77 signatures are in a file <tt class="docutils literal"><span class="pre">signatures_capi2cpp.f</span></tt> we
+can get F2PY to generate a FORTRAN 90 module in a file <tt class="docutils literal"><span class="pre">ODEFieldSolvercpp.pyf</span></tt>
+by the command</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">Terminal&gt; F2PY -m ODEFieldSolvercpp -h ODEFieldSolvercpp.pyf \</span>
+<span class="go">          --overwrite-signature signatures_capi2cpp.f</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">-m</span></tt> option specifies the name of the extension module that contains
+the Python interfaces to the C API.</p>
+<p>The module typically looks like</p>
+<div class="highlight-fortran"><div class="highlight"><pre><span class="c">!    -*- f90 -*-</span>
+<span class="c">! Note: the context of this file is case sensitive.</span>
+
+<span class="nv">python</span> <span class="k">module </span><span class="nv">ODEFieldSolvercpp</span> <span class="c">! in</span>
+    <span class="k">interface</span>  <span class="c">! in :ODEFieldSolvercpp</span>
+        <span class="k">subroutine </span><span class="nv">set_ic_and_dt</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span><span class="nv">s0</span><span class="p">,</span><span class="nv">dt</span><span class="p">)</span>
+            <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">set_ic_and_dt</span>
+            <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">),</span><span class="nv">check</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nv">s0</span><span class="p">)</span><span class="o">&gt;=</span><span class="nv">n</span><span class="p">),</span><span class="nv">depend</span><span class="p">(</span><span class="nv">s0</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">n</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="nv">s0</span><span class="p">)</span>
+            <span class="kt">real</span><span class="o">*</span><span class="mi">8</span> <span class="k">dimension</span><span class="p">(</span><span class="nv">n</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">s0</span>
+            <span class="kt">real</span><span class="o">*</span><span class="mi">8</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">dt</span>
+        <span class="k">end subroutine </span><span class="nv">set_ic_and_dt</span>
+        <span class="k">subroutine </span><span class="nv">set_const_ic_and_dt</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span><span class="nv">s0</span><span class="p">,</span><span class="nv">dt</span><span class="p">)</span>
+            <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">set_const_ic_and_dt</span>
+            <span class="kt">integer </span><span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">n</span>
+            <span class="kt">real</span><span class="o">*</span><span class="mi">8</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">s0</span>
+            <span class="kt">real</span><span class="o">*</span><span class="mi">8</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">dt</span>
+        <span class="k">end subroutine </span><span class="nv">set_const_ic_and_dt</span>
+        <span class="k">subroutine </span><span class="nv">set_u</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span><span class="nv">u</span><span class="p">)</span>
+            <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">set_u</span>
+            <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">),</span><span class="nv">check</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nv">u</span><span class="p">)</span><span class="o">&gt;=</span><span class="nv">n</span><span class="p">),</span><span class="nv">depend</span><span class="p">(</span><span class="nv">u</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">n</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="nv">u</span><span class="p">)</span>
+            <span class="kt">real</span><span class="o">*</span><span class="mi">8</span> <span class="k">dimension</span><span class="p">(</span><span class="nv">n</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">u</span>
+        <span class="k">end subroutine </span><span class="nv">set_u</span>
+        <span class="k">subroutine </span><span class="nv">advance_one_timestep</span> <span class="c">! in :ODEFieldSolvercpp:signatures_capi2cpp.f</span>
+            <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">advance_one_timestep</span>
+        <span class="k">end subroutine </span><span class="nv">advance_one_timestep</span>
+        <span class="k">subroutine </span><span class="nv">get_s</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span><span class="nv">s</span><span class="p">)</span>
+            <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">get_s</span>
+            <span class="kt">integer</span><span class="p">,</span> <span class="k">optional</span><span class="p">,</span><span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">),</span><span class="nv">check</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nv">s</span><span class="p">)</span><span class="o">&gt;=</span><span class="nv">n</span><span class="p">),</span><span class="nv">depend</span><span class="p">(</span><span class="nv">s</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">n</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="nv">s</span><span class="p">)</span>
+            <span class="kt">real</span><span class="o">*</span><span class="mi">8</span> <span class="k">dimension</span><span class="p">(</span><span class="nv">n</span><span class="p">),</span><span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">,</span><span class="nv">in</span><span class="p">,</span><span class="nv">out</span><span class="p">)</span> <span class="kd">::</span> <span class="nv">s</span>
+        <span class="k">end subroutine </span><span class="nv">get_s</span>
+    <span class="k">end interface</span>
+<span class="k">end </span><span class="nv">python</span> <span class="k">module </span><span class="nv">ODEFieldSolvercpp</span>
+
+<span class="c">! This file was auto-generated with f2py (version:2).</span>
+<span class="c">! See http://cens.ioc.ee/projects/f2pye/</span>
+</pre></div>
+</div>
+<p>Those who are familiar with FORTRAN 90 modules can write such
+code by hand instead of first writing FORTRAN 77 headers and letting
+F2PY generate the module.</p>
+</div>
+<div class="section" id="building-the-extension-module">
+<h3>Building the extension module<a class="headerlink" href="#building-the-extension-module" title="Permalink to this headline">¶</a></h3>
+<p>With the aid of the FORTRAN 90 specification of the C functions, F2PY
+can compile and link the extension module by a command like</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">Terminal&gt; F2PY -c --fcompiler=gfortran -I.. --build-dir tmp1 \</span>
+<span class="go">         -DF2PY_REPORT_ON_ARRAY_COPY=1 \</span>
+<span class="go">          ODEFieldSolvercpp.pyf ../ODEFieldSolver.cpp capi2cpp.cpp</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">-DF2PY_REPORT_ON_ARRAY_COPY=1</span></tt> option is handy for letting F2PY
+notify us if arrays are copied when transferred from Python to C,
+as we want to avoid time-consuming copies. The C++ class is assumed
+to be in the parent directory (note <tt class="docutils literal"><span class="pre">-I..</span></tt> and the <tt class="docutils literal"><span class="pre">../</span></tt> prefix
+in the filename). All the files generated
+and built by F2PY will reside in the <tt class="docutils literal"><span class="pre">tmp1</span></tt> directory for later
+inspection if run into build problems.</p>
+<p>The result of the above compile command is a C/C++ extension module
+in the file <tt class="docutils literal"><span class="pre">ODEFieldSolvercpp.so</span></tt>. The module can be loaded
+into Python and examined for content:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ODEFieldSolvercpp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">(</span><span class="n">ODEFieldSolvercpp</span><span class="p">)</span>
+<span class="go">[&#39;__doc__&#39;, &#39;__file__&#39;, &#39;__name__&#39;, &#39;__package__&#39;, &#39;__version__&#39;,</span>
+<span class="go"> &#39;advance_one_timestep&#39;, &#39;get_s&#39;, &#39;set_const_ic_and_dt&#39;,</span>
+<span class="go"> &#39;set_ic_and_dt&#39;, &#39;set_u&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">ODEFieldSolvercpp</span><span class="o">.</span><span class="n">__doc__</span>
+<span class="go">This module &#39;ODEFieldSolvercpp&#39; is auto-generated with F2PY (version:2).</span>
+<span class="go">Functions:</span>
+<span class="go">  set_ic_and_dt(s0,dt,n=len(s0))</span>
+<span class="go">  set_const_ic_and_dt(n,s0,dt)</span>
+<span class="go">  set_u(u,n=len(u))</span>
+<span class="go">  advance_one_timestep()</span>
+<span class="go">  s = get_s(s,n=len(s))</span>
+</pre></div>
+</div>
+<p>A word of caution is required for newcomers to F2PY: it is extremely
+important to <em>study the doc strings</em> of the various functions before
+trying to call them from Python. The reason is that F2PY drops
+unnecessary arguments, such as array lengths (since these are
+contained in NumPy array objects), and all output arguments are
+returned and removed from the subroutine&#8217;s argument list.
+The function arguments and return values are therefore different
+in Python and C!
+For example, the <tt class="docutils literal"><span class="pre">set_ic_and_dt</span></tt> function only needs <tt class="docutils literal"><span class="pre">s0</span></tt> transferred
+from Python since <tt class="docutils literal"><span class="pre">n</span></tt> can be deduced from the F2PY-generated
+interface. The signature of this function, as seen from Python,
+is then</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">ODEFieldSolvercpp</span><span class="o">.</span><span class="n">set_ic_and_dt</span><span class="o">.</span><span class="n">__doc__</span>
+<span class="go">set_ic_and_dt - Function signature:</span>
+<span class="go">  set_ic_and_dt(s0,dt,[n])</span>
+<span class="go">Required arguments:</span>
+<span class="go">  s0 : input rank-1 array(&#39;d&#39;) with bounds (n)</span>
+<span class="go">  dt : input float</span>
+<span class="go">Optional arguments:</span>
+<span class="go">  n := len(s0) input int</span>
+</pre></div>
+</div>
+<p>Furthermore, the <tt class="docutils literal"><span class="pre">get_s</span></tt> function has specified its <tt class="docutils literal"><span class="pre">s</span></tt>
+argument as input and output (<tt class="docutils literal"><span class="pre">intent(c,in,out)</span></tt>) and the
+doc string shows the correct call syntax:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">ODEFieldSolvercpp</span><span class="o">.</span><span class="n">get_s</span><span class="o">.</span><span class="n">__doc__</span>
+<span class="go">get_s - Function signature:</span>
+<span class="go">  s = get_s(s,[n])</span>
+<span class="go">Required arguments:</span>
+<span class="go">  s : input rank-1 array(&#39;d&#39;) with bounds (n)</span>
+<span class="go">Optional arguments:</span>
+<span class="go">  n := len(s) input int</span>
+<span class="go">Return objects:</span>
+<span class="go">  s : rank-1 array(&#39;d&#39;) with bounds (n)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="main-program-in-python">
+<h3>Main program in Python<a class="headerlink" href="#main-program-in-python" title="Permalink to this headline">¶</a></h3>
+<p>The Python code for calling the C++ functions in the <tt class="docutils literal"><span class="pre">ODEFieldSolvercpp</span></tt>
+module can take the following form:`</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">ODEFieldSolvercpp</span> <span class="kn">as</span> <span class="nn">cpp</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="n">s0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span>
+<span class="n">u</span>  <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span>
+<span class="n">n</span>  <span class="o">=</span> <span class="n">s0</span><span class="o">.</span><span class="n">size</span>
+<span class="n">s</span>  <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">cpp</span><span class="o">.</span><span class="n">set_ic_and_dt</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+    <span class="n">cpp</span><span class="o">.</span><span class="n">set_u</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+    <span class="n">cpp</span><span class="o">.</span><span class="n">advance_one_timestep</span><span class="p">()</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">cpp</span><span class="o">.</span><span class="n">get_s</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">n</span><span class="p">,</span> <span class="n">s</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="a-pure-c-version-of-the-c-class">
+<h2>A pure C version of the C++ class<a class="headerlink" href="#a-pure-c-version-of-the-c-class" title="Permalink to this headline">¶</a></h2>
+<p>It may be illustrative to also see a pure C code that implements
+the same type of actions as the C++ class.
+The class variables are here global variables in a library and
+all the class functions are stand-alone C functions working with
+these global variables. A bit more sophisticated implementation
+would collect the global variables in a global struct instead, so
+that the functions work with the struct.
+The advantage of a pure C code is that F2PY can interface all parts
+of this code directly without any need to make a C API to C++ code.
+(Having said that, we should add that making a C API to C++ codes
+is often a good exercise as it tends to emphasize faster computing with
+arrays rather than with special (potentially small) C++ objects.
+Python interfacing of C++ this way may lead to sound redesign of
+the C++ code.)</p>
+<p>The pure C implementation goes as follows:</p>
+<div class="highlight-c"><div class="highlight"><pre><span class="cp">#include &lt;stdlib.h&gt;</span>
+<span class="cp">#include &lt;stdio.h&gt;</span>
+
+<span class="cm">/* global variables */</span>
+<span class="kt">double</span><span class="o">*</span> <span class="n">s</span><span class="p">;</span>
+<span class="kt">double</span><span class="o">*</span> <span class="n">s_1</span><span class="p">;</span>
+<span class="kt">double</span><span class="o">*</span> <span class="n">u</span><span class="p">;</span>
+<span class="kt">double</span> <span class="n">dt</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">redim</span><span class="p">(</span><span class="kt">int</span> <span class="n">n_</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">n</span> <span class="o">=</span> <span class="n">n_</span><span class="p">;</span>
+  <span class="n">s</span> <span class="o">=</span>   <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="o">*</span><span class="n">n</span><span class="p">);</span>
+  <span class="n">s_1</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="o">*</span><span class="n">n</span><span class="p">);</span>
+  <span class="n">u</span> <span class="o">=</span>   <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="o">*</span><span class="n">n</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">deallocate</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">free</span><span class="p">(</span><span class="n">s</span><span class="p">);</span> <span class="n">free</span><span class="p">(</span><span class="n">s_1</span><span class="p">);</span> <span class="n">free</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* Note: do not mix upper and lower case letters as in set_IC_...</span>
+<span class="cm">   This leads to undefined symbols when f2py compiles the code.</span>
+<span class="cm">*/</span>
+
+<span class="kt">void</span> <span class="nf">set_ic_and_dt</span><span class="p">(</span><span class="kt">int</span> <span class="n">n_</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">s0</span><span class="p">,</span> <span class="kt">double</span> <span class="n">dt_</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+  <span class="n">redim</span><span class="p">(</span><span class="n">n_</span><span class="p">);</span>
+  <span class="n">dt</span> <span class="o">=</span> <span class="n">dt_</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">s_1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s0</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">set_const_ic_and_dt</span><span class="p">(</span><span class="kt">int</span> <span class="n">n_</span><span class="p">,</span> <span class="kt">double</span> <span class="n">s0</span><span class="p">,</span> <span class="kt">double</span> <span class="n">dt_</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+  <span class="n">redim</span><span class="p">(</span><span class="n">n_</span><span class="p">);</span>
+  <span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">s_1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s0</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">set_u</span><span class="p">(</span><span class="kt">int</span> <span class="n">n_</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">u_</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">u_</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">double</span> <span class="nf">g</span><span class="p">(</span><span class="kt">double</span> <span class="n">s_</span><span class="p">,</span> <span class="kt">double</span> <span class="n">u_</span><span class="p">)</span> <span class="p">{</span>
+  <span class="cm">/* return s_*u_*(1 - s_); */</span>
+  <span class="k">return</span> <span class="n">s_</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">advance_one_timestep</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="cm">/* Use the Forward Euler time integration for simplicity */</span>
+  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">g</span><span class="p">(</span><span class="n">s_1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+    <span class="cm">/* For debugging: */</span>
+    <span class="cm">/* printf(&quot;i=%d, s_1=%g, dt=%g, g=%g, s=%g\n&quot;,</span>
+<span class="cm">       i, s_1[i], dt, g(s_1[i], u[i]), s[i]); */</span>
+  <span class="p">}</span>
+  <span class="cm">/* Update for next time step */</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span> <span class="n">s_1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="p">}</span>
+
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">get_s</span><span class="p">(</span><span class="kt">int</span> <span class="n">n_</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">s_</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">s_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>By writing the corresponding FORTRAN 77 signatures, F2PY can generate
+a FORTRAN 90 module specification of the extension module, and this
+code can be compiled as explained above.
+We refer to the files in the <a class="reference external" href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/ODEFieldSolver/f2py-c">f2py-c</a>
+directory for details.</p>
+</div>
+<div class="section" id="wrapping-with-swig">
+<h2>Wrapping with SWIG<a class="headerlink" href="#wrapping-with-swig" title="Permalink to this headline">¶</a></h2>
+<p>Next, we emply the tool <a class="reference external" href="http://www.swig.org">SWIG</a> to wrap the C++ class
+directly and make it available as a Python class.
+SWIG is also used in DOLFIN and Instant, as demonstrated
+in the section <a class="reference internal" href="._part0003_fenics-mixed.html#fext-dolfin-cpp"><em>How to interface a C++/DOLFIN code from Python</em></a>.
+Useful references on SWIG in a FEniCS context
+are <a class="reference internal" href="._part0005_fenics-mixed.html#ref02">[Ref02]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref11">[Ref11]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref12">[Ref12]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref13">[Ref13]</a>.</p>
+<p>To use SWIG, you must first write an <em>interface file</em> (ending in <tt class="docutils literal"><span class="pre">.i</span></tt>)
+that tells SWIG about the parts of the C++ code you want to access
+from Python. The next step is to run SWIG to generate (a lot of) wrapper
+code in C. The final step is to compile the wrapper code and your C++ code
+and link with required libraries.</p>
+<p>A first attempt to write an interface for our <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> class
+consists in listing just the class declaration:</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="o">%</span><span class="n">module</span> <span class="n">ODEFieldSolver</span>
+<span class="o">%</span><span class="p">{</span>
+<span class="cp">#include &lt;arrayobject.h&gt;</span>
+<span class="cp">#include &lt;sstream&gt;</span>
+<span class="cp">#include &quot;ODEFieldSolver.h&quot;</span>
+<span class="o">%</span><span class="p">}</span>
+
+
+<span class="o">%</span><span class="n">init</span> <span class="o">%</span><span class="p">{</span>
+<span class="n">import_array</span><span class="p">();</span>
+<span class="o">%</span><span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">ODEFieldSolver</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">n</span><span class="p">;</span>                <span class="c1">// no of points (or regions)</span>
+  <span class="kt">double</span><span class="o">*</span> <span class="n">s</span><span class="p">;</span>            <span class="c1">// discrete values of unknown s)</span>
+  <span class="kt">double</span><span class="o">*</span> <span class="n">s_1</span><span class="p">;</span>          <span class="c1">// s at the previous time level</span>
+  <span class="kt">double</span><span class="o">*</span> <span class="n">u</span><span class="p">;</span>            <span class="c1">// discrete values of external field u</span>
+  <span class="kt">double</span> <span class="n">dt</span><span class="p">;</span>            <span class="c1">// time step size</span>
+
+  <span class="nl">public:</span>
+  <span class="n">ODEFieldSolver</span><span class="p">();</span>
+ <span class="o">~</span><span class="n">ODEFieldSolver</span><span class="p">();</span>
+  <span class="kt">void</span> <span class="nf">redim</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">);</span>    <span class="c1">// allocate data structures</span>
+  <span class="kt">int</span> <span class="nf">size</span><span class="p">();</span>           <span class="c1">// return the no of points/regions</span>
+  <span class="k">virtual</span> <span class="kt">double</span> <span class="nf">g</span><span class="p">(</span><span class="kt">double</span> <span class="n">s</span><span class="p">,</span> <span class="kt">double</span> <span class="n">u</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">set_dt</span><span class="p">(</span><span class="kt">double</span> <span class="n">dt</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">set_IC</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">in_array</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">set_u</span> <span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">in_array</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">set_IC</span><span class="p">(</span><span class="kt">double</span> <span class="n">const_value</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">set_u</span> <span class="p">(</span><span class="kt">double</span> <span class="n">const_value</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="nf">advance_one_timestep</span><span class="p">();</span>
+
+  <span class="kt">void</span> <span class="nf">get_s</span>  <span class="p">(</span><span class="kt">int</span><span class="o">&amp;</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span><span class="o">*</span> <span class="n">out_array</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>All SWIG commands start with <tt class="docutils literal"><span class="pre">%</span></tt>. The <tt class="docutils literal"><span class="pre">%module</span></tt> command defines the
+name of the module. Following this command comes a list of header files
+needed by the module. The <tt class="docutils literal"><span class="pre">%init</span></tt> command includes code that should be
+executed when the module is imported in Python. When using NumPy arrays
+in C++ code we always need to call the <tt class="docutils literal"><span class="pre">import_array</span></tt> function to
+initialize the NumPy package (removal of this statement will
+result in a segmentation fault!).  The rest of the code defines the
+interface that should be wrapped, that is; the declaration of the
+class <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt>.</p>
+<p>SWIG is meant to automate interfacing of C and C++ code, and there is
+mainly only one thing that needs to be addressed manually: the
+handling of pointers to arrays. Consider for instance the <tt class="docutils literal"><span class="pre">set_IC</span></tt>
+function. Here, <tt class="docutils literal"><span class="pre">in_array</span></tt> is a pointer to the first element of a
+double precision array of length <tt class="docutils literal"><span class="pre">n</span></tt>.  However, the fact that
+<tt class="docutils literal"><span class="pre">in_array</span></tt> is an array is not explicitly stated in C++, and therefore
+SWIG simply by default handles the pointer as a plain pointer, and
+this is not what we want. SWIG does, however, offer typemaps for
+changing this default behavior.  With typemaps we can specify that the
+pointer <tt class="docutils literal"><span class="pre">in_array</span></tt> is a NumPy array object (<tt class="docutils literal"><span class="pre">PyObject</span></tt>) when it comes
+from Python, and we can extract the underlying data pointer
+(<tt class="docutils literal"><span class="pre">double*</span></tt>) and communicate it to C.</p>
+<p>To enable NumPy arrays to be passed to the functions <tt class="docutils literal"><span class="pre">set_IC</span></tt> and
+<tt class="docutils literal"><span class="pre">set_u</span></tt> we provide the following typemap.</p>
+<div class="highlight-c++"><pre>%typemap(in) (int n, double* array){
+  if (!PyArray_Check($input)) {
+    PyErr_SetString(PyExc_TypeError, "Not a NumPy array");
+    return NULL; ;
+  }
+  PyArrayObject* pyarray;
+  pyarray = (PyArrayObject*)$input;
+  if (!(PyArray_TYPE(pyarray) == NPY_DOUBLE)) {
+    PyErr_SetString(PyExc_TypeError, "Not a NumPy array of doubles");
+    return NULL; ;
+  }
+  $1 = int(pyarray-&gt;dimensions[0]);
+  $2 = (double*)pyarray-&gt;data;
+}</pre>
+</div>
+<p>Typemap code often looks complicated, at least when viewed for the
+first time. The logic is straightforward, though, once some basic
+knowledge of the C API of Python and NumPy is acquired. The idea
+with the typemap is to recognize a set of arguments in C/C++, here
+<tt class="docutils literal"><span class="pre">n</span></tt> and <tt class="docutils literal"><span class="pre">in_array</span></tt>, and then execute some C/C++ code to transform
+a Python object to the C/C++ arguments.
+In the present example we want to map a NumPy array object
+to an integer <tt class="docutils literal"><span class="pre">n</span></tt> (the array size) and a plain C array <tt class="docutils literal"><span class="pre">in_array</span></tt>
+(the array data). All Python objects, when viewed in C, are of type
+<tt class="docutils literal"><span class="pre">PyObject</span></tt>. We can think of <tt class="docutils literal"><span class="pre">PyObject</span></tt> as a superclass for all the different
+object types in Python. The special NumPy array object type is
+<tt class="docutils literal"><span class="pre">PyArrayObject</span></tt>.</p>
+<p>SWIG has some special variables prefixed with <tt class="docutils literal"><span class="pre">$</span></tt>, which in the
+present example are <tt class="docutils literal"><span class="pre">$input</span></tt> for the incoming NumPy array object, and
+<tt class="docutils literal"><span class="pre">$1</span></tt> and <tt class="docutils literal"><span class="pre">$2</span></tt> for the outgoing C/C++ arguments <tt class="docutils literal"><span class="pre">n</span></tt> and <tt class="docutils literal"><span class="pre">in_array</span></tt>.
+The first <tt class="docutils literal"><span class="pre">if</span></tt> statement checks that the incoming array is of right
+type, and if not, a <tt class="docutils literal"><span class="pre">TypeError</span></tt> exception is raised.  The <tt class="docutils literal"><span class="pre">return</span>
+<span class="pre">NULL</span></tt> statement is essential for this exception to work.  The next
+step is to cast the <tt class="docutils literal"><span class="pre">PyObject</span></tt> pointer in <tt class="docutils literal"><span class="pre">$input</span></tt> to the correct
+array object type, <tt class="docutils literal"><span class="pre">PyArrayObject</span></tt>, because we need this object to
+call C functionality in the NumPy object to extract the data and the
+array size.  For safety reasons, we insert a test that the array data
+are of type <tt class="docutils literal"><span class="pre">NPY_DOUBLE</span></tt> so that the array element types in Python and
+C match.  Then we come to the final and most essential point:
+extracting data from the NumPy array object and storing them in <tt class="docutils literal"><span class="pre">n</span></tt>
+(<tt class="docutils literal"><span class="pre">$1</span></tt>) and <tt class="docutils literal"><span class="pre">in_array</span></tt> (<tt class="docutils literal"><span class="pre">$2</span></tt>):</p>
+<div class="highlight-c"><pre>$1 = int(pyarray-&gt;dimensions[0]);
+$2 = (double*)pyarray-&gt;data;</pre>
+</div>
+<p>(<strong>hpl 2</strong>: Kent, I don&#8217;t understand this <tt class="docutils literal"><span class="pre">typecheck</span></tt> stuff - can you explain
+a bit more??)</p>
+<p>Because we have overloaded the <tt class="docutils literal"><span class="pre">set_IC</span></tt> function, we also need to provide
+SWIG with a <tt class="docutils literal"><span class="pre">typecheck</span></tt> to determine which of the C++ functions to use.
+A suitable typecheck is:</p>
+<div class="highlight-c++"><pre>%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (int n, double* array) {
+$1 = PyArray_Check($input) ? 1 : 0;
+}</pre>
+</div>
+<p>The function</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="kt">void</span> <span class="nf">get_s</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">double</span> <span class="o">*</span><span class="n">array</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>should return NumPy arrays when called from Python as</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="n">s</span> <span class="o">=</span> <span class="n">odesolver</span><span class="p">.</span><span class="n">get_s</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>That is, we would like to be able to call this function from Python
+without providing and input array, and instead get an output
+array. This means that an array must be created before being passed to
+C++ and then returned to Python. To accomplish this we hide the
+function by calling it <tt class="docutils literal"><span class="pre">_get_s</span></tt>. Then we extend the interface using
+the <tt class="docutils literal"><span class="pre">%extend</span></tt> and <tt class="docutils literal"><span class="pre">%pythoncode</span></tt> directives with a Python function
+<tt class="docutils literal"><span class="pre">get_s</span></tt>.  The Python function <tt class="docutils literal"><span class="pre">get_s</span></tt> allocate an array before passing
+it to the hidden <tt class="docutils literal"><span class="pre">_get_s</span></tt> function and thereafter it
+returns the array. The code is</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="cm">/* Wrap ODEFieldSolver::get_s in a Python function */</span>
+<span class="o">%</span><span class="n">rename</span> <span class="p">(</span><span class="n">_get_s</span><span class="p">)</span> <span class="n">ODEFieldSolver</span><span class="o">::</span><span class="n">get_s</span><span class="p">;</span>
+
+<span class="o">%</span><span class="n">extend</span> <span class="n">ODEFieldSolver</span><span class="p">{</span>
+ <span class="o">%</span><span class="n">pythoncode</span><span class="o">%</span><span class="p">{</span>
+    <span class="n">def</span> <span class="n">get_s</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="o">:</span>
+      <span class="n">import</span> <span class="n">numpy</span> <span class="n">as</span> <span class="n">np</span>
+      <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">size</span><span class="p">())</span>
+      <span class="n">self</span><span class="p">.</span><span class="n">_get_s</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">a</span>
+ <span class="o">%</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>To summarize, the complete
+SWIG interface file for wrapping the <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> class is
+listed next.</p>
+<div class="highlight-c++"><pre>%module ODEFieldSolver
+%{
+#include &lt;arrayobject.h&gt;
+#include &lt;sstream&gt;
+#include "ODEFieldSolver.h"
+%}
+
+
+%init %{
+import_array();
+%}
+
+%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (int n, double* array) {
+$1 = PyArray_Check($input) ? 1 : 0;
+}
+
+%typemap(in) (int n, double* array){
+  if (!PyArray_Check($input)) {
+    PyErr_SetString(PyExc_TypeError, "Not a NumPy array");
+    return NULL; ;
+  }
+  PyArrayObject* pyarray;
+  pyarray = (PyArrayObject*)$input;
+  if (!(PyArray_TYPE(pyarray) == NPY_DOUBLE)) {
+    PyErr_SetString(PyExc_TypeError, "Not a NumPy array of doubles");
+    return NULL; ;
+  }
+  $1 = int(pyarray-&gt;dimensions[0]);
+  $2 = (double*)pyarray-&gt;data;
+}
+
+/* Wrap ODEFieldSolver::get_s in a Python function */
+%rename (_get_s) ODEFieldSolver::get_s;
+
+%extend ODEFieldSolver{
+ %pythoncode%{
+    def get_s(self):
+      import numpy as np
+      a = np.zeros(self.size())
+      self._get_s(a)
+      return a
+ %}
+}
+
+%include std_string.i
+%include "ODEFieldSolver.h"</pre>
+</div>
+<p>To make SWIG generate the wrapper code, we run</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">swig -python -c++  -I. -I.. ODEFieldSolver.i</span>
+</pre></div>
+</div>
+<p>SWIG supports many languages and we therefore specify what languages
+we need wrapper code for by the <tt class="docutils literal"><span class="pre">-python</span></tt> and <tt class="docutils literal"><span class="pre">-c++</span></tt> flags. Further,
+<tt class="docutils literal"><span class="pre">-I</span></tt> is used to specify where SWIG should look for interface files
+(with extension <tt class="docutils literal"><span class="pre">.i</span></tt>).  The C++ class files are located in
+the parent directory.
+SWIG will from this command generate two files
+<tt class="docutils literal"><span class="pre">ODEFieldSolver.py</span></tt> and <tt class="docutils literal"><span class="pre">ODEFieldSolver_wrap.cxx</span></tt>. The latter
+needs to be compiled and
+linked with the <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> code to form a shared library
+with name <tt class="docutils literal"><span class="pre">_ODEFieldSolver.so</span></tt>. The <tt class="docutils literal"><span class="pre">ODEFieldSolver.py</span></tt> file
+is the module to use from Python and this is nothing but
+a Python class wrapper to <tt class="docutils literal"><span class="pre">_ODEFieldSolver.so</span></tt> module.
+Building the shared library is most conveniently done
+via a standard <tt class="docutils literal"><span class="pre">setup.py</span></tt> script. The following <tt class="docutils literal"><span class="pre">setup.py</span></tt> file provides
+an appropriate recipe for writing this kind of files:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">distutils.core</span> <span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">Extension</span>
+<span class="n">name</span> <span class="o">=</span> <span class="s">&#39;ODEFieldSolver&#39;</span>
+<span class="n">swig_cmd</span> <span class="o">=</span><span class="s">&#39;swig -python   -c++  -I.. -I.  </span><span class="si">%s</span><span class="s">.i&#39;</span> <span class="o">%</span> <span class="n">name</span>
+<span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">swig_cmd</span><span class="p">)</span>
+<span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;../</span><span class="si">%s</span><span class="s">.cpp&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_wrap.cxx&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">]</span>
+<span class="n">setup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+      <span class="n">ext_modules</span><span class="o">=</span> <span class="p">[</span>
+          <span class="n">Extension</span><span class="p">(</span><span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span>
+                    <span class="n">sources</span><span class="p">,</span>
+                    <span class="n">include_dirs</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;..&#39;</span><span class="p">,</span>
+                                  <span class="n">numpy</span><span class="o">.</span><span class="n">get_include</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;/numpy&quot;</span><span class="p">])])</span>
+</pre></div>
+</div>
+<p>To create and install the extension module
+locally in the current working directory (<tt class="docutils literal"><span class="pre">.</span></tt>),
+we run</p>
+<div class="highlight-bash"><div class="highlight"><pre>python setup.py install --install-platlib<span class="o">=</span>.
+</pre></div>
+</div>
+<p>Now we can do <tt class="docutils literal"><span class="pre">import</span> <span class="pre">ODEFieldSolver</span></tt> in Python and access the
+C++ class as a Python class.</p>
+<p>The FEniCS solver for the parabolic PDE can be implemented as
+a class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ParabolicSolver</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set up PDE problem for NxN mesh and time step dt.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">UnitSquareMesh</span><span class="p">,</span> <span class="n">FunctionSpace</span><span class="p">,</span> <span class="n">TrialFunction</span><span class="p">,</span> \
+         <span class="n">TestFunction</span><span class="p">,</span> <span class="n">Function</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dot</span><span class="p">,</span> <span class="n">grad</span>
+
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">UnitSquareMesh</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">V</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s">&quot;Lagrange&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="n">TrialFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">u</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">dx</span> <span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">*</span><span class="n">dx</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">advance_one_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">u_1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solve the PDE for one time step.</span>
+<span class="sd">    f: the source term in the PDE.</span>
+<span class="sd">    u_1: solution at the previous time step.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">TestFunction</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">solve</span>
+
+    <span class="n">V</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>  <span class="c"># strip off self prefix</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="p">(</span><span class="n">u_1</span> <span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">f</span><span class="p">)</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">dx</span>
+
+    <span class="n">solve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="n">L</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span>
+</pre></div>
+</div>
+<p>The following pseudo code illustrates how to work with this code and
+the ODE solver:</p>
+<div class="highlight-text"><div class="highlight"><pre>for i in range(num_time_steps):   # time loop
+    &lt;compute f&gt;
+    &lt;call ParabolicSolver&#39;s advance_one_time_step&gt;
+    &lt;compute g&gt;
+    &lt;call the ODE solver&gt;
+</pre></div>
+</div>
+<p>A complete code goes as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">dolfin</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="k">def</span> <span class="nf">F</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">U</span><span class="p">):</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Function</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="o">*</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">S</span><span class="p">)</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="o">*</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">S</span><span class="p">)</span><span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+<span class="k">class</span> <span class="nc">ParabolicSolver</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set up PDE problem for NxN mesh and time step dt.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">UnitSquareMesh</span><span class="p">,</span> <span class="n">FunctionSpace</span><span class="p">,</span> <span class="n">TrialFunction</span><span class="p">,</span> \
+         <span class="n">TestFunction</span><span class="p">,</span> <span class="n">Function</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dot</span><span class="p">,</span> <span class="n">grad</span>
+
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">UnitSquareMesh</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">V</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s">&quot;Lagrange&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="n">TrialFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">u</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">dx</span> <span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">dot</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">*</span><span class="n">dx</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">U</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">advance_one_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">u_1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solve the PDE for one time step.</span>
+<span class="sd">    f: the source term in the PDE.</span>
+<span class="sd">    u_1: solution at the previous time step.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="n">TestFunction</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">solve</span>
+
+    <span class="n">V</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>  <span class="c"># strip off self prefix</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="p">(</span><span class="n">u_1</span> <span class="o">+</span> <span class="n">dt</span><span class="o">*</span><span class="n">f</span><span class="p">)</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">dx</span>
+
+    <span class="n">solve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">==</span> <span class="n">L</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">U</span>
+
+<span class="kn">import</span> <span class="nn">dolfin</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="mi">12</span>     <span class="c"># mesh partition</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c"># time step</span>
+<span class="n">parabolicsolver</span> <span class="o">=</span> <span class="n">ParabolicSolver</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+<span class="n">U1</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">parabolicsolver</span><span class="o">.</span><span class="n">V</span><span class="p">)</span>
+<span class="n">U0</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">parabolicsolver</span><span class="o">.</span><span class="n">V</span><span class="p">)</span>
+<span class="n">U0</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">parabolicsolver</span><span class="o">.</span><span class="n">V</span><span class="o">.</span><span class="n">dim</span><span class="p">())</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">(</span><span class="n">parabolicsolver</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="s">&quot;DG&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">S0_ex</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Expression</span><span class="p">(</span><span class="s">&quot;x[0]&quot;</span><span class="p">)</span>
+<span class="n">S0</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">S0_ex</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span>
+<span class="n">S1</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">ODEFieldSolver</span>  <span class="c"># import module wrapping the ODE solver</span>
+<span class="n">odesolver</span> <span class="o">=</span> <span class="n">ODEFieldSolver</span><span class="o">.</span><span class="n">ODEFieldSolver</span><span class="p">()</span>
+<span class="n">odesolver</span><span class="o">.</span><span class="n">redim</span><span class="p">(</span><span class="n">S0</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">odesolver</span><span class="o">.</span><span class="n">set_IC</span><span class="p">(</span><span class="n">S0</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">array</span><span class="p">())</span>
+<span class="n">plot</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">23</span><span class="p">):</span>  <span class="c"># time loop</span>
+  <span class="n">f</span> <span class="o">=</span> <span class="n">F</span><span class="p">(</span><span class="n">S0</span><span class="p">,</span> <span class="n">U0</span><span class="p">)</span>
+  <span class="n">U1</span> <span class="o">=</span> <span class="n">parabolicsolver</span><span class="o">.</span><span class="n">advance_one_timestep</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">U0</span><span class="p">)</span>
+
+  <span class="n">U1c</span> <span class="o">=</span> <span class="n">dolfin</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">Q</span><span class="p">)</span>
+
+  <span class="n">odesolver</span><span class="o">.</span><span class="n">set_u</span><span class="p">(</span><span class="n">U1c</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span><span class="o">.</span><span class="n">array</span><span class="p">())</span>
+  <span class="n">odesolver</span><span class="o">.</span><span class="n">advance_one_timestep</span><span class="p">()</span>
+  <span class="n">S1</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">=</span> <span class="n">odesolver</span><span class="o">.</span><span class="n">get_s</span><span class="p">()</span>
+
+  <span class="n">U0</span> <span class="o">=</span> <span class="n">U1</span>
+  <span class="n">S0</span> <span class="o">=</span> <span class="n">S1</span>
+
+  <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+    <span class="n">dolfin</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&quot;U&quot;</span><span class="p">)</span>
+    <span class="n">dolfin</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">S1</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&quot;S&quot;</span><span class="p">)</span>
+    <span class="n">dolfin</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="wrapping-with-cython">
+<h2>Wrapping with Cython<a class="headerlink" href="#wrapping-with-cython" title="Permalink to this headline">¶</a></h2>
+<p>Cython can also be used to wrap C/C++ code.
+To this end we define the C++ class in a  <tt class="docutils literal"><span class="pre">.pyx</span></tt> file:</p>
+<div class="highlight-cython"><div class="highlight"><pre><span class="k">cimport</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">cnp</span>
+<span class="k">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">cdef</span> <span class="kr">extern</span> <span class="k">from</span> <span class="s">&quot;ODEFieldSolver.h&quot;</span><span class="p">:</span>
+
+    <span class="n">cppclass</span> <span class="n">ODEFieldSolver_</span> <span class="s">&quot;ODEFieldSolver&quot;</span><span class="p">:</span>
+        <span class="n">ODEFieldSolver</span><span class="p">()</span>
+        <span class="n">void</span> <span class="n">redim</span><span class="p">(</span><span class="nb">int</span> <span class="n">n</span><span class="p">)</span>
+        <span class="nb">int</span> <span class="n">size</span><span class="p">()</span>
+        <span class="n">double</span> <span class="n">g</span><span class="p">(</span><span class="n">double</span> <span class="n">s</span><span class="p">,</span> <span class="n">double</span> <span class="n">u</span><span class="p">)</span>
+        <span class="n">void</span> <span class="n">set_dt</span><span class="p">(</span><span class="n">double</span> <span class="n">dt</span><span class="p">)</span>
+        <span class="n">void</span> <span class="n">set_IC</span><span class="p">(</span><span class="nb">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">double</span><span class="o">*</span> <span class="n">array</span><span class="p">)</span>
+        <span class="n">void</span> <span class="n">set_const_IC</span><span class="p">(</span><span class="n">double</span> <span class="n">s0</span><span class="p">)</span>
+        <span class="n">void</span> <span class="n">set_u</span> <span class="p">(</span><span class="nb">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">double</span><span class="o">*</span> <span class="n">array</span><span class="p">)</span>
+        <span class="n">void</span> <span class="n">set_IC</span><span class="p">(</span><span class="n">double</span> <span class="n">val</span><span class="p">)</span>
+        <span class="n">void</span> <span class="n">set_u</span> <span class="p">(</span><span class="n">double</span> <span class="n">const_value</span><span class="p">)</span>
+        <span class="n">void</span> <span class="n">advance_one_timestep</span><span class="p">()</span>
+        <span class="n">void</span> <span class="n">get_s</span>  <span class="p">(</span><span class="nb">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">double</span><span class="o">*</span> <span class="n">array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, we redefine the name to <tt class="docutils literal"><span class="pre">ODEFieldSolver_</span></tt> such that we may shadow the
+underlying class with the following Python class.</p>
+<div class="highlight-cython"><div class="highlight"><pre><span class="k">cdef</span> <span class="k">class</span> <span class="nf">ODEFieldSolver</span><span class="p">:</span>
+    <span class="k">cdef</span> <span class="kt">ODEFieldSolver_</span>  *<span class="nf">wrapped</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrapped</span> <span class="o">=</span> <span class="n">new</span> <span class="n">ODEFieldSolver_</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__dealloc__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapped</span> <span class="o">!=</span> <span class="bp">NULL</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapped</span>
+</pre></div>
+</div>
+<p>We have a pointer called <tt class="docutils literal"><span class="pre">wrapped</span></tt> to the underlying SWIG-generated
+C interface to the C++ code.
+Simple functions like e.g. <tt class="docutils literal"><span class="pre">redim</span></tt> are straightforward to wrap,</p>
+<div class="highlight-cython"><div class="highlight"><pre><span class="k">def</span> <span class="nf">redim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">wrapped</span><span class="o">.</span><span class="n">redim</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For the <tt class="docutils literal"><span class="pre">set_IC</span></tt> function we need to check that the input argument is a contiguous 1-dimensional numpy array
+of type <tt class="docutils literal"><span class="pre">double</span></tt>. This is spesified as <tt class="docutils literal"><span class="pre">cnp.ndarray[double,</span> <span class="pre">ndim=1,</span> <span class="pre">mode='c']</span></tt>. Further, we check that
+the length of the input array is the same as <tt class="docutils literal"><span class="pre">self.wrapped.size</span></tt> before we pass the input array to the
+underlying C++ object.</p>
+<div class="highlight-cython"><div class="highlight"><pre><span class="k">def</span> <span class="nf">set_IC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="mf">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;c&#39;</span><span class="p">]</span> <span class="n">array</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapped</span><span class="o">.</span><span class="n">size</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;incorrect dimension on array&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">wrapped</span><span class="o">.</span><span class="n">set_IC</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mf">0</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">array</span><span class="p">[</span><span class="mf">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>We allow the user to employ the <tt class="docutils literal"><span class="pre">get_s</span></tt> function both with and without an input
+argument, refered to as <tt class="docutils literal"><span class="pre">out</span></tt>. If the user does not supply any input,
+i.e., <tt class="docutils literal"><span class="pre">if</span> <span class="pre">out</span> <span class="pre">is</span> <span class="pre">None</span></tt> then we create an array of appropriate type and size. Otherwise,
+we check that <tt class="docutils literal"><span class="pre">out</span></tt> has the appropriate type and size before the array is passed to
+the C++ object&#8217;s <tt class="docutils literal"><span class="pre">get_s</span></tt> function. At the end, we simply return <tt class="docutils literal"><span class="pre">out</span></tt>.</p>
+<div class="highlight-cython"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+          <span class="n">cnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="n">double</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="mf">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;c&#39;</span><span class="p">]</span> <span class="n">out</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wrapped</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapped</span><span class="o">.</span><span class="n">size</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;incorrect dimension on out&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">wrapped</span><span class="o">.</span><span class="n">get_s</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mf">0</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">out</span><span class="p">[</span><span class="mf">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+</div>
+<p>Finally, the module is built as</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">distutils.core</span> <span class="kn">import</span> <span class="n">setup</span>
+<span class="kn">from</span> <span class="nn">distutils.extension</span> <span class="kn">import</span> <span class="n">Extension</span>
+<span class="kn">from</span> <span class="nn">Cython.Distutils</span> <span class="kn">import</span> <span class="n">build_ext</span>
+
+<span class="n">setup</span><span class="p">(</span>
+    <span class="n">cmdclass</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;build_ext&#39;</span><span class="p">:</span> <span class="n">build_ext</span><span class="p">},</span>
+    <span class="n">ext_modules</span> <span class="o">=</span> <span class="p">[</span><span class="n">Extension</span><span class="p">(</span><span class="s">&quot;ODEFieldSolver&quot;</span><span class="p">,</span>
+                             <span class="p">[</span><span class="s">&quot;ODEFieldSolver.pyx&quot;</span><span class="p">,</span> <span class="s">&quot;../ODEFieldSolver.cpp&quot;</span><span class="p">],</span>
+                             <span class="n">include_dirs</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;..&#39;</span><span class="p">],</span>
+                             <span class="n">language</span><span class="o">=</span><span class="s">&#39;c++&#39;</span><span class="p">)]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><em>Acknowledgment.</em> The first author want to thank Alison L. Marsden,
+Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
+Example 2 and 3, and for hosting the first author during the summer
+2012. Furthermore, Dag Sverre Seljebotn provided the code for the
+Cython wrapping in example 3. Mikael Mortensen provided the code for
+the Probe in Example 1.</p>
+</div>
+</div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+      </div><!-- /row -->
+
+      <!-- row -->
+      <div class="row-fluid">
+<div class="related navbar ">
+  <div class="navbar-inner">
+    <ul class="nav pull-right">
+      
+        <li><a href="genindex.html" title="General Index" >index</a></li>
+        <li><a href="._part0005_fenics-mixed.html" title="References" >next</a></li>
+        <li><a href="._part0003_fenics-mixed.html" title="How to interface a C++/DOLFIN code from Python" >previous</a></li>
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a></li> 
+      
+    </ul>
+  </div>
+</div>
+      </div><!-- /row -->
+
+      <!-- footer -->
+      <footer>
+          &copy; Copyright 2013, K.-A. Mardal and H. P. Langtangen.
+        Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      </footer>
+      <!-- /footer -->
+
+    </div>
+    <!-- /container -->
+
+  </body>
+</html>

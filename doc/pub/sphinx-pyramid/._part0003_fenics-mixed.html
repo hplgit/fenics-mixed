@@ -1,0 +1,370 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>How to interface a C++/DOLFIN code from Python &mdash; Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
+    <link rel="next" title="FEniCS solver coupled with ODE solver in C++" href="._part0004_fenics-mixed.html" />
+    <link rel="prev" title="FEniCS solver with optimization in Octave" href="._part0002_fenics-mixed.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="._part0004_fenics-mixed.html" title="FEniCS solver coupled with ODE solver in C++"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="._part0002_fenics-mixed.html" title="FEniCS solver with optimization in Octave"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="how-to-interface-a-c-dolfin-code-from-python">
+<span id="fext-dolfin-cpp"></span><h1>How to interface a C++/DOLFIN code from Python<a class="headerlink" href="#how-to-interface-a-c-dolfin-code-from-python" title="Permalink to this headline">¶</a></h1>
+<p>Although FEniCS can easily and flexibly be extended by Python code,
+the need for speed in scientific computing occasionally makes
+a demand to implement new finite element functionality in C++.
+The present example shows how one can extend DOLFIN&#8217;s finite
+element functionality through a new piece of C++ code and call
+this functionality from a Python FEniCS solver.</p>
+<p>FEniCS finite element functions can be evaluated at an arbitrary
+point in the mesh. In a parallel computing setting, however,
+the evaluation point must be in the part of the mesh that belongs
+to the current process and the searching for the element containing
+the point is not optimally efficient. Therefore, one may want to
+have a utility for fast evaluation of finite element functions
+at prescribed points on parallel computers.
+We can write a class <tt class="docutils literal"><span class="pre">Probe</span></tt> for this purpose. The constructor takes a spatial
+point <tt class="docutils literal"><span class="pre">x</span></tt> and precomputes which element that
+contains the point and other data useful for later
+fast evaluation of functions at <tt class="docutils literal"><span class="pre">x</span></tt>.
+A member function <tt class="docutils literal"><span class="pre">eval(u)</span></tt> takes any <tt class="docutils literal"><span class="pre">Function</span></tt> object <tt class="docutils literal"><span class="pre">u</span></tt> and
+stores its value(s) at the point <tt class="docutils literal"><span class="pre">x</span></tt>. With <tt class="docutils literal"><span class="pre">get_values(i)</span></tt> we
+can retrieve all values component <tt class="docutils literal"><span class="pre">i</span></tt> of the function computed in
+previous calls to <tt class="docutils literal"><span class="pre">eval</span></tt>.
+For a scalar function there is only one component (<tt class="docutils literal"><span class="pre">i=0</span></tt>), but
+the class supports vector and tensor functions too.</p>
+<p>The name <tt class="docutils literal"><span class="pre">Probe</span></tt> reflects the use of such a class: we insert a
+probe, as in a physical experiment, and measure the response
+at that point through time. In FEniCS simulators it means that we
+want to record the evolution in time of some field at a given spatial
+point. For long time series there can be a lot of evaluations of
+the field at this point, and class <tt class="docutils literal"><span class="pre">Probe</span></tt> will be much more
+efficient than the standard FEniCS point evaluation of fields (which
+performs a lot of searching to find the element containing the point).</p>
+<p>(<strong>hpl 1</strong>: I did some renaming of the interface: <tt class="docutils literal"><span class="pre">like_.py</span></tt>
+<tt class="docutils literal"><span class="pre">num_components</span></tt> instead
+of <tt class="docutils literal"><span class="pre">value_size</span></tt>, <tt class="docutils literal"><span class="pre">get_value</span></tt> instead of <tt class="docutils literal"><span class="pre">get_probe</span></tt>, <tt class="docutils literal"><span class="pre">num_eval_calls</span></tt>
+instead of <tt class="docutils literal"><span class="pre">number_of_evaluations</span></tt>, <tt class="docutils literal"><span class="pre">get_point</span></tt> instead of
+<tt class="docutils literal"><span class="pre">coordinates</span></tt>, and the argument <tt class="docutils literal"><span class="pre">i</span></tt> is now <tt class="docutils literal"><span class="pre">component</span></tt>. Check if
+the meaning is correct. The C++ .cpp file is not changed except
+for the function names.)</p>
+<div class="section" id="the-c-class">
+<h2>The C++ class<a class="headerlink" href="#the-c-class" title="Permalink to this headline">¶</a></h2>
+<p>Class <tt class="docutils literal"><span class="pre">Probe</span></tt> is a fairly short C++ code that makes use of various
+DOLFIN C++ classes and programming conventions. The header file
+reads</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="cp">#include &lt;dolfin/function/FunctionSpace.h&gt;</span>
+<span class="cp">#include &lt;dolfin/function/Function.h&gt;</span>
+
+<span class="k">namespace</span> <span class="n">dolfin</span>
+<span class="p">{</span>
+  <span class="k">class</span> <span class="nc">Function</span><span class="p">;</span>
+  <span class="k">class</span> <span class="nc">FunctionSpace</span><span class="p">;</span>
+  <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">Array</span><span class="p">;</span>
+
+  <span class="k">class</span> <span class="nc">Probe</span>
+  <span class="p">{</span>
+  <span class="nl">public:</span>
+    <span class="n">Probe</span><span class="p">(</span><span class="k">const</span> <span class="n">Array</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">point</span><span class="p">,</span> <span class="k">const</span> <span class="n">FunctionSpace</span><span class="o">&amp;</span> <span class="n">V</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">eval</span><span class="p">(</span><span class="k">const</span> <span class="n">Function</span><span class="o">&amp;</span> <span class="n">u</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">get_values</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">component</span><span class="p">);</span>
+
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">num_components</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="n">value_size_loc</span><span class="p">;};</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">number_of_eval_calls</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="n">_probes</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">size</span><span class="p">();};</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">get_point</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">erase</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">i</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">clear</span><span class="p">();</span>
+
+  <span class="nl">private:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">basis_matrix</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">coefficients</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="n">_x</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">FiniteElement</span><span class="o">&gt;</span> <span class="n">_element</span><span class="p">;</span>
+    <span class="n">Cell</span><span class="o">*</span> <span class="n">dolfin_cell</span><span class="p">;</span>
+    <span class="n">UFCCell</span><span class="o">*</span> <span class="n">ufc_cell</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">value_size_loc</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">_probes</span><span class="p">;</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The most important functionality for users
+lies in the constructor and the <tt class="docutils literal"><span class="pre">eval</span></tt> and <tt class="docutils literal"><span class="pre">get_values</span></tt> functions, while the
+rest of the class contains short convenience functions and data
+structures for help with fast function evaluations.
+Note that <tt class="docutils literal"><span class="pre">eval</span></tt> does not return any value, it just records the
+value.</p>
+<p>The reader may consult the corresponding <a class="reference external" href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/Probe/Probe.cpp">Probe.cpp</a> file for all implementation details. Obviously, this type
+of code requires familiarity with the DOLFIN classes, but looking at
+the DOLFIN code itself is a good starting point for learning about
+those classes, the associated implementation conventions, and other
+programming tools that the DOLFIN library makes use of.</p>
+</div>
+<div class="section" id="compiling-and-linking-at-the-python-dolfin-level">
+<h2>Compiling and linking at the Python DOLFIN level<a class="headerlink" href="#compiling-and-linking-at-the-python-dolfin-level" title="Permalink to this headline">¶</a></h2>
+<p>The next, and often more technically challenging, step is to compile
+the C++ code, link it to DOLFIN, and make it callable from a FEniCS
+solver in Python.  Fortunately, this is not so difficult if we use the
+FEniCS Just-in-time (JIT) compiler Instant, which is already the
+compiler that DOLFIN applies when compiling variational forms. Instant
+employs SWIG in its JIT compiling, and some knowledge of SWIG is
+therefore required to understand how Instant works.  However, hardly
+any SWIG knowledge is needed if we use the convenience function
+<tt class="docutils literal"><span class="pre">compile_extension_module</span></tt> found in the Python package <tt class="docutils literal"><span class="pre">dolfin</span></tt>
+package. This function is a high-level interface to Instant
+functionality.</p>
+<p>Basically, the <tt class="docutils literal"><span class="pre">compile_extension_module</span></tt> function
+requires a declaration of our C++ code to be interfaced, a list
+of <tt class="docutils literal"><span class="pre">.cpp</span></tt> source code files, and some information on where files
+are found. Compilation and linking are then taken care of automatically.
+The C++ code to be interfaced in this example
+is contained in the <tt class="docutils literal"><span class="pre">Probe.h</span></tt> header file.
+The call to the <tt class="docutils literal"><span class="pre">compile_extension_module</span></tt> function is then</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">header_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;Probe/Probe.h&quot;</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+<span class="n">code</span> <span class="o">=</span> <span class="n">header_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">header_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">probe_module</span> <span class="o">=</span> <span class="n">compile_extension_module</span><span class="p">(</span>
+    <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">source_directory</span><span class="o">=</span><span class="s">&quot;Probe&quot;</span><span class="p">,</span> <span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;Probe.cpp&quot;</span><span class="p">],</span>
+    <span class="n">include_dirs</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&quot;Probe&quot;</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>We can now import <tt class="docutils literal"><span class="pre">probe_module</span></tt> in the forthcoming code and use it
+for fast evaluations at some point <tt class="docutils literal"><span class="pre">x</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mesh</span> <span class="o">=</span> <span class="n">UnitCubeMesh</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s">&#39;CG&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+<span class="n">probe</span> <span class="o">=</span> <span class="n">probe_module</span><span class="o">.</span><span class="n">Probe</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+
+<span class="n">u0</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">Expression</span><span class="p">(</span><span class="s">&#39;x[0]&#39;</span><span class="p">),</span> <span class="n">V</span><span class="p">)</span>
+<span class="c"># Fast evaluation of U0 at x:</span>
+<span class="n">probe</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">u0</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;The value at &quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s">&quot; is &quot;</span><span class="p">,</span> <span class="n">probe</span><span class="o">.</span><span class="n">get_probe</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To summarize, with <tt class="docutils literal"><span class="pre">compile_extension_module</span></tt> the compilation and
+linking of C++ and DOLFIN code to make accessible in Python is a matter
+of one function call.</p>
+</div>
+<div class="section" id="compiling-and-linking-at-the-instant-level">
+<h2>Compiling and linking at the Instant level<a class="headerlink" href="#compiling-and-linking-at-the-instant-level" title="Permalink to this headline">¶</a></h2>
+<p>We shall now go into details how the steps above would be done by
+using basic Instant only, as this explains how to use Instant for
+interfacing C++ code in general.  Instant provides the <tt class="docutils literal"><span class="pre">build_module</span></tt>
+function for building a Python module out of the C++ code:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">compiled_module</span> <span class="o">=</span> <span class="n">instant</span><span class="o">.</span><span class="n">build_module</span><span class="p">(</span>
+    <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
+    <span class="n">source_directory</span><span class="o">=</span><span class="n">source_dir</span><span class="p">,</span>
+    <span class="n">additional_declarations</span><span class="o">=</span><span class="n">additional_decl</span><span class="p">,</span>
+    <span class="n">system_headers</span><span class="o">=</span><span class="n">system_headers</span><span class="p">,</span>
+    <span class="n">include_dirs</span><span class="o">=</span><span class="n">include_dirs</span><span class="p">,</span>
+    <span class="n">swigargs</span><span class="o">=</span><span class="n">swigargs</span><span class="p">,</span>
+    <span class="n">sources</span><span class="o">=</span><span class="n">sources</span><span class="p">,</span>
+    <span class="n">cmake_packages</span><span class="o">=</span><span class="n">cmake_packages</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here,</p>
+<blockquote>
+<div><ul>
+<li><p class="first"><tt class="docutils literal"><span class="pre">code</span></tt> is the C++ code that is to be wrapped,</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">source_directory</span></tt> is the directory where the C++ <tt class="docutils literal"><span class="pre">.cpp</span></tt> files are found,</p>
+</li>
+<li><dl class="first docutils">
+<dt><tt class="docutils literal"><span class="pre">additional_declarations</span></tt> are additional declaration needed to</dt>
+<dd><p class="first last">make SWIG behave properly,</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">system_headers</span></tt> is a list of the additional header files needed
+for compilation,</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">include_dirs</span></tt> is a list of
+additional include directories required for compilation,</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">swigargs</span></tt> is the arguments that shall be passed to SWIG on the
+command line,</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">sources</span></tt> is
+a list of C++ files that shall be compiled into the Pyhton module, and</p>
+</li>
+<li><p class="first"><tt class="docutils literal"><span class="pre">cmake_packages</span></tt> is a list of packages that the CMake compilation
+depend on.</p>
+</li>
+</ul>
+</div></blockquote>
+<p>The following code illustrates the setting of these variables:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">system_headers</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;numpy/arrayobject.h&#39;</span><span class="p">,</span>
+                  <span class="s">&#39;dolfin/function/Function.h&#39;</span><span class="p">,</span>
+                  <span class="s">&#39;dolfin/function/FunctionSpace.h&#39;</span><span class="p">]</span>
+<span class="n">swigargs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;-c++&#39;</span><span class="p">,</span> <span class="s">&#39;-fcompact&#39;</span><span class="p">,</span> <span class="s">&#39;-O&#39;</span><span class="p">,</span> <span class="s">&#39;-I.&#39;</span><span class="p">,</span> <span class="s">&#39;-small&#39;</span><span class="p">]</span>
+<span class="n">cmake_packages</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;DOLFIN&#39;</span><span class="p">]</span>
+<span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;Probe.cpp&quot;</span><span class="p">]</span>
+<span class="n">source_dir</span> <span class="o">=</span> <span class="s">&quot;Probe&quot;</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">Probe</span></tt> class employs several DOLFIN classes. Hence, for this class
+to work properly it is crucial that the JIT compiler and SWIG are told
+how to relate to the DOLFIN classes. Instant provides the hook
+<tt class="docutils literal"><span class="pre">additional_declarations</span></tt> for providing additional declarations to
+SWIG. Such declarations require knowledge of how to write
+SWIG interface files. In the current example, the additional
+declarations look like the following string:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">additional_decl</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="si">%i</span><span class="s">nit%{</span>
+<span class="s">import_array();</span>
+<span class="s">%}</span>
+
+<span class="s">// Include global SWIG interface files:</span>
+<span class="s">// Typemaps, shared_ptr declarations, exceptions, version</span>
+<span class="si">%i</span><span class="s">nclude &lt;boost_shared_ptr.i&gt;</span>
+
+<span class="s">// Global typemaps and forward declarations</span>
+<span class="si">%i</span><span class="s">nclude &quot;dolfin/swig/typemaps/includes.i&quot;</span>
+<span class="si">%i</span><span class="s">nclude &quot;dolfin/swig/forwarddeclarations.i&quot;</span>
+
+<span class="s">// Global exceptions</span>
+<span class="si">%i</span><span class="s">nclude &lt;exception.i&gt;</span>
+
+<span class="s">// Local shared_ptr declarations</span>
+<span class="si">%s</span><span class="s">hared_ptr(dolfin::Function)</span>
+<span class="si">%s</span><span class="s">hared_ptr(dolfin::FunctionSpace)</span>
+
+<span class="s">// </span><span class="si">%i</span><span class="s">mport types from submodule function of SWIG module function</span>
+<span class="si">%i</span><span class="s">mport(module=&quot;dolfin.cpp.function&quot;) &quot;dolfin/function/Function.h&quot;</span>
+<span class="si">%i</span><span class="s">mport(module=&quot;dolfin.cpp.function&quot;) &quot;dolfin/function/FunctionSpace.h&quot;</span>
+
+<span class="si">%f</span><span class="s">eature(&quot;autodoc&quot;, &quot;1&quot;);</span>
+<span class="s">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">init</span></tt> part containing <tt class="docutils literal"><span class="pre">import_array</span></tt> is always needed when NumPy
+arrays are involved.  Thereafter, we include various SWIG interface
+files (ending in <tt class="docutils literal"><span class="pre">.i</span></tt>) that we need in DOLFIN-related code. We also
+need shared pointers for <tt class="docutils literal"><span class="pre">dolfin::Function</span></tt> and
+<tt class="docutils literal"><span class="pre">dolfin::FunctionSpace</span></tt>. In addition we need header files for
+<tt class="docutils literal"><span class="pre">Function</span></tt> and <tt class="docutils literal"><span class="pre">FunctionSpace</span></tt> classes in DOLFIN. Note that the
+<tt class="docutils literal"><span class="pre">import</span></tt> and <tt class="docutils literal"><span class="pre">include</span></tt> statements in SWIG may seem similar, but that
+whereas <tt class="docutils literal"><span class="pre">include</span></tt> makes SWIG generate wrappers for the code included,
+the <tt class="docutils literal"><span class="pre">import</span></tt> directive simply provides SWIG with the necessary type
+information.</p>
+<p>We refer to the complete file <a class="reference external" href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/instant_test_probe.py">instant_test_probe.py</a> for how all of the
+information about is put together and executed in order to build the
+extension module using plain Instant functionality.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">How to interface a C++/DOLFIN code from Python</a><ul>
+<li><a class="reference internal" href="#the-c-class">The C++ class</a></li>
+<li><a class="reference internal" href="#compiling-and-linking-at-the-python-dolfin-level">Compiling and linking at the Python DOLFIN level</a></li>
+<li><a class="reference internal" href="#compiling-and-linking-at-the-instant-level">Compiling and linking at the Instant level</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="._part0002_fenics-mixed.html"
+                        title="previous chapter">FEniCS solver with optimization in Octave</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="._part0004_fenics-mixed.html"
+                        title="next chapter">FEniCS solver coupled with ODE solver in C++</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="._part0004_fenics-mixed.html" title="FEniCS solver coupled with ODE solver in C++"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="._part0002_fenics-mixed.html" title="FEniCS solver with optimization in Octave"
+             >previous</a> |</li>
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, K.-A. Mardal and H. P. Langtangen.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

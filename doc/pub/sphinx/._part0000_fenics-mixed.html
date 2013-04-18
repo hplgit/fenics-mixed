@@ -1,0 +1,218 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB &mdash; Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+    
+    <link rel="stylesheet" href="_static/fenics.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
+    <link rel="next" title="FEniCS solver with boundary conditions in FORTRAN" href="._part0001_fenics-mixed.html" />
+    <link rel="prev" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+<link rel="stylesheet" href="_static/featured.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+<script src="_static/slides.min.jquery.js"></script>
+  <script>
+	$(function(){
+		$('#products').slides({
+			preload: true,
+			preloadImage: 'img/loading.gif',
+			effect: 'slide, fade',
+			crossfade: true,
+			slideSpeed: 350,
+			fadeSpeed: 500,
+			generateNextPrev: false,
+			generatePagination: false,
+	                play: 5000,
+                        hoverPause: false,
+                        animationStart: function(current){
+				$('.caption').animate({
+					bottom:-35
+				},100);
+				if (window.console && console.log) {
+					// example return of current slide number
+					console.log('animationStart on slide: ', current);
+				};
+			},
+			animationComplete: function(current){
+				$('.caption').animate({
+					bottom:0
+				},200);
+				if (window.console && console.log) {
+					// example return of current slide number
+					console.log('animationComplete on slide: ', current);
+				};
+			},
+			slidesLoaded: function() {
+				$('.caption').animate({
+					bottom:0
+				},200);
+			}
+		});
+	});
+  </script>
+
+
+<link rel="shortcut icon" href="_static/fenics.ico" />
+
+
+  </head>
+  <body>
+<div class="wrapper">
+  <a href="http://fenicsproject.org/"><img src="_static/fenics_banner.png" width="900px" alt="FEniCS Project Banner" /></a>
+  <div id="access">
+    <div class="menu">
+      <ul>
+	<li class="page_item"><a href="http://fenicsproject.org/about/" title="Find out more about the FEniCS project">About</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/download/" title="Obtain the FEniCS project">Download</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/documentation/" title="Learn how to use the FEniCS project">Documentation</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/applications/" title="Learn how others are using the FEniCS project">Applications</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/contributing/" title="Learn how to contribute to the FEniCS project">Contributing</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/citing/" title="Learn how to cite the FEniCS project">Citing</a></li>
+	<li class="page_item"><a href="http://fenicsproject.org/support/" title="Where to go for more help">Support</a></li>
+      </ul>
+    </div><!-- .menu -->
+  </div><!-- #access -->
+</div><!-- #wrapper -->
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="combining-fenics-with-your-favorite-software-in-c-c-fortran-or-matlab">
+<h1>Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB<a class="headerlink" href="#combining-fenics-with-your-favorite-software-in-c-c-fortran-or-matlab" title="Permalink to this headline">¶</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body">Kent-Andre Mardal (kent-and at simula.no), Hans Petter Langtangen (hpl at simula.no)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Date:</th><td class="field-body">Apr 18, 2013</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>FEniCS is an easy-to-use tool for solving partial differential
+equations (PDEs) and enables very flexible specifications of PDE
+problems.  However, many scientific problems require (much) more than
+solving PDEs, and in those cases a FEniCS solver must be coupled to
+other types of software.  This is usually easy and convenient if the
+FEniCS solver is coded in Python and the other software is either
+written in Python or easily accessible from Python.</p>
+<p>Coupling of FEniCS solvers in Python with MATLAB, FORTRAN, C, or C++
+codes is possible, and in principle straightforward, but there might
+be a lot of technical details in practice. Many potential FEniCS users
+already have substantial pieces of software in other more traditional
+scientific computing languages, and the new solvers they write in FEniCS
+may need to communicate with this existing and well-tested software.
+Unfortunately, the world of gluing computer code in very different
+languages with the aid of tools like F2PY, SWIG, Cython, and Instant
+is seldom the focal point of a computational scientist.
+We have therefore written this document to provide some examples and
+associated detailed explanations on how the mentioned tools can be used to
+combine FEniCS solvers in Python with other code written in MATLAB,
+FORTRAN, C, and C++. We believe that even if the examples are
+short and limited in complexity, the couplings are technically
+complicated and broad enough to cover a range of different situations
+in the real world.</p>
+<p>To illustrate the tools and techniques, we focus on four specific
+case studies:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><em>A flow problem with boundary conditions depending on a system of
+ODEs</em>. The ODE solver and the ODE system are implemented in
+FORTRAN, and we use F2PY to generate wrapper code such that
+the ODE solver is accessible from Python.</li>
+<li><em>A flow optimization problem</em>. The goal here is to compute the
+optimal placement, permeability and size of a porous medium within
+a flow field such that certain flow properties are minimized in a
+given region.  A FEniCS flow solver is coupled to sophisticated
+MATLAB/Octave code for steps in the optimization process (kriging
+and surrogate modeling).</li>
+<li><em>DOLFIN library-level programming in C++</em>.  A new C++ utility,
+based on DOLFIN, for fast repeated evaluations of finite element
+functions on parallel computers is developed. We glue C++ code,
+DOLFIN, and Python with the aid of the FEniCS JIT compiler
+Instant.</li>
+<li><em>A parabolic FEniCS solver in Python coupled to a C++ ODE solver at
+each node</em>.  In this example we illustrate F2PY, SWIG, and Cython
+as alternative ways for coupling C++ and Python codes.</li>
+</ol>
+</div></blockquote>
+<p>This tutorial is meant for FEniCS users. For introductions to FEniCS,
+see the gentle tutorial <a class="reference internal" href="._part0005_fenics-mixed.html#ref01">[Ref01]</a>, the paper
+<a class="reference internal" href="._part0005_fenics-mixed.html#ref02">[Ref02]</a>, or the more comprehensive book about the FEniCS
+project <a class="reference internal" href="._part0005_fenics-mixed.html#ref03">[Ref03]</a>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<div class="wrapper">
+  <div class="footer">
+    <div class="footer-nav">
+      <div class="span-6">
+	<h4>Usage documentation</h4>
+	<ul>
+	  <li><a href="http://fenicsproject.org/documentation/tutorial/">Tutorial</a></li>
+	  <li><a href="http://fenicsproject.org/documentation/dolfin/dev/python/">Python API</a></li>
+	  <li><a href="http://fenicsproject.org/documentation/dolfin/dev/cpp/">C++ API</a></li>
+          <li><a href="http://fenicsproject.org/releases/">Release notes</a></li>
+	</ul>
+      </div>
+      <div class="span-6">
+	<h4>Developer resources</h4>
+	<ul>
+	  <li><a href="http://fenicsproject.org/buildbot/">Buildbot</a></li>
+	  <li><a href="http://fenicsproject.org/benchbot/">Benchbot</a></li>
+	  <li><a href="http://fenicsproject.org/support/launchpad_pages.html">FEniCS on Launchpad</a></li>
+	</ul>
+      </div>
+      <div class="span-6 last">
+	<h4>Search this site</h4>
+	<div id="searchbox">
+	  <form class="search" action="/search.html" method="get">
+	    <input type="text" name="q" size="18" />
+	    <input type="submit" value="Go" />
+	    <input type="hidden" name="check_keywords" value="yes" />
+	    <input type="hidden" name="area" value="default" />
+	  </form>
+	</div>
+      </div>
+    </div>
+    &copy; <a href="http://fenicsproject.org/">The FEniCS Project</a>. (<a href="http://fenicsproject.org/disclaimer.html">Disclaimer</a>)
+  </div>
+</div>
+
+  </body>
+</html>

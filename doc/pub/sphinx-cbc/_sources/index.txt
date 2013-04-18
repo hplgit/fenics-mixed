@@ -1,0 +1,25 @@
+
+.. Master file automatically created by doconce sphinx_dir
+
+Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB
+==========================================================================
+
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+
+   ._part0000_fenics-mixed
+   ._part0001_fenics-mixed
+   ._part0002_fenics-mixed
+   ._part0003_fenics-mixed
+   ._part0004_fenics-mixed
+   ._part0005_fenics-mixed
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

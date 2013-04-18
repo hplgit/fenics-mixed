@@ -1,0 +1,2632 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+Automatically generated HTML file from Doconce source
+(http://code.google.com/p/doconce/)
+-->
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Doconce: http://code.google.com/p/doconce/" />
+<meta name="description" content="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB">
+
+
+
+<style type="text/css">
+    body {
+      font-family: Helvetica, Verdana, Arial, Sans-serif;
+      color: #404040;
+      background: #ffffff;
+    }
+    h1 { font-size: 1.8em;  color: #8A0808; }
+    h2 { font-size: 1.5em;  color: #8A0808; }
+    h3, h4 { color: #8A0808; }
+    a { color: #8A0808; text-decoration:none; }
+    tt { font-family: "Courier New", Courier; }
+    pre { background: #ededed; color: #000; padding: 15px;}
+    p { text-indent: 0px; }
+    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
+    p.caption { width: 80%; font-style: normal; text-align: left; }
+    hr.figure { border: 0; width: 80%; border-bottom: 1px solid #aaa}
+
+</style>
+
+</head>
+
+<!-- tocinfo
+{'highest level': 1,
+ 'sections': [(' Introduction ', 1, None, '___sec0'),
+              (' FEniCS solver with boundary conditions in FORTRAN  ',
+               1,
+               None,
+               '___sec1'),
+              (' The FEniCS solver ', 2, None, '___sec2'),
+              (' The FORTRAN code for modeling boundary conditions ',
+               2,
+               None,
+               '___sec3'),
+              (' Coupling the Python FEniCS solver with the FORTRAN routine ',
+               2,
+               None,
+               '___sec4'),
+              (' FEniCS solver with optimization in Octave  ',
+               1,
+               None,
+               '___sec5'),
+              (' Basic use of Pytave ', 2, None, '___sec6'),
+              (' Calling the MATLAB/Octave software ', 2, None, '___sec7'),
+              (' The FEniCS PDE solver ', 2, None, '___sec8'),
+              (' Coupling FEniCS and the MATLAB/Octave software ',
+               2,
+               None,
+               '___sec9'),
+              (' Installing Pytave ', 2, None, '___sec10'),
+              (' How to interface a C++/DOLFIN code from Python  ',
+               1,
+               'fext:dolfin:cpp',
+               'fext:dolfin:cpp'),
+              (' The C++ class ', 2, None, '___sec12'),
+              (' Compiling and linking at the Python DOLFIN level ',
+               2,
+               None,
+               '___sec13'),
+              (' Compiling and linking at the Instant level ',
+               2,
+               None,
+               '___sec14'),
+              (' FEniCS solver coupled with ODE solver in C++ ',
+               1,
+               'fext:pdeode:cpp',
+               'fext:pdeode:cpp'),
+              (' Wrapping with F2PY ', 2, None, '___sec16'),
+              (' C API to C++ code ', 3, None, '___sec17'),
+              (' Writing corresponding FORTRAN signatures ',
+               3,
+               None,
+               '___sec18'),
+              (' Building the extension module ', 3, None, '___sec19'),
+              (' Main program in Python ', 3, None, '___sec20'),
+              (' A pure C version of the C++ class ', 2, None, '___sec21'),
+              (' Wrapping with SWIG ', 2, None, '___sec22'),
+              (' Wrapping with Cython ', 2, None, '___sec23'),
+              (' References ', 1, None, '___sec24')]}
+end of tocinfo -->
+
+<body>
+
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: {
+     equationNumbers: {  autoNumber: "AMS"  },
+     extensions: ["AMSmath.js", "AMSsymbols.js", "autobold.js"]
+  }
+});
+</script>
+<script type="text/javascript"
+ src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<!-- Fix slow MathJax rendering in IE8 -->
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+
+
+
+
+    
+<!-- ------------------- main content ---------------------- -->
+
+
+<p>
+
+
+<title>Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+
+<center><h1>Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</h1></center>  <!-- document title -->
+
+<p>
+<!-- author(s): Kent-Andre Mardal, and Hans Petter Langtangen -->
+
+<center>
+<b>Kent-Andre Mardal</b> [1, 2] (<tt>kent-and at simula.no</tt>)
+</center>
+
+<center>
+<b>Hans Petter Langtangen</b> [1, 2] (<tt>hpl at simula.no</tt>)
+</center>
+
+
+<p>
+<!-- institution(s) -->
+
+<center>[1] <b>Center for Biomedical Computing, Simula Research Laboratory</b></center>
+<center>[2] <b>Department of Informatics, University of Oslo</b></center>
+<p>
+<center><h4>Apr 18, 2013</h4></center> <!-- date -->
+<p>
+
+<h2>Table of contents</h2>
+
+<p>
+
+<a href="#___sec0"> Introduction </a><br>
+<a href="#___sec1"> FEniCS solver with boundary conditions in FORTRAN  </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec2"> The FEniCS solver </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec3"> The FORTRAN code for modeling boundary conditions </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec4"> Coupling the Python FEniCS solver with the FORTRAN routine </a><br>
+<a href="#___sec5"> FEniCS solver with optimization in Octave  </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec6"> Basic use of Pytave </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec7"> Calling the MATLAB/Octave software </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec8"> The FEniCS PDE solver </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec9"> Coupling FEniCS and the MATLAB/Octave software </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec10"> Installing Pytave </a><br>
+<a href="#fext:dolfin:cpp"> How to interface a C++/DOLFIN code from Python  </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec12"> The C++ class </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec13"> Compiling and linking at the Python DOLFIN level </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec14"> Compiling and linking at the Instant level </a><br>
+<a href="#fext:pdeode:cpp"> FEniCS solver coupled with ODE solver in C++ </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec16"> Wrapping with F2PY </a><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="#___sec17"> C API to C++ code </a><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="#___sec18"> Writing corresponding FORTRAN signatures </a><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="#___sec19"> Building the extension module </a><br>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="#___sec20"> Main program in Python </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec21"> A pure C version of the C++ class </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec22"> Wrapping with SWIG </a><br>
+&nbsp; &nbsp; &nbsp; <a href="#___sec23"> Wrapping with Cython </a><br>
+<a href="#___sec24"> References </a><br>
+
+<p>
+
+
+
+<h2>Introduction  <a name="___sec0"></a></h2>
+
+<p>
+FEniCS is an easy-to-use tool for solving partial differential
+equations (PDEs) and enables very flexible specifications of PDE
+problems.  However, many scientific problems require (much) more than
+solving PDEs, and in those cases a FEniCS solver must be coupled to
+other types of software.  This is usually easy and convenient if the
+FEniCS solver is coded in Python and the other software is either
+written in Python or easily accessible from Python.
+
+<p>
+Coupling of FEniCS solvers in Python with MATLAB, FORTRAN, C, or C++
+codes is possible, and in principle straightforward, but there might
+be a lot of technical details in practice. Many potential FEniCS users
+already have substantial pieces of software in other more traditional
+scientific computing languages, and the new solvers they write in FEniCS
+may need to communicate with this existing and well-tested software.
+Unfortunately, the world of gluing computer code in very different
+languages with the aid of tools like F2PY, SWIG, Cython, and Instant
+is seldom the focal point of a computational scientist.
+We have therefore written this document to provide some examples and
+associated detailed explanations on how the mentioned tools can be used to
+combine FEniCS solvers in Python with other code written in MATLAB,
+FORTRAN, C, and C++. We believe that even if the examples are
+short and limited in complexity, the couplings are technically
+complicated and broad enough to cover a range of different situations
+in the real world.
+
+<p>
+To illustrate the tools and techniques, we focus on four specific
+case studies:
+
+<p>
+
+<ol>
+ <li> <em>A flow problem with boundary conditions depending on a system of
+    ODEs</em>. The ODE solver and the ODE system are implemented in
+    FORTRAN, and we use F2PY to generate wrapper code such that
+    the ODE solver is accessible from Python.</li>
+ <li> <em>A flow optimization problem</em>. The goal here is to compute the
+    optimal placement, permeability and size of a porous medium within
+    a flow field such that certain flow properties are minimized in a
+    given region.  A FEniCS flow solver is coupled to sophisticated
+    MATLAB/Octave code for steps in the optimization process (kriging
+    and surrogate modeling).</li>
+ <li> <em>DOLFIN library-level programming in C++</em>.  A new C++ utility,
+    based on DOLFIN, for fast repeated evaluations of finite element
+    functions on parallel computers is developed. We glue C++ code,
+    DOLFIN, and Python with the aid of the FEniCS JIT compiler
+    Instant.</li>
+ <li> <em>A parabolic FEniCS solver in Python coupled to a C++ ODE solver at
+    each node</em>.  In this example we illustrate F2PY, SWIG, and Cython
+    as alternative ways for coupling C++ and Python codes.</li>
+</ol>
+
+This tutorial is meant for FEniCS users. For introductions to FEniCS,
+see the gentle tutorial <a href="#langtangen2012fenics">[1]</a>, the paper
+<a href="#Logg_et_al_2010">[2]</a>, or the more comprehensive book about the FEniCS
+project <a href="#Logg_et_al2012b">[3]</a>.
+
+<p>
+
+<!-- !split -->
+
+<h2>FEniCS solver with boundary conditions in FORTRAN   <a name="___sec1"></a></h2>
+
+<p>
+FORTRAN programs are usually easy to interface in Python
+by using the wrapper code
+generator <a href="http://www.scipy.org/f2py">F2PY</a>.
+F2PY supports FORTRAN 77, FORTRAN 90, and even C (and thereby C++,
+see the section <a href="#fext:pdeode:cpp">FEniCS solver coupled with ODE solver in C++</a>). It is our experience
+that F2PY is much more straightforward to use than
+the other tools we describe for interfacing Python with compiled languages.
+F2PY is therefore a natural starting point for our examples.
+
+<p>
+
+<center> <!-- figure -->
+<hr class="figure">
+<center><p class="caption">Figure 1:  An illustration of a cerebral aneurysm. <a name="fext:ex2:fig1"></a> </p></center>
+<p><img src="fig-fenics-mixed/Cerebral_aneurysm_NIH.jpg" align="bottom" width=400></p>
+</center>
+
+<p>
+
+The present worked example involves solving the Navier-Stokes equations by
+a FEniCS solver, but calling up a FORTRAN 77 code for modeling the
+boundary conditions.
+The physical problem concerns blood flow in a cerebral aneurysm. An
+aneurysm is a balloon-shaped deformation of a cerebral artery, see
+Figure <a href="#fext:ex2:fig1">1</a>.  Some aneurysms rupture and cause stroke, while
+other remain stable for long periods of time, and it is currently not
+possible to determine the rupture risk in a patient-specific manner.
+Computational studies have recently
+demonstrated that fluid dynamics simulations can be used to discriminate ruptured from non-ruptured aneurysms <a href="#Cebral_et_al2011a">[4]</a> <a href="#Cebral_et_al2011b">[5]</a> <a href="#Xiang_et_al_2011">[6]</a> <a href="#Valen-Sendstad_et_al_2011">[7]</a>,
+retrospectively, and have therefore demonstrated the potential of simulations to many clinicians.
+
+<p>
+
+<center> <!-- figure -->
+<hr class="figure">
+<center><p class="caption">Figure 2:  A DOLFIN mesh illustrating a patient-specific aneurysm geometry. <a name="fext:ex2:fig2"></a> </p></center>
+<p><img src="fig-fenics-mixed/aneurysm.png" align="bottom" width=400></p>
+</center>
+
+<p>
+
+To model blood flow we assume that blood is Newtonian and incompressible with a viscosity of 0.0035 Pa s and density similar to water.
+The equations read
+
+<p>
+$$
+\begin{align}
+\rho (\frac{ \partial v}{\partial t} +
+(v \cdot \nabla) v) &=
+-\nabla p + \mu \Delta u + f  &
+\mbox{ in }\Omega \\ 
+\nabla \cdot v &=  0   & \mbox{ in } \Omega
+\end{align}
+$$
+
+Here, \( v \) and \( p \) are the unknown blood velocity and pressure,
+respectively, while \( \mu \) is the viscosity and \( \rho \) the density.
+
+<p>
+Quite often the outlet boundary conditions are unknown. It is therefore
+common to model the boundary conditions using differential equations
+of lower dimension.  In our case, we assume that the pressure at the
+inlet or outlet boundaries can be
+modeled by a system of ODEs:
+
+<p>
+$$
+\begin{align}
+\frac{\partial P_i}{\partial t} &=
+f(P_i, v, p, \ldots) & \mbox{ on } \partial \Omega_o .
+\end{align}
+$$
+
+These ODEs are coupled to the Navier-Stokes equations through the
+inlet or outlet boundary condition
+
+<p>
+$$
+\begin{align}
+\mu \frac{\partial u}{\partial n} + p n &=  P_o &
+\mbox{ on } \partial \Omega_o
+\end{align}
+$$
+
+
+<p>
+
+<h3>The FEniCS solver  <a name="___sec2"></a></h3>
+
+<p>
+The Navier-Stokes solver is implemented in FEniCS as a
+class <code>NSSolver</code>.
+The typical usage of the class goes as follows:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">   solver <span style="color: #666666">=</span> NSSolver()
+   solver<span style="color: #666666">.</span>setIC()
+   t <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+   dt <span style="color: #666666">=</span> <span style="color: #666666">0.01</span>
+   T <span style="color: #666666">=</span> <span style="color: #666666">1.0</span>
+   P1, P2 <span style="color: #666666">=</span> <span style="color: #666666">0</span>, <span style="color: #666666">0</span>
+   <span style="color: #008000; font-weight: bold">while</span> t <span style="color: #666666">&lt;</span> T:
+       t <span style="color: #666666">+=</span> dt
+       solver<span style="color: #666666">.</span>advance_one_time_step((P1, P2), t)
+</pre></div>
+<p>
+The <code>setIC()</code> function sets the initial conditions. Futhermore,
+<code>P1</code> and <code>P2</code> are the pressures at the two outlets at time <code>t</code>.
+The implementation details of class <code>NSSolver</code> are not essential to
+this document, so we just refer the reader to the relatively short
+<a href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/ns/NSSolver.py"><tt>NSSolver.py</tt></a> file.
+<!-- In the following, the most important knowledge about this file is -->
+<!-- that <code>u_</code> and <code>p_</code> contains the most recently computed velocity and -->
+<!-- pressure fields, respectively (the available solution). -->
+
+<p>
+<!-- The <code>__init__</code> function defines the various function spaces and variational forms: -->
+<!-- @@@CODE src-fenics-mixed/ns/NSSolver.py fromto: class@ufile -->
+<!-- The <code>advance_one_timestep</code> function implements the Chorin scheme: -->
+<!-- @@@CODE src-fenics-mixed/ns/NSSolver.py fromto: advance_one_time_step@ufile -->
+
+<p>
+
+<h3>The FORTRAN code for modeling boundary conditions  <a name="___sec3"></a></h3>
+
+<p>
+The <code>NSSolver</code> class sets Dirichlet condition for the pressure on
+inlet and outlet boundaries in terms of prescribed constants in a list
+<code>P</code> (one for each prescribed outlet or inlet). Our aim now is to use a
+lower-dimensional flow model for computing the Dirichlet values in <code>P</code>
+based on physics and the current velocity and pressure fields. One
+such model is formulated in terms of ODEs. For an outlet boundary, let
+\( P \) be the pressure at the boundary. Then the model for \( P \) is
+
+<p>
+$$
+C \frac{\partial P} {\partial t} = Q - P / R_d,
+$$
+
+where
+
+<p>
+$$ Q = \int_{\partial \Omega_o} v \cdot n  ds $$
+
+is the volume flux throught the boundary \( \partial\Omega_o \)
+(easily computed in the FEniCS
+solver). The parameters \( C \) and \( R_d \) must be prescribed along with
+the initial value of \( P \).
+
+<p>
+The differential equation for \( P \) can be discretized by a very simple
+Forward Euler scheme. With \( i \) denoting the time level corresponding
+to small time steps \( \delta t \) in the fluid solver time step \( \Delta t \),
+we can write
+
+<p>
+$$ P^{i+1} = P^i + \delta t (Q - P/R_d)/C,$$
+
+for \( i=0,\ldots, N-1 \), where \( \Delta t = N\delta t \), and then
+the new pressure outlet condition is \( P=P^{N} \) for the next time step.
+\( P^0 \) is taken as \( P \) at time \( t \) (\( P \) is the outlet pressure
+value at time \( t+\Delta t \)).
+
+<p>
+The computational model for \( P \) is implemented in FORTRAN. (Our
+specific model is a simple one; the problem setting is that another
+research group is continuously developing such models, and their software
+is in FORTRAN.) The solver in FORTRAN is implemented in a file
+<code>PMODEL.f</code> with the content
+
+<p>
+
+
+<!-- code=fortran (from !bc fpro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">      <span style="color: #008000; font-weight: bold">SUBROUTINE </span><span style="color: #19177C">PMODEL</span>(<span style="color: #19177C">P</span>, <span style="color: #19177C">P_1</span>, <span style="color: #19177C">R_D</span>, <span style="color: #19177C">Q</span>, <span style="color: #19177C">C</span>, <span style="color: #19177C">N</span>, <span style="color: #19177C">T</span>)
+<span style="color: #19177C">C</span>     <span style="color: #19177C">Integrate</span> <span style="color: #19177C">P</span> <span style="color: #19177C">in</span> <span style="color: #19177C">N</span> <span style="color: #19177C">steps</span> <span style="color: #19177C">from</span> <span style="color: #666666">0</span> <span style="color: #19177C">to</span> <span style="color: #19177C">T</span>, <span style="color: #19177C">given</span> <span style="color: #19177C">start</span> <span style="color: #008000; font-weight: bold">value </span><span style="color: #19177C">P_1</span>
+      <span style="color: #B00040">INTEGER </span><span style="color: #19177C">N</span>
+      <span style="color: #B00040">REAL</span><span style="color: #666666">*8</span> <span style="color: #19177C">P</span>(<span style="color: #666666">0</span>:<span style="color: #19177C">N</span>), <span style="color: #19177C">P_1</span>, <span style="color: #19177C">R_D</span>, <span style="color: #19177C">Q</span>, <span style="color: #19177C">C</span>, <span style="color: #19177C">T</span>
+      <span style="color: #B00040">REAL</span><span style="color: #666666">*8</span> <span style="color: #19177C">DT</span>
+      <span style="color: #B00040">INTEGER </span><span style="color: #19177C">I</span>
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">in</span>) <span style="color: #19177C">P0</span>, <span style="color: #19177C">R</span>, <span style="color: #19177C">Q</span>, <span style="color: #19177C">C</span>, <span style="color: #19177C">N</span>
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">out</span>) <span style="color: #19177C">P</span>
+
+      <span style="color: #19177C">DT</span> <span style="color: #666666">=</span> <span style="color: #19177C">T</span><span style="color: #666666">/</span><span style="color: #19177C">N</span>
+      <span style="color: #19177C">P</span>(<span style="color: #666666">0</span>) <span style="color: #666666">=</span> <span style="color: #19177C">P_1</span>
+      <span style="color: #008000; font-weight: bold">DO </span><span style="color: #19177C">I</span> <span style="color: #666666">=</span> <span style="color: #666666">0</span>, <span style="color: #19177C">N</span><span style="color: #666666">-1</span>
+        <span style="color: #19177C">P</span>(<span style="color: #19177C">i</span><span style="color: #666666">+1</span>) <span style="color: #666666">=</span> <span style="color: #19177C">P</span>(<span style="color: #19177C">i</span>) <span style="color: #666666">+</span> <span style="color: #19177C">DT</span><span style="color: #666666">*</span>(<span style="color: #19177C">Q</span> <span style="color: #666666">-</span> <span style="color: #19177C">P</span>(<span style="color: #19177C">i</span>)<span style="color: #666666">/</span><span style="color: #19177C">R_D</span>)<span style="color: #666666">/</span><span style="color: #19177C">C</span>
+      <span style="color: #008000; font-weight: bold">END DO</span>
+<span style="color: #008000; font-weight: bold">      END SUBROUTINE </span><span style="color: #19177C">PMODEL</span>
+</pre></div>
+<p>
+Given <code>P_1</code> as the value of <code>P</code> at time <code>t</code>, the subroutine computes
+\( P \) at all the <code>N</code> local time steps (of length <code>DT</code>) up to time <code>t+T</code>,
+with <code>P(N)</code> as the final value at that time.  We shall call <code>PMODEL</code>
+at every time step in the flow solver and let <code>T</code> correspond to the
+fluid solver time step \( \Delta t \).
+
+<p>
+The subroutine is plain FORTRAN 77 except for some special comment
+lines starting with <code>CF2PY</code>. These are needed because in
+FORTRAN, subroutine arguments are both input and output,
+but in Python one normally takes all input as arguments to a function
+and <em>returns</em> all output arguments. This is technically not
+possible in FORTRAN (or C or C++). With the <code>CF2PY</code> comment lines
+we can help the F2PY translater to make the FORTRAN subroutine look
+more "Pythonic" from the Python side. To this end, we need to specify
+what arguments that are input and output. All arguments are
+input by default, but here we still list them to have complete
+specification of every argument in this function. The output
+argument, to be returned to Python, <em>must</em> be specified, here <code>P</code>.
+
+<p>
+
+Creating a shared library of the FORTRAN code that we can call from
+Python as an ordinary module is easy:
+
+<p>
+
+
+<!-- code=bash (from !bc sys) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">Terminal&gt; F2PY -c -m bcmodelf77 ../PMODEL.f
+</pre></div>
+<p>
+Here, <code>-m bcmodelf77</code> tells F2PY that the module name is
+be <code>bcmodelf77</code>, the <code>-c</code> instructs F2PY to compile and create
+a shared library <code>bcmodelf77.so</code>, and <code>PMODEL.f</code> is the name of
+the FORTRAN file to analyze and compile. Our convention is to
+compile F2PY modules in a subdirectory of the FORTRAN code,
+which explains why the file here has name <code>../PMODEL.f</code>.
+
+<p>
+A little test code can compare the FORTRAN ODE solver with a couple
+of manual lines in Python:
+
+<p>
+
+
+<!-- code=python (from !bc pypro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">nose.tools</span> <span style="color: #008000; font-weight: bold">as</span> <span style="color: #0000FF; font-weight: bold">nt</span>
+
+<span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">test_bcmodelf77</span>():
+    <span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">bcmodelf77</span>
+    C <span style="color: #666666">=</span> <span style="color: #666666">0.127</span>
+    R_d <span style="color: #666666">=</span> <span style="color: #666666">5.43</span>
+    N <span style="color: #666666">=</span> <span style="color: #666666">2</span>
+    P_1 <span style="color: #666666">=</span> <span style="color: #666666">16000</span>
+    Q <span style="color: #666666">=</span> <span style="color: #666666">1000</span>
+    T <span style="color: #666666">=</span> <span style="color: #666666">0.01</span>
+    P_ <span style="color: #666666">=</span> bcmodelf77<span style="color: #666666">.</span>pmodel(P_1, R_d, Q, C, N, T)
+
+    <span style="color: #408080; font-style: italic"># Manual formula:</span>
+    P1_ <span style="color: #666666">=</span> P_1 <span style="color: #666666">+</span> T<span style="color: #666666">/2*</span>(Q <span style="color: #666666">-</span> P_1<span style="color: #666666">/</span>R_d)<span style="color: #666666">/</span>C
+    P1_ <span style="color: #666666">=</span> P1_ <span style="color: #666666">+</span> T<span style="color: #666666">/2*</span>(Q <span style="color: #666666">-</span> P1_<span style="color: #666666">/</span>R_d)<span style="color: #666666">/</span>C
+    nt<span style="color: #666666">.</span>assert_almost_equal(
+        P_[<span style="color: #666666">-1</span>], P1_, places<span style="color: #666666">=10</span>, msg<span style="color: #666666">=</span><span style="color: #BA2121">&#39;F77: </span><span style="color: #BB6688; font-weight: bold">%g</span><span style="color: #BA2121">, manual coding: </span><span style="color: #BB6688; font-weight: bold">%s</span><span style="color: #BA2121">&#39;</span> <span style="color: #666666">%</span>
+        (P_[<span style="color: #666666">-1</span>], P1_))
+
+<span style="color: #008000; font-weight: bold">if</span> __name__ <span style="color: #666666">==</span> <span style="color: #BA2121">&#39;__main__&#39;</span>:
+    test_bcmodelf77()
+</pre></div>
+<p>
+Note that F2PY turns all upper case letters into lower case when
+viewed from Python.  Also note that this test function is created as a
+nose unit test. Running <code>nosetests</code> in that directory finds all
+<code>test_*</code> functions in all files and executes these functions.
+
+<p>
+Instead of calling the FORTRAN function directly with many parameters,
+we wrap a class around the function such that the syntax of
+each call to compute \( P \) becomes simpler. The idea is to let
+parameters that are constant through the fluid flow simulation
+be attributes in the class so that it is sufficient to provide the varying
+parameters in the call to <code>PMODEL</code>. The Python code hopefully
+explains this idea clearly:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">BCModel</span>:
+    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">__init__</span>(<span style="color: #008000">self</span>, C, R_d, N, T):
+        <span style="color: #008000">self</span><span style="color: #666666">.</span>C, <span style="color: #008000">self</span><span style="color: #666666">.</span>R, <span style="color: #008000">self</span><span style="color: #666666">.</span>N, <span style="color: #008000">self</span><span style="color: #666666">.</span>T <span style="color: #666666">=</span> C, R_d, N, T
+
+    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">__call__</span>(<span style="color: #008000">self</span>, P, Q):
+        P_ <span style="color: #666666">=</span> bcmodelf77<span style="color: #666666">.</span>pmodel(
+             P, <span style="color: #008000">self</span><span style="color: #666666">.</span>R, Q, <span style="color: #008000">self</span><span style="color: #666666">.</span>C, <span style="color: #008000">self</span><span style="color: #666666">.</span>N, <span style="color: #008000">self</span><span style="color: #666666">.</span>T)
+        <span style="color: #008000; font-weight: bold">return</span> P_
+</pre></div>
+<p>
+We can now set all constant parameters at once,
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">pmodel <span style="color: #666666">=</span> BCModel(C<span style="color: #666666">=0.127</span>, R_d<span style="color: #666666">=5.43</span>, N<span style="color: #666666">=2</span>, T<span style="color: #666666">=0.01</span>)
+</pre></div>
+<p>
+and there after call the FORTRAN subroutine <code>PMODEL</code> by
+<code>pmodel(P, Q)</code>, i.e., with only the arguments that change
+from time step to time step in the fluid solver.
+
+<p>
+
+<h3>Coupling the Python FEniCS solver with the FORTRAN routine  <a name="___sec4"></a></h3>
+
+<p>
+It remains to make the final glue between the FEniCS solver and
+the FORTRAN subroutine. In the FEniCS solver, we import the
+<code>BCModel</code> class and make a list of such objects, with one element
+for each outlet boundary where we want to use the ODE model. Then
+we invoke a time loop where new \( u \) and \( p \) are computed, then
+we compute the flux \( Q \), and finally we compute new outlet
+pressures by calling up each ODE solver in turn.
+
+<p>
+
+
+<!-- code=python (from !bc pypro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">NSSolver</span>
+<span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">BCModel</span> <span style="color: #008000; font-weight: bold">import</span> BCModel
+
+solver <span style="color: #666666">=</span> NSSolver<span style="color: #666666">.</span>NSSolver()
+solver<span style="color: #666666">.</span>setIC()
+t <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+dt <span style="color: #666666">=</span> <span style="color: #666666">0.01</span>   <span style="color: #408080; font-style: italic"># fluid solver time step</span>
+T <span style="color: #666666">=</span> <span style="color: #666666">5.0</span>     <span style="color: #408080; font-style: italic"># end time of simulation</span>
+
+C <span style="color: #666666">=</span> <span style="color: #666666">0.127</span>
+R <span style="color: #666666">=</span> <span style="color: #666666">5.43</span>
+N <span style="color: #666666">=</span> <span style="color: #666666">1000</span>    <span style="color: #408080; font-style: italic"># use N steps in the ODE solver in [t,t+dt]</span>
+
+num_outlets <span style="color: #666666">=</span> <span style="color: #666666">2</span>  <span style="color: #408080; font-style: italic"># no out outflow boundaries</span>
+
+<span style="color: #408080; font-style: italic"># Create an ODE model for the pressure at each outlet boundary</span>
+pmodels <span style="color: #666666">=</span> [BCModel(C, R, N, dt) <span style="color: #008000; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #666666">0</span>,num_outlets)]
+
+P_ <span style="color: #666666">=</span> [<span style="color: #666666">16000</span>, <span style="color: #666666">100</span>]   <span style="color: #408080; font-style: italic"># start values for outlet pressures</span>
+
+<span style="color: #008000; font-weight: bold">while</span> t <span style="color: #666666">&lt;</span> T:
+    t <span style="color: #666666">+=</span> dt
+
+    <span style="color: #408080; font-style: italic"># Compute u_ and p_ using known outlet pressures P_</span>
+    solver<span style="color: #666666">.</span>advance_one_time_step(P_, t)
+    <span style="color: #408080; font-style: italic"># Compute the flux at outlet boundaries</span>
+    Q <span style="color: #666666">=</span> solver<span style="color: #666666">.</span>flux()
+
+    <span style="color: #408080; font-style: italic"># Advance outlet pressure boundary condition to the</span>
+    <span style="color: #408080; font-style: italic"># next time step (for each outlet boundary)</span>
+    <span style="color: #408080; font-style: italic"># (pmodels returns a vector of size N containg the </span>
+    <span style="color: #408080; font-style: italic"># the solution between [t, t+dt]. </span>
+    <span style="color: #408080; font-style: italic"># We take the last one with [-1])</span>
+    <span style="color: #008000; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #666666">0</span>, num_outlets):
+        P_[i] <span style="color: #666666">=</span> pmodels[i](P_[i], Q[i])[<span style="color: #666666">-1</span>]
+</pre></div>
+<p>
+
+<!-- !split -->
+
+<h2>FEniCS solver with optimization in Octave   <a name="___sec5"></a></h2>
+
+<p>
+While Python has gained significant momentum in scientific computing
+in recent years, Matlab and its open source counterpart Octave are
+still much more dominating tools in the community.  There are tons
+of MATLAB/Octave code around that FEniCS users may like to take
+advantage of. Fortunately,
+MATLAB and Octave both have Python interfaces so it is straightforward
+to call MATLAB/Octave from FEniCS simulators implemented in Python.
+The technical details of such coupling is the presented with the
+aid of an example.
+
+<p>
+
+<h3>Basic use of Pytave  <a name="___sec6"></a></h3>
+
+<p>
+First we show how to operate Octave from Python.
+Our focus is on the Octave interface named <a href="http://launchpad.net/pytave">Pytave</a>.
+The basic Pytave command is
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">result <span style="color: #666666">=</span> pytave<span style="color: #666666">.</span>feval(n, <span style="color: #BA2121">&quot;func&quot;</span>, A, B, <span style="color: #666666">...</span>)
+</pre></div>
+<p>
+for running the function <code>func</code> in the Octave engine with arguments
+<code>A</code>, <code>B</code>, and so forth, resulting in <code>n</code> returned objects to Python.
+For example, computing the eigenvalues of a matrix is done by
+
+<p>
+
+
+<!-- code=python (from !bc pypro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">numpy</span><span style="color: #666666">,</span> <span style="color: #0000FF; font-weight: bold">pytave</span>
+A <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>random<span style="color: #666666">.</span>random([<span style="color: #666666">2</span>,<span style="color: #666666">2</span>])
+e <span style="color: #666666">=</span> pytave<span style="color: #666666">.</span>feval(<span style="color: #666666">1</span>, <span style="color: #BA2121">&quot;eig&quot;</span>, A)
+<span style="color: #008000; font-weight: bold">print</span> <span style="color: #BA2121">&#39;Eigenvalues:&#39;</span>, e
+</pre></div>
+<p>
+The eigenvalues <em>and</em> eigenvectors of a generalized eigenvalue
+problem \( A v = \lambda B v \) is computed by
+obtain both the eigenvalues and the eigenvectors, we do
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">A <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>random<span style="color: #666666">.</span>random([<span style="color: #666666">2</span>,<span style="color: #666666">2</span>])
+B <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>random<span style="color: #666666">.</span>random([<span style="color: #666666">2</span>,<span style="color: #666666">2</span>])
+e, v <span style="color: #666666">=</span> pytave<span style="color: #666666">.</span>feval(<span style="color: #666666">2</span>, <span style="color: #BA2121">&quot;eig&quot;</span>, A, B)
+<span style="color: #008000; font-weight: bold">print</span> <span style="color: #BA2121">&#39;Eigenvalues:&#39;</span>, e
+<span style="color: #008000; font-weight: bold">print</span> <span style="color: #BA2121">&#39;Eigenvectors:&#39;</span>, v
+</pre></div>
+<p>
+Note that we here have two input arguments, <code>A</code> and <code>B</code>, and two output arguments, <code>e</code> and <code>v</code> (and because of the latter the first argument to
+<code>feval</code> is <code>2</code>).
+
+<p>
+We could equally well solved these eigenvalue problems directly in
+<code>numpy</code> without any need for Octave, but the next example shows
+how to take advantage of a package with many MATLAB/Octave files
+offering functionality that is not available in Python.
+
+<p>
+
+<h3>Calling the MATLAB/Octave software  <a name="___sec7"></a></h3>
+
+<p>
+The following scientific application involves the coupling of our
+FEniCS flow solver with a MATLAB/Octave toolbox for solving
+optimization problems based on Kriging and the surrogate managment
+method.  Our task is to minimize the fluid velocity in a certain
+region by placing a porous media within the domain. We can choose the
+size, placement and permability of the porous media, but are not
+allowed to affect the pressure drop from the inlet to the outlet
+much. Figures <a href="#fext:ex3:fig1">3</a> and <a href="#fext:ex3:fig2">4</a> show the flow
+velocity with two different placements of two different porous media.
+
+<p>
+
+<center> <!-- figure -->
+<hr class="figure">
+<center><p class="caption">Figure 3:  Velocity problem around a porous media with \( K_0=1000, x_0 = 0.4, c=0.1 \). <a name="fext:ex3:fig1"></a> </p></center>
+<p><img src="fig-fenics-mixed/opt_flow.png" align="bottom" width=500></p>
+</center>
+
+<p>
+
+<center> <!-- figure -->
+<hr class="figure">
+<center><p class="caption">Figure 4:  Velocity problem around a porous media with near optimal values: \( K_0=564, x_0 = 0.92, c=0.10 \). <a name="fext:ex3:fig2"></a> </p></center>
+<p><img src="fig-fenics-mixed/opt_flow2.png" align="bottom" width=500></p>
+</center>
+
+<p>
+
+For this particular application we assume that the Reynolds number is
+low such that the flow can be modeled by the Stokes problem.
+Furthermore, the additional resistance caused by the porous medium is
+modeled by a positive lower order term \( K u \) resulting in the
+Brinkman model.  The equations then reads
+
+<p>
+$$
+\begin{align}
+-\Delta u + K u - \nabla p &= 0,\quad
+\mbox{ in }\Omega \\ 
+\nabla \cdot  u &= 0,\quad
+\mbox{ in } \Omega \\ 
+ u &= (0,0),\quad
+\mbox{ on } y=0,1 \\ 
+u &= (y(1-y),0),\quad
+\mbox{ on } x=0 \\ 
+\frac{\partial u}{\partial n} + p n  &=  0,\quad
+\mbox{ on } x=1
+\end{align}
+$$
+
+with
+
+<p>
+$$
+K = K_0 \mbox{ if } |x - x_0 | \leq  c,\ | y - 0.5 | \leq c,
+$$
+
+while \( K=0 \) outside this rectangular region.
+
+<p>
+When \( K=0 \) we have viscous Stokes flow while inside the porous medium,
+\( K=K_0 \), and the \( K u \) term in the equation dominates over the viscous
+term \( \Delta u \).
+
+<p>
+The goal functional that we seek to minimize is
+$$
+\begin{align}
+J(K_0, x_0, c) = u_x|_{(x=1,y=0.5)} + \int_\Omega (\nabla p)^2 \, dx
+\end{align}
+$$
+
+Here, \( u \) and \( p \) are functions of \( K_0 \), \( x_0 \), and \( c \), and
+\( u_x \) is the \( x \) component of \( u \).
+
+<p>
+The MATLAB/Octave code for the surrogate management and Kriging is
+based on <a href="http://www2.imm.dtu.dk/~hbn/dace/">Dace</a>, but has been
+extended by Alison Marsden et. al. <a href="#Marsden_et_al_2004">[8]</a> <a href="#Marsden_et_al_2008">[9]</a> <a href="#Marsden_et_al_2012">[10]</a>
+to implement surrogate management.
+This algorithm
+consists of four main steps 1) search, 2) poll, 3) refine and 4) run
+simulations, with a flow chart appearing in Figure <a href="#fext:ex3:fig3">5</a>.
+The two first steps find new sample points \( K_0 \),
+\( x_0 \), and \( c \), while refine increases the resolution in the
+parameter space, and finally the fourth step runs simulations with the new
+sample points.
+
+<p>
+
+<center> <!-- figure -->
+<hr class="figure">
+<center><p class="caption">Figure 5:  The flow chart of the surrogate managment method. <a name="fext:ex3:fig3"></a> </p></center>
+<p><img src="fig-fenics-mixed/SMF.png" align="bottom" width=600></p>
+</center>
+
+<p>
+
+The main algorithm is implemented in Python and listed below.
+It calls three key Python functions: <code>search</code>, <code>poll</code>, and <code>refine</code>,
+which make calls to the MATLAB/Octave package.
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #408080; font-style: italic"># main loop</span>
+<span style="color: #008000; font-weight: bold">while</span> nit <span style="color: #666666">&lt;=</span> max_nit <span style="color: #AA22FF; font-weight: bold">and</span> refine_ok <span style="color: #AA22FF; font-weight: bold">and</span> <span style="color: #AA22FF; font-weight: bold">not</span> converged:
+   <span style="color: #408080; font-style: italic"># search step</span>
+   <span style="color: #008000; font-weight: bold">if</span> cost_improve:
+       Ai_new <span style="color: #666666">=</span> search(Aall, Jall, curr_bestA, theta,
+                       upb, lob, N, amin, amax, spc, delta)
+       prev_it <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;search&quot;</span>
+       Ai_new <span style="color: #666666">=</span> coarsen(Ai_new)
+   <span style="color: #008000; font-weight: bold">else</span>:
+       <span style="color: #408080; font-style: italic"># poll step</span>
+       <span style="color: #008000; font-weight: bold">if</span> prev_it <span style="color: #666666">==</span> <span style="color: #BA2121">&quot;search&quot;</span>:
+	   Ai_new <span style="color: #666666">=</span> poll(Aall, Jall, curr_bestA, N,
+                         delta, spc, amin, amax)
+	   prev_it <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;poll&quot;</span>
+       <span style="color: #408080; font-style: italic"># refine if previous poll did not lead to cost improvement</span>
+       <span style="color: #008000; font-weight: bold">if</span> prev_it <span style="color: #666666">==</span> <span style="color: #BA2121">&quot;poll&quot;</span>:
+	   refine_ok, delta, spc <span style="color: #666666">=</span> refine(delta, deltamin, spc)
+           <span style="color: #008000; font-weight: bold">if</span> refine_ok:
+	       Ai_new <span style="color: #666666">=</span> search(Aall, Jall, curr_bestA, theta,
+                               upb, lob, N, amin, amax, spc, delta)
+	       prev_it <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;search&quot;</span>
+           <span style="color: #008000; font-weight: bold">else</span>:
+               Ai_new <span style="color: #666666">=</span> <span style="color: #008000">None</span>
+   nit <span style="color: #666666">+=</span> <span style="color: #666666">1</span>
+
+   <span style="color: #408080; font-style: italic"># run simulations on the new parameters</span>
+   <span style="color: #008000; font-weight: bold">if</span> <span style="color: #AA22FF; font-weight: bold">not</span> Ai_new <span style="color: #666666">==</span> <span style="color: #008000">None</span>:
+       Ai_new, J_new <span style="color: #666666">=</span> run_simulations(Ai_new)
+
+       <span style="color: #408080; font-style: italic"># stack the new runs to the previous</span>
+       Jall <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>hstack((Jall, J_new))
+       Aall <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>vstack((Aall, Ai_new))
+
+       <span style="color: #408080; font-style: italic"># monitor convergence (write to files)</span>
+       monitor(Aall, Jall, nit, curr_bestA, curr_bestJ,
+               delta, prev_it, improve, spc)
+
+       <span style="color: #408080; font-style: italic"># check convergence</span>
+       cost_improve, curr_bestA, curr_bestJ <span style="color: #666666">=</span> check(
+           Ai_new, J_new, nit, curr_bestJ, curr_bestA)
+   <span style="color: #008000; font-weight: bold">else</span>:
+       cost_improve <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+</pre></div>
+<p>
+
+The search and poll steps are both implemented in Python but are mainly wrappers around MATLAB/Octave functions.
+The search step is implemented as follows:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">search</span>(Aall, Jall, curr_bestA, theta, upb,
+           lob, N, amin, amax, spc, delta):
+    <span style="color: #BA2121; font-style: italic">&quot;&quot;&quot;Search step.&quot;&quot;&quot;</span>
+     <span style="color: #408080; font-style: italic"># make sure that all points are unique</span>
+    (Am, Jm) <span style="color: #666666">=</span> pytave<span style="color: #666666">.</span>feval(<span style="color: #666666">2</span>, <span style="color: #BA2121">&quot;dsmerge&quot;</span>, Aall, Jall)
+
+    next_ptsall <span style="color: #666666">=</span> []
+    next_pts <span style="color: #666666">=</span> <span style="color: #008000">None</span>
+    max_no_searches <span style="color: #666666">=</span> <span style="color: #666666">100</span>
+    no_searches <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+    <span style="color: #008000; font-weight: bold">while</span> next_pts <span style="color: #666666">==</span> <span style="color: #008000">None</span> <span style="color: #AA22FF; font-weight: bold">and</span> no_searches <span style="color: #666666">&lt;</span> max_no_searches:
+	next_ptsall, min_est, max_mse_pt <span style="color: #666666">=</span> pytave<span style="color: #666666">.</span>feval(
+            <span style="color: #666666">3</span>, <span style="color: #BA2121">&quot;krig_min_find_MADS_oct&quot;</span>,
+            Am, Jm, curr_bestA, theta, upb, lob,
+            N, amin, amax, spc, delta)
+	next_pts <span style="color: #666666">=</span> check_for_new_points(next_ptsall, Aall)
+	no_searches <span style="color: #666666">+=</span> <span style="color: #666666">1</span>
+    <span style="color: #008000; font-weight: bold">return</span> next_pts
+</pre></div>
+<p>
+Here, <code>dsmerge</code> and <code>krig_min_find_MADS_kent</code> are functions
+available in the MATLAB/Octave
+files <code>dsmerge.m</code> and <code>krig_min_find_MADS_kent.m</code>. We need to notify
+Octave about the directory (<code>SMF</code>) where these files can be found:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">pytave<span style="color: #666666">.</span>feval(<span style="color: #666666">0</span>, <span style="color: #BA2121">&quot;addpath&quot;</span>, <span style="color: #BA2121">&quot;SMF&quot;</span>)
+</pre></div>
+<p>
+
+
+<h3>The FEniCS PDE solver  <a name="___sec8"></a></h3>
+
+<p>
+The FEniCS solver first defines the inflow condition (class <code>EssentialBC</code>),
+the <code>K</code> coefficient in the PDEs, and the Dirichlet boundary:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">EssentialBC</span>(Expression):
+    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">eval</span>(<span style="color: #008000">self</span>, v, x):
+        <span style="color: #008000; font-weight: bold">if</span> x[<span style="color: #666666">0</span>] <span style="color: #666666">&lt;</span> DOLFIN_EPS:
+            y <span style="color: #666666">=</span> x[<span style="color: #666666">1</span>]
+            v[<span style="color: #666666">0</span>] <span style="color: #666666">=</span> y<span style="color: #666666">*</span>(<span style="color: #666666">1-</span>y);  v[<span style="color: #666666">1</span>] <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+        <span style="color: #008000; font-weight: bold">else</span>:
+            v[<span style="color: #666666">0</span>] <span style="color: #666666">=</span> <span style="color: #666666">0</span>; v[<span style="color: #666666">1</span>] <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+
+    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">value_shape</span>(<span style="color: #008000">self</span>):
+        <span style="color: #008000; font-weight: bold">return</span> (<span style="color: #666666">2</span>,)
+
+<span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">K</span>(Expression):
+    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">__init__</span>(<span style="color: #008000">self</span>, K0, x0, c):
+        <span style="color: #008000">self</span><span style="color: #666666">.</span>K0, <span style="color: #008000">self</span><span style="color: #666666">.</span>x0, <span style="color: #008000">self</span><span style="color: #666666">.</span>c <span style="color: #666666">=</span> K0, x0, c
+
+    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">eval</span>(<span style="color: #008000">self</span>, v, x):
+        x0, K0, c <span style="color: #666666">=</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>x0, <span style="color: #008000">self</span><span style="color: #666666">.</span>K0, <span style="color: #008000">self</span><span style="color: #666666">.</span>c
+        <span style="color: #008000; font-weight: bold">if</span> <span style="color: #008000">abs</span>(x[<span style="color: #666666">0</span>] <span style="color: #666666">-</span> x0) <span style="color: #666666">&lt;=</span> c <span style="color: #AA22FF; font-weight: bold">and</span> <span style="color: #008000">abs</span>(x[<span style="color: #666666">1</span>] <span style="color: #666666">-</span> <span style="color: #666666">0.5</span>) <span style="color: #666666">&lt;=</span> c:
+            v[<span style="color: #666666">0</span>] <span style="color: #666666">=</span> K0
+        <span style="color: #008000; font-weight: bold">else</span>:
+            v[<span style="color: #666666">0</span>] <span style="color: #666666">=</span> <span style="color: #666666">1</span>
+
+<span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">dirichlet_boundary</span>(x):
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000">bool</span>(x[<span style="color: #666666">0</span>] <span style="color: #666666">&lt;</span> DOLFIN_EPS <span style="color: #AA22FF; font-weight: bold">or</span> x[<span style="color: #666666">1</span>] <span style="color: #666666">&lt;</span> DOLFIN_EPS <span style="color: #AA22FF; font-weight: bold">or</span> \
+                x[<span style="color: #666666">1</span>] <span style="color: #666666">&gt;</span> <span style="color: #666666">1.0</span> <span style="color: #666666">-</span> DOLFIN_EPS)
+</pre></div>
+<p>
+The core of the solver is the following class:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">FlowProblem2Optimize</span>:
+    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">__init__</span>(<span style="color: #008000">self</span>, K0, x0, c, plot):
+        <span style="color: #008000">self</span><span style="color: #666666">.</span>K0, <span style="color: #008000">self</span><span style="color: #666666">.</span>x0, <span style="color: #008000">self</span><span style="color: #666666">.</span>c, <span style="color: #008000">self</span><span style="color: #666666">.</span>plot <span style="color: #666666">=</span> K0, x0, c, plot
+
+    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">run</span>(<span style="color: #008000">self</span>):
+        K0, x0, c <span style="color: #666666">=</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>K0, <span style="color: #008000">self</span><span style="color: #666666">.</span>x0, <span style="color: #008000">self</span><span style="color: #666666">.</span>c
+
+        mesh <span style="color: #666666">=</span> UnitSquareMesh(<span style="color: #666666">20</span>, <span style="color: #666666">20</span>)
+        V <span style="color: #666666">=</span> VectorFunctionSpace(mesh, <span style="color: #BA2121">&quot;Lagrange&quot;</span>, <span style="color: #666666">2</span>)
+        Q <span style="color: #666666">=</span> FunctionSpace(mesh, <span style="color: #BA2121">&quot;Lagrange&quot;</span>, <span style="color: #666666">1</span>)
+        W <span style="color: #666666">=</span> MixedFunctionSpace([V,Q])
+        u, p <span style="color: #666666">=</span> TrialFunctions(W)
+        v, q <span style="color: #666666">=</span> TestFunctions(W)
+        k <span style="color: #666666">=</span> K(K0, x0, c)
+
+        u_inflow <span style="color: #666666">=</span> EssentialBC()
+        bc <span style="color: #666666">=</span> DirichletBC(W<span style="color: #666666">.</span>sub(<span style="color: #666666">0</span>), u_inflow, dirichlet_boundary)
+        f <span style="color: #666666">=</span> Constant(<span style="color: #666666">0</span>)
+
+        a <span style="color: #666666">=</span> inner(grad(u), grad(v))<span style="color: #666666">*</span>dx <span style="color: #666666">+</span> k<span style="color: #666666">*</span>inner(u, v)<span style="color: #666666">*</span>dx <span style="color: #666666">+</span> \
+            div(u)<span style="color: #666666">*</span>q<span style="color: #666666">*</span>dx <span style="color: #666666">+</span> div(v)<span style="color: #666666">*</span>p<span style="color: #666666">*</span>dx
+        L <span style="color: #666666">=</span> f<span style="color: #666666">*</span>q<span style="color: #666666">*</span>dx
+
+        w <span style="color: #666666">=</span> Function(W)
+        solve(a <span style="color: #666666">==</span> L, w, bc)
+
+        u, p <span style="color: #666666">=</span> w<span style="color: #666666">.</span>split()
+        u1, u2 <span style="color: #666666">=</span> split(u)
+
+        goal1 <span style="color: #666666">=</span> assemble(inner(grad(p), grad(p))<span style="color: #666666">*</span>dx)
+        goal2 <span style="color: #666666">=</span> u(<span style="color: #666666">1.0</span>, <span style="color: #666666">0.5</span>)[<span style="color: #666666">0</span>]<span style="color: #666666">*1000</span>
+        goal <span style="color: #666666">=</span> goal1 <span style="color: #666666">+</span> goal2
+
+        <span style="color: #008000; font-weight: bold">if</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>plot:
+            plot(u)
+
+        key_variables <span style="color: #666666">=</span> <span style="color: #008000">dict</span>(K0<span style="color: #666666">=</span>K0, x0<span style="color: #666666">=</span>x0, c<span style="color: #666666">=</span>c, goal1<span style="color: #666666">=</span>goal1,
+                             goal2<span style="color: #666666">=</span>goal2, goal<span style="color: #666666">=</span>goal)
+        <span style="color: #008000; font-weight: bold">print</span> key_variables
+        <span style="color: #008000; font-weight: bold">return</span> goal1, goal2
+</pre></div>
+<p>
+
+
+<h3>Coupling FEniCS and the MATLAB/Octave software  <a name="___sec9"></a></h3>
+
+<p>
+It now remains to do the coupling of the optimization algorithm that makes
+use of MATLAB/Octave files and the FEniCS flow solver. The following
+function performs the task:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">run_simulations</span>(Ai):
+    <span style="color: #BA2121; font-style: italic">&quot;&quot;&quot;Run a sequence of simulations with input parameters Ai.&quot;&quot;&quot;</span>
+    <span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">flow_problem</span>
+    plot <span style="color: #666666">=</span> <span style="color: #008000">True</span>
+    <span style="color: #008000; font-weight: bold">if</span> <span style="color: #008000">len</span>(Ai<span style="color: #666666">.</span>shape) <span style="color: #666666">==</span> <span style="color: #666666">1</span>: <span style="color: #408080; font-style: italic"># only one set of parameters</span>
+        J <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>zeros(<span style="color: #666666">1</span>)
+	K0, x0, c <span style="color: #666666">=</span> Ai
+	p <span style="color: #666666">=</span> flow_problem<span style="color: #666666">.</span>FlowProblem2Optimize(K0, x0, c, plot)
+	goal1, goal2 <span style="color: #666666">=</span> p<span style="color: #666666">.</span>run()
+	J[<span style="color: #666666">0</span>] <span style="color: #666666">=</span>  goal1 <span style="color: #666666">+</span> goal2
+    <span style="color: #008000; font-weight: bold">else</span>: <span style="color: #408080; font-style: italic"># several sets of parameters</span>
+        J <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>zeros(<span style="color: #008000">len</span>(Ai))
+        i <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+	<span style="color: #008000; font-weight: bold">for</span> a <span style="color: #AA22FF; font-weight: bold">in</span> Ai:
+	    K0, x0, c <span style="color: #666666">=</span> a
+	    p <span style="color: #666666">=</span> flow_problem<span style="color: #666666">.</span>FlowProblem2Optimize(K0, x0, c, plot)
+	    goal1, goal2 <span style="color: #666666">=</span> p<span style="color: #666666">.</span>run()
+	    J[i] <span style="color: #666666">=</span> goal1 <span style="color: #666666">+</span> goal2
+	    i <span style="color: #666666">=</span> i<span style="color: #666666">+1</span>
+    <span style="color: #008000; font-weight: bold">return</span> Ai, J
+</pre></div>
+<p>
+
+
+<h3>Installing Pytave  <a name="___sec10"></a></h3>
+
+<p>
+Obviously, Pytave depends on Octave,
+which can be somewhat challenging to install.
+Prebuilt binaries are available
+for Linux (Debian/Ubuntu, Fedora, Gentoo, SuSE, and FreeBSD), Mac OS X
+(via MacPorts or Homebrew), and Windows (requires Cygwin).
+On Debian-based systems (including Ubuntu)
+you are recommended to run these commands
+
+<p>
+
+
+<!-- code=text (from !bc pro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"># Install Octave
+sudo apt-get update
+sudo apt-get install libtool automake libboost-python-dev libopenmpi-dev
+sudo apt-get install octave  octave3.2-headers
+
+# Install Pytave
+bzr branch lp:pytave
+cd pytave
+bzr revert -r 51
+autoreconf --install
+./configure
+sudo python setup.py install
+</pre></div>
+<p>
+Pytave has not yet been officially released, but it is quite stable
+and has a rather complete interface to Octave. Unfortunately, the
+latest changeset has a bug and that is why we need to revert
+to a previous revision (<code>bzr revert -r 51</code>).
+
+<p>
+There are at least two Python modules that interface MATLAB:
+<a href="http://code.google.com/p/pymat2/">pymat2</a> and
+<a href="http://pypi.python.org/pypi/pymatlab">pymatlab</a>, but the authors do
+not have MATLAB installed and were unable to test these packages.
+
+<p>
+
+<!-- !split -->
+
+<h2>How to interface a C++/DOLFIN code from Python <a name="fext:dolfin:cpp"></a></h2>
+
+<p>
+Although FEniCS can easily and flexibly be extended by Python code,
+the need for speed in scientific computing occasionally makes
+a demand to implement new finite element functionality in C++.
+The present example shows how one can extend DOLFIN's finite
+element functionality through a new piece of C++ code and call
+this functionality from a Python FEniCS solver.
+
+<p>
+FEniCS finite element functions can be evaluated at an arbitrary
+point in the mesh. In a parallel computing setting, however,
+the evaluation point must be in the part of the mesh that belongs
+to the current process and the searching for the element containing
+the point is not optimally efficient. Therefore, one may want to
+have a utility for fast evaluation of finite element functions
+at prescribed points on parallel computers.
+We can write a class <code>Probe</code> for this purpose. The constructor takes a spatial
+point <code>x</code> and precomputes which element that
+contains the point and other data useful for later
+fast evaluation of functions at <code>x</code>.
+A member function <code>eval(u)</code> takes any <code>Function</code> object <code>u</code> and
+stores its value(s) at the point <code>x</code>. With <code>get_values(i)</code> we
+can retrieve all values component <code>i</code> of the function computed in
+previous calls to <code>eval</code>.
+For a scalar function there is only one component (<code>i=0</code>), but
+the class supports vector and tensor functions too.
+
+<p>
+The name <code>Probe</code> reflects the use of such a class: we insert a
+probe, as in a physical experiment, and measure the response
+at that point through time. In FEniCS simulators it means that we
+want to record the evolution in time of some field at a given spatial
+point. For long time series there can be a lot of evaluations of
+the field at this point, and class <code>Probe</code> will be much more
+efficient than the standard FEniCS point evaluation of fields (which
+performs a lot of searching to find the element containing the point).
+
+<p>
+
+<!-- begin inline comment -->
+[<b>hpl 1</b>: <em>I did some renaming of the interface: <code>like_.py</code>
+<code>num_components</code> instead
+of <code>value_size</code>, <code>get_value</code> instead of <code>get_probe</code>, <code>num_eval_calls</code>
+instead of <code>number_of_evaluations</code>, <code>get_point</code> instead of
+<code>coordinates</code>, and the argument <code>i</code> is now <code>component</code>. Check if
+the meaning is correct. The C++ .cpp file is not changed except
+for the function names.</em>]
+<!-- end inline comment -->
+
+
+<p>
+
+<h3>The C++ class  <a name="___sec12"></a></h3>
+
+<p>
+Class <code>Probe</code> is a fairly short C++ code that makes use of various
+DOLFIN C++ classes and programming conventions. The header file
+reads
+
+<p>
+
+
+<!-- code=c++ (from !bc cppcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #BC7A00">#include &lt;dolfin/function/FunctionSpace.h&gt;</span>
+<span style="color: #BC7A00">#include &lt;dolfin/function/Function.h&gt;</span>
+
+<span style="color: #008000; font-weight: bold">namespace</span> dolfin
+{
+  <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">Function</span>;
+  <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">FunctionSpace</span>;
+  <span style="color: #008000; font-weight: bold">template</span><span style="color: #666666">&lt;</span><span style="color: #008000; font-weight: bold">typename</span> T<span style="color: #666666">&gt;</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">Array</span>;
+
+  <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">Probe</span>
+  {
+  <span style="color: #A0A000">public:</span>
+    Probe(<span style="color: #008000; font-weight: bold">const</span> Array<span style="color: #666666">&lt;</span><span style="color: #B00040">double</span><span style="color: #666666">&gt;&amp;</span> point, <span style="color: #008000; font-weight: bold">const</span> FunctionSpace<span style="color: #666666">&amp;</span> V);
+    <span style="color: #B00040">void</span> <span style="color: #0000FF">eval</span>(<span style="color: #008000; font-weight: bold">const</span> Function<span style="color: #666666">&amp;</span> u);
+    std<span style="color: #666666">::</span>vector<span style="color: #666666">&lt;</span><span style="color: #B00040">double</span><span style="color: #666666">&gt;</span> get_values(std<span style="color: #666666">::</span><span style="color: #B00040">size_t</span> component);
+
+    std<span style="color: #666666">::</span><span style="color: #B00040">size_t</span> num_components() {<span style="color: #008000; font-weight: bold">return</span> value_size_loc;};
+    std<span style="color: #666666">::</span><span style="color: #B00040">size_t</span> number_of_eval_calls() {<span style="color: #008000; font-weight: bold">return</span> _probes[<span style="color: #666666">0</span>].size();};
+    std<span style="color: #666666">::</span>vector<span style="color: #666666">&lt;</span><span style="color: #B00040">double</span><span style="color: #666666">&gt;</span> get_point();
+    <span style="color: #B00040">void</span> <span style="color: #0000FF">erase</span>(std<span style="color: #666666">::</span><span style="color: #B00040">size_t</span> i);
+    <span style="color: #B00040">void</span> <span style="color: #0000FF">clear</span>();
+
+  <span style="color: #A0A000">private:</span>
+    std<span style="color: #666666">::</span>vector<span style="color: #666666">&lt;</span>std<span style="color: #666666">::</span>vector<span style="color: #666666">&lt;</span><span style="color: #B00040">double</span><span style="color: #666666">&gt;</span> <span style="color: #666666">&gt;</span> basis_matrix;
+    std<span style="color: #666666">::</span>vector<span style="color: #666666">&lt;</span><span style="color: #B00040">double</span><span style="color: #666666">&gt;</span> coefficients;
+    <span style="color: #B00040">double</span> _x[<span style="color: #666666">3</span>];
+    boost<span style="color: #666666">::</span>shared_ptr<span style="color: #666666">&lt;</span><span style="color: #008000; font-weight: bold">const</span> FiniteElement<span style="color: #666666">&gt;</span> _element;
+    Cell<span style="color: #666666">*</span> dolfin_cell;
+    UFCCell<span style="color: #666666">*</span> ufc_cell;
+    std<span style="color: #666666">::</span><span style="color: #B00040">size_t</span> value_size_loc;
+    std<span style="color: #666666">::</span>vector<span style="color: #666666">&lt;</span>std<span style="color: #666666">::</span>vector<span style="color: #666666">&lt;</span><span style="color: #B00040">double</span><span style="color: #666666">&gt;</span> <span style="color: #666666">&gt;</span> _probes;
+  };
+}
+</pre></div>
+<p>
+The most important functionality for users
+lies in the constructor and the <code>eval</code> and <code>get_values</code> functions, while the
+rest of the class contains short convenience functions and data
+structures for help with fast function evaluations.
+Note that <code>eval</code> does not return any value, it just records the
+value.
+
+<p>
+The reader may consult the corresponding <a href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/Probe/Probe.cpp"><tt>Probe.cpp</tt></a> file for all implementation details. Obviously, this type
+of code requires familiarity with the DOLFIN classes, but looking at
+the DOLFIN code itself is a good starting point for learning about
+those classes, the associated implementation conventions, and other
+programming tools that the DOLFIN library makes use of.
+
+<p>
+
+<h3>Compiling and linking at the Python DOLFIN level  <a name="___sec13"></a></h3>
+
+<p>
+The next, and often more technically challenging, step is to compile
+the C++ code, link it to DOLFIN, and make it callable from a FEniCS
+solver in Python.  Fortunately, this is not so difficult if we use the
+FEniCS Just-in-time (JIT) compiler Instant, which is already the
+compiler that DOLFIN applies when compiling variational forms. Instant
+employs SWIG in its JIT compiling, and some knowledge of SWIG is
+therefore required to understand how Instant works.  However, hardly
+any SWIG knowledge is needed if we use the convenience function
+<code>compile_extension_module</code> found in the Python package <code>dolfin</code>
+package. This function is a high-level interface to Instant
+functionality.
+
+<p>
+Basically, the <code>compile_extension_module</code> function
+requires a declaration of our C++ code to be interfaced, a list
+of <code>.cpp</code> source code files, and some information on where files
+are found. Compilation and linking are then taken care of automatically.
+The C++ code to be interfaced in this example
+is contained in the <code>Probe.h</code> header file.
+The call to the <code>compile_extension_module</code> function is then
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">dolfin</span> <span style="color: #008000; font-weight: bold">import</span> <span style="color: #666666">*</span>
+<span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">numpy</span>
+<span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">os</span>
+
+header_file <span style="color: #666666">=</span> <span style="color: #008000">open</span>(<span style="color: #BA2121">&quot;Probe/Probe.h&quot;</span>, <span style="color: #BA2121">&quot;r&quot;</span>)
+code <span style="color: #666666">=</span> header_file<span style="color: #666666">.</span>read()
+header_file<span style="color: #666666">.</span>close()
+probe_module <span style="color: #666666">=</span> compile_extension_module(
+    code<span style="color: #666666">=</span>code, source_directory<span style="color: #666666">=</span><span style="color: #BA2121">&quot;Probe&quot;</span>, sources<span style="color: #666666">=</span>[<span style="color: #BA2121">&quot;Probe.cpp&quot;</span>],
+    include_dirs<span style="color: #666666">=</span>[<span style="color: #BA2121">&quot;.&quot;</span>, os<span style="color: #666666">.</span>path<span style="color: #666666">.</span>abspath(<span style="color: #BA2121">&quot;Probe&quot;</span>)])
+</pre></div>
+<p>
+We can now import <code>probe_module</code> in the forthcoming code and use it
+for fast evaluations at some point <code>x</code>:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">mesh <span style="color: #666666">=</span> UnitCubeMesh(<span style="color: #666666">10</span>, <span style="color: #666666">10</span>, <span style="color: #666666">10</span>)
+V <span style="color: #666666">=</span> FunctionSpace(mesh, <span style="color: #BA2121">&#39;CG&#39;</span>, <span style="color: #666666">1</span>)
+
+x <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>array((<span style="color: #666666">0.5</span>, <span style="color: #666666">0.5</span>, <span style="color: #666666">0.5</span>))
+probe <span style="color: #666666">=</span> probe_module<span style="color: #666666">.</span>Probe(x, V)
+
+u0 <span style="color: #666666">=</span> interpolate(Expression(<span style="color: #BA2121">&#39;x[0]&#39;</span>), V)
+<span style="color: #408080; font-style: italic"># Fast evaluation of U0 at x:</span>
+probe<span style="color: #666666">.</span>eval(u0)
+<span style="color: #008000; font-weight: bold">print</span> <span style="color: #BA2121">&quot;The value at &quot;</span>, x, <span style="color: #BA2121">&quot; is &quot;</span>, probe<span style="color: #666666">.</span>get_probe(<span style="color: #666666">0</span>)
+</pre></div>
+<p>
+To summarize, with <code>compile_extension_module</code> the compilation and
+linking of C++ and DOLFIN code to make accessible in Python is a matter
+of one function call.
+
+<p>
+
+<h3>Compiling and linking at the Instant level  <a name="___sec14"></a></h3>
+
+<p>
+We shall now go into details how the steps above would be done by
+using basic Instant only, as this explains how to use Instant for
+interfacing C++ code in general.  Instant provides the <code>build_module</code>
+function for building a Python module out of the C++ code:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">compiled_module <span style="color: #666666">=</span> instant<span style="color: #666666">.</span>build_module(
+    code<span style="color: #666666">=</span>code,
+    source_directory<span style="color: #666666">=</span>source_dir,
+    additional_declarations<span style="color: #666666">=</span>additional_decl,
+    system_headers<span style="color: #666666">=</span>system_headers,
+    include_dirs<span style="color: #666666">=</span>include_dirs,
+    swigargs<span style="color: #666666">=</span>swigargs,
+    sources<span style="color: #666666">=</span>sources,
+    cmake_packages<span style="color: #666666">=</span>cmake_packages)
+</pre></div>
+<p>
+Here,
+
+<p>
+
+<ul>
+ <li> <code>code</code> is the C++ code that is to be wrapped,</li>
+ <li> <code>source_directory</code> is the directory where the C++ <code>.cpp</code> files are found,</li>
+ <li> <code>additional_declarations</code> are additional declaration needed to
+    make SWIG behave properly,</li>
+ <li> <code>system_headers</code> is a list of the additional header files needed
+   for compilation,</li>
+ <li> <code>include_dirs</code> is a list of
+   additional include directories required for compilation,</li>
+ <li> <code>swigargs</code> is the arguments that shall be passed to SWIG on the
+   command line,</li>
+ <li> <code>sources</code> is
+   a list of C++ files that shall be compiled into the Pyhton module, and</li>
+ <li> <code>cmake_packages</code> is a list of packages that the CMake compilation
+   depend on.</li>
+</ul>
+
+The following code illustrates the setting of these variables:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">system_headers <span style="color: #666666">=</span> [<span style="color: #BA2121">&#39;numpy/arrayobject.h&#39;</span>,
+                  <span style="color: #BA2121">&#39;dolfin/function/Function.h&#39;</span>,
+                  <span style="color: #BA2121">&#39;dolfin/function/FunctionSpace.h&#39;</span>]
+swigargs <span style="color: #666666">=</span> [<span style="color: #BA2121">&#39;-c++&#39;</span>, <span style="color: #BA2121">&#39;-fcompact&#39;</span>, <span style="color: #BA2121">&#39;-O&#39;</span>, <span style="color: #BA2121">&#39;-I.&#39;</span>, <span style="color: #BA2121">&#39;-small&#39;</span>]
+cmake_packages <span style="color: #666666">=</span> [<span style="color: #BA2121">&#39;DOLFIN&#39;</span>]
+sources <span style="color: #666666">=</span> [<span style="color: #BA2121">&quot;Probe.cpp&quot;</span>]
+source_dir <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;Probe&quot;</span>
+</pre></div>
+<p>
+
+The <code>Probe</code> class employs several DOLFIN classes. Hence, for this class
+to work properly it is crucial that the JIT compiler and SWIG are told
+how to relate to the DOLFIN classes. Instant provides the hook
+<code>additional_declarations</code> for providing additional declarations to
+SWIG. Such declarations require knowledge of how to write
+SWIG interface files. In the current example, the additional
+declarations look like the following string:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">additional_decl <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;&quot;&quot;</span>
+<span style="color: #BB6688; font-weight: bold">%i</span><span style="color: #BA2121">nit%{</span>
+<span style="color: #BA2121">import_array();</span>
+<span style="color: #BA2121">%}</span>
+
+<span style="color: #BA2121">// Include global SWIG interface files:</span>
+<span style="color: #BA2121">// Typemaps, shared_ptr declarations, exceptions, version</span>
+<span style="color: #BB6688; font-weight: bold">%i</span><span style="color: #BA2121">nclude &lt;boost_shared_ptr.i&gt;</span>
+
+<span style="color: #BA2121">// Global typemaps and forward declarations</span>
+<span style="color: #BB6688; font-weight: bold">%i</span><span style="color: #BA2121">nclude &quot;dolfin/swig/typemaps/includes.i&quot;</span>
+<span style="color: #BB6688; font-weight: bold">%i</span><span style="color: #BA2121">nclude &quot;dolfin/swig/forwarddeclarations.i&quot;</span>
+
+<span style="color: #BA2121">// Global exceptions</span>
+<span style="color: #BB6688; font-weight: bold">%i</span><span style="color: #BA2121">nclude &lt;exception.i&gt;</span>
+
+<span style="color: #BA2121">// Local shared_ptr declarations</span>
+<span style="color: #BB6688; font-weight: bold">%s</span><span style="color: #BA2121">hared_ptr(dolfin::Function)</span>
+<span style="color: #BB6688; font-weight: bold">%s</span><span style="color: #BA2121">hared_ptr(dolfin::FunctionSpace)</span>
+
+<span style="color: #BA2121">// </span><span style="color: #BB6688; font-weight: bold">%i</span><span style="color: #BA2121">mport types from submodule function of SWIG module function</span>
+<span style="color: #BB6688; font-weight: bold">%i</span><span style="color: #BA2121">mport(module=&quot;dolfin.cpp.function&quot;) &quot;dolfin/function/Function.h&quot;</span>
+<span style="color: #BB6688; font-weight: bold">%i</span><span style="color: #BA2121">mport(module=&quot;dolfin.cpp.function&quot;) &quot;dolfin/function/FunctionSpace.h&quot;</span>
+
+<span style="color: #BB6688; font-weight: bold">%f</span><span style="color: #BA2121">eature(&quot;autodoc&quot;, &quot;1&quot;);</span>
+<span style="color: #BA2121">&quot;&quot;&quot;</span>
+</pre></div>
+<p>
+
+The <code>init</code> part containing <code>import_array</code> is always needed when NumPy
+arrays are involved.  Thereafter, we include various SWIG interface
+files (ending in <code>.i</code>) that we need in DOLFIN-related code. We also
+need shared pointers for <code>dolfin::Function</code> and
+<code>dolfin::FunctionSpace</code>. In addition we need header files for
+<code>Function</code> and <code>FunctionSpace</code> classes in DOLFIN. Note that the
+<code>import</code> and <code>include</code> statements in SWIG may seem similar, but that
+whereas <code>include</code> makes SWIG generate wrappers for the code included,
+the <code>import</code> directive simply provides SWIG with the necessary type
+information.
+
+<p>
+We refer to the complete file <a href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/instant_test_probe.py"><tt>instant_test_probe.py</tt></a> for how all of the
+information about is put together and executed in order to build the
+extension module using plain Instant functionality.
+
+<p>
+
+<!-- !split -->
+
+<h2>FEniCS solver coupled with ODE solver in C++ <a name="fext:pdeode:cpp"></a></h2>
+
+<p>
+In this final example we will consider a solver for a reaction-diffusion
+equation described by a parabolic PDE coupled to a set of ODEs. The
+equation can be written as
+
+<p>
+$$
+\begin{align*}
+u_t &= \Delta u + f(u, s),
+& \forall x \in\Omega,\ t>0, \\ 
+s_t &= g(u, s),
+& \forall x \in \Omega,\ t>0.
+\end{align*}
+$$
+
+Here, \( u \) is a scalar function, subscript \( t \) means differentiation with
+respect to time, \( s \) is a scalar field (governed pointwise by an ODE),
+and \( \Delta u \) is a Laplace term.
+The problem is usually solved using a first order operator splitting scheme,
+where we at a time level first solve the PDE with \( f \) evaluated at
+the previous time level, and thereafter we update the ODEs using
+the most recent value of \( u \). More precisely,
+
+<p>
+$$
+\begin{align*}
+u^n &= u^{n-1} + \Delta t (\Delta u^n + f(u^{n-1}, s^{n-1})),  \\ 
+s^n &= s^{n-1} + \Delta t g(u^n, s^{n-1}) ,
+\end{align*}
+$$
+
+The superscript \( n \) denotes the time level, and \( \Delta t \) is the time step.
+
+<p>
+The solver for the parabolic problem is implemented in FEniCS, while
+the ODE solver is implemented in a homemade C++ code. We will glue
+these two different solvers together using Python. The C++ code consists
+basically of the class <code>ODEFieldSolver</code> declared in a file <code>ODEFieldSolver.h</code>:
+
+<p>
+
+
+<!-- code=c++ (from !bc cppcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ODEFieldSolver</span> {
+  <span style="color: #B00040">int</span> n;                <span style="color: #408080; font-style: italic">// no of points (or regions)</span>
+  <span style="color: #B00040">double</span><span style="color: #666666">*</span> s;            <span style="color: #408080; font-style: italic">// discrete values of unknown s)</span>
+  <span style="color: #B00040">double</span><span style="color: #666666">*</span> s_1;          <span style="color: #408080; font-style: italic">// s at the previous time level</span>
+  <span style="color: #B00040">double</span><span style="color: #666666">*</span> u;            <span style="color: #408080; font-style: italic">// discrete values of external field u</span>
+  <span style="color: #B00040">double</span> dt;            <span style="color: #408080; font-style: italic">// time step size</span>
+
+  <span style="color: #A0A000">public:</span>
+  ODEFieldSolver();
+ <span style="color: #666666">~</span>ODEFieldSolver();
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">redim</span>(<span style="color: #B00040">int</span> n);    <span style="color: #408080; font-style: italic">// allocate data structures</span>
+  <span style="color: #B00040">int</span> <span style="color: #0000FF">size</span>();           <span style="color: #408080; font-style: italic">// return the no of points/regions</span>
+  <span style="color: #008000; font-weight: bold">virtual</span> <span style="color: #B00040">double</span> <span style="color: #0000FF">g</span>(<span style="color: #B00040">double</span> s, <span style="color: #B00040">double</span> u);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">set_dt</span>(<span style="color: #B00040">double</span> dt);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">set_IC</span>(<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> in_array);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">set_u</span> (<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> in_array);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">set_IC</span>(<span style="color: #B00040">double</span> const_value);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">set_u</span> (<span style="color: #B00040">double</span> const_value);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">advance_one_timestep</span>();
+};
+</pre></div>
+<p>
+The <code>set_IC</code> functions set the initial condition of the ODE system, and
+<code>set_u</code> provides the \( u \) field (the "environment") to the ODE system.
+Note that there are two versions of <code>set_IC</code> and <code>set_u</code>: one for
+a constant value one for spatial variations.
+
+<p>
+The mathematics behind the shown class is to have \( n \) regional or pointwise
+values of \( u \) and \( s \), and then solve \( s_t = g(s,u) \) in each region
+or at each point. In the present case we will solve for \( s \) at
+the nodes in the finite element mesh used to compute \( u \).
+The \( s \) and \( u \) functions are in the C++ code represented by
+plain C arrays holding nodal values. The usage of the C++ code typically
+goes like this:
+
+<p>
+
+
+<!-- code=c++ (from !bc cppcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">ODEFieldSolver solver <span style="color: #666666">=</span> ODEFieldSolver();
+solver.redim(n);               <span style="color: #408080; font-style: italic">// allocate data</span>
+solver.set_dt(dt);             <span style="color: #408080; font-style: italic">// set time step</span>
+solver.set_IC(n, s0);          <span style="color: #408080; font-style: italic">// set initial conditions</span>
+t <span style="color: #666666">=</span> <span style="color: #666666">0</span>
+<span style="color: #008000; font-weight: bold">while</span> (t <span style="color: #666666">&lt;=</span> T) {
+    solver.set_u(n, u);        <span style="color: #408080; font-style: italic">// give access to PDE solution</span>
+    solver.advance_one_timestep();
+    <span style="color: #408080; font-style: italic">// plot solver.s</span>
+}
+</pre></div>
+<p>
+A subclass must be written to specify the desired <code>g</code> function.
+
+<p>
+We need to wrap the C++ class in Python such that
+the FEniCS Python solver can call the C++ code.
+We would then need to transfer the computed
+\( s \) back to Python. To this end, we add a member function <code>get_s</code>
+to the class so that we can fill some array on the user's side with
+the most recently computed <code>s</code> values:
+
+<p>
+
+
+<!-- code=c++ (from !bc cppcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ODEFieldSolver</span> {
+  ...
+  <span style="color: #B00040">void</span> get_s  (<span style="color: #B00040">int</span><span style="color: #666666">&amp;</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> out_array);
+};
+</pre></div>
+<p>
+
+
+<h3>Wrapping with F2PY  <a name="___sec16"></a></h3>
+
+<p>
+The easiest way to interface FORTRAN, C, and C++ code is to use F2PY.
+Although F2PY was made for interfacing FORTRAN and most of the documentation
+is written with FORTRAN codes in mind, it is convenient to interface
+C and C++ too. Or more precisely, F2PY can interface a pure C API, not
+C++ classes. The idea is then to construct a set of C functions on top
+of the C++ classes for accessing high-level operations using the those classes.
+The example involving class <code>ODEFieldSolver</code> will illustrate the elements
+in this technique.
+
+<p>
+
+<h4>C API to C++ code  <a name="___sec17"></a></h4>
+
+<p>
+The first step is to decide on the C API. The exposed functions in
+Python must do essentially the same as the main program. A possible
+set of functions is
+
+<p>
+
+<ul>
+  <li> <code>set_ic_and_dt(int n, double* s0, double dt)</code> for initializing
+    the class object and setting the initial conditions
+    and the time step. Also a variant <code>set_const_ic_and_dt</code> for
+    constant initial condition <code>s0</code> is handy.</li>
+  <li> <code>set_u(int n, double* u)</code> for assigning the <code>u</code> function to the class.</li>
+  <li> <code>advance_one_timestep()</code> for computing the solution at a time step.</li>
+  <li> <code>get_s(int n, double* s)</code> for getting access to the computed array <code>s</code>
+    in the <code>ODEFieldSolver</code> class.</li>
+</ul>
+
+These functions must make use of a global variable holding a
+<code>ODEFieldSolver</code> object and interact with this object as appropriate.
+The complete code of the C API then becomes
+
+<p>
+
+
+<!-- code=c++ (from !bc cpppro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #BC7A00">#include &quot;ODEFieldSolver.h&quot;</span>
+
+ODEFieldSolver solver <span style="color: #666666">=</span> ODEFieldSolver();
+
+<span style="color: #008000; font-weight: bold">extern</span> <span style="color: #BA2121">&quot;C&quot;</span> {
+
+<span style="color: #B00040">void</span> set_ic_and_dt(<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> s0, <span style="color: #B00040">double</span> dt)
+{
+  solver.redim(n);
+  solver.set_dt(dt);
+  solver.set_IC(n, s0);
+}
+
+<span style="color: #B00040">void</span> set_const_ic_and_dt(<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span> s0, <span style="color: #B00040">double</span> dt)
+{
+  solver.redim(n);
+  solver.set_dt(dt);
+  solver.set_const_IC(s0);
+}
+
+<span style="color: #B00040">void</span> set_u(<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> u)
+{
+  solver.set_u(n, u);
+}
+
+<span style="color: #B00040">void</span> advance_one_timestep()
+{
+  solver.advance_one_timestep();
+}
+
+<span style="color: #B00040">void</span> get_s(<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> s)
+{
+  solver.get_s(n, s);
+}
+
+}
+</pre></div>
+<p>
+
+
+<h4>Writing corresponding FORTRAN signatures  <a name="___sec18"></a></h4>
+
+<p>
+The nice thing about F2PY is that it can automatically make a Python
+interface to this C code, where NumPy arrays can be passed to the
+functions taking plain C arrays as arguments. For this to work, F2PY
+needs a specification of all the C functions in terms of FORTRAN 90
+module syntax. However, F2PY can generate this module for us if we
+specify the function signatures in plain FORTRAN 77. This is done as
+follows:
+
+<p>
+
+
+<!-- code=fortran (from !bc fpro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">      <span style="color: #008000; font-weight: bold">subroutine </span><span style="color: #19177C">set_ic_and_dt</span>(<span style="color: #19177C">n</span>, <span style="color: #19177C">s0</span>, <span style="color: #19177C">dt</span>)
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">set_ic_and_dt</span>
+      <span style="color: #B00040">integer </span><span style="color: #19177C">n</span>
+      <span style="color: #B00040">real</span><span style="color: #666666">*8</span> <span style="color: #19177C">s0</span>(<span style="color: #666666">0</span>:<span style="color: #19177C">n</span><span style="color: #666666">-1</span>), <span style="color: #19177C">dt</span>
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">n</span>, <span style="color: #19177C">s0</span>, <span style="color: #19177C">dt</span>
+      <span style="color: #008000; font-weight: bold">return</span>
+<span style="color: #008000; font-weight: bold">      end</span>
+
+<span style="color: #008000; font-weight: bold">      subroutine </span><span style="color: #19177C">set_const_ic_and_dt</span>(<span style="color: #19177C">n</span>, <span style="color: #19177C">s0</span>, <span style="color: #19177C">dt</span>)
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">set_const_ic_and_dt</span>
+      <span style="color: #B00040">integer </span><span style="color: #19177C">n</span>
+      <span style="color: #B00040">real</span><span style="color: #666666">*8</span> <span style="color: #19177C">s0</span>, <span style="color: #19177C">dt</span>
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">n</span>, <span style="color: #19177C">s0</span>, <span style="color: #19177C">dt</span>
+      <span style="color: #008000; font-weight: bold">return</span>
+<span style="color: #008000; font-weight: bold">      end</span>
+
+<span style="color: #008000; font-weight: bold">      subroutine </span><span style="color: #19177C">set_u</span>(<span style="color: #19177C">n</span>, <span style="color: #19177C">u</span>)
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">set_u</span>
+      <span style="color: #B00040">integer </span><span style="color: #19177C">n</span>
+      <span style="color: #B00040">real</span><span style="color: #666666">*8</span> <span style="color: #19177C">u</span>(<span style="color: #666666">0</span>:<span style="color: #19177C">n</span><span style="color: #666666">-1</span>)
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">n</span>, <span style="color: #19177C">u</span>
+      <span style="color: #008000; font-weight: bold">return</span>
+<span style="color: #008000; font-weight: bold">      end</span>
+
+<span style="color: #008000; font-weight: bold">      subroutine </span><span style="color: #19177C">advance_one_timestep</span>()
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">advance_one_timestep</span>
+      <span style="color: #008000; font-weight: bold">return</span>
+<span style="color: #008000; font-weight: bold">      end</span>
+
+<span style="color: #008000; font-weight: bold">      subroutine </span><span style="color: #19177C">get_s</span>(<span style="color: #19177C">n</span>, <span style="color: #19177C">s</span>)
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">get_s</span>
+      <span style="color: #B00040">integer </span><span style="color: #19177C">n</span>
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">n</span>
+      <span style="color: #B00040">real</span><span style="color: #666666">*8</span> <span style="color: #19177C">s</span>(<span style="color: #666666">0</span>:<span style="color: #19177C">n</span><span style="color: #666666">-1</span>)
+<span style="color: #19177C">Cf2py</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>, <span style="color: #19177C">in</span>, <span style="color: #19177C">out</span>) <span style="color: #19177C">s</span>
+      <span style="color: #008000; font-weight: bold">return</span>
+<span style="color: #008000; font-weight: bold">      end</span>
+</pre></div>
+<p>
+
+For each C function we
+
+<p>
+
+<ul>
+  <li> write the corresponding FORTRAN subroutine or function header,</li>
+  <li> insert an F2PY-specific comment (<code>CF2PY</code>) that tells that the
+    function is in C: <code>intent(c)</code>,</li>
+  <li> specify that all variables are in C: <code>intent(c)</code> (FORTRAN treats
+    all arguments as pointers, so the specification of C variables is
+    strictly needed only for non-pointers),</li>
+  <li> specify if we want the Python interface to return one or more output
+    arguments.</li>
+</ul>
+
+Regarding the last point, we specify <code>s</code> in <code>get_s</code> as <code>intent(c,in,out)</code>,
+meaning that we in Python can call this function as <code>s = get_s(s)</code>.
+The <code>s</code> argument is needed for the function to avoid
+reallocating the returned array every time the function is call. Instead
+we reuse the storage provied in the <code>s</code> array.
+
+<p>
+If the FORTRAN 77 signatures are in a file <code>signatures_capi2cpp.f</code> we
+can get F2PY to generate a FORTRAN 90 module in a file <code>ODEFieldSolvercpp.pyf</code>
+by the command
+
+<p>
+
+
+<!-- code=bash (from !bc sys) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">Terminal&gt; F2PY -m ODEFieldSolvercpp -h ODEFieldSolvercpp.pyf <span style="color: #BB6622; font-weight: bold">\ </span>
+          --overwrite-signature signatures_capi2cpp.f
+</pre></div>
+<p>
+The <code>-m</code> option specifies the name of the extension module that contains
+the Python interfaces to the C API.
+
+<p>
+The module typically looks like
+<p>
+
+<!-- code=fortran (from !bc fcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #408080; font-style: italic">!    -*- f90 -*-</span>
+<span style="color: #408080; font-style: italic">! Note: the context of this file is case sensitive.</span>
+
+<span style="color: #19177C">python</span> <span style="color: #008000; font-weight: bold">module </span><span style="color: #19177C">ODEFieldSolvercpp</span> <span style="color: #408080; font-style: italic">! in</span>
+    <span style="color: #008000; font-weight: bold">interface</span>  <span style="color: #408080; font-style: italic">! in :ODEFieldSolvercpp</span>
+        <span style="color: #008000; font-weight: bold">subroutine </span><span style="color: #19177C">set_ic_and_dt</span>(<span style="color: #19177C">n</span>,<span style="color: #19177C">s0</span>,<span style="color: #19177C">dt</span>)
+            <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">set_ic_and_dt</span>
+            <span style="color: #B00040">integer</span>, <span style="color: #008000; font-weight: bold">optional</span>,<span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>),<span style="color: #19177C">check</span>(<span style="color: #008000">len</span>(<span style="color: #19177C">s0</span>)<span style="color: #666666">&gt;=</span><span style="color: #19177C">n</span>),<span style="color: #19177C">depend</span>(<span style="color: #19177C">s0</span>) <span style="color: #008000; font-weight: bold">::</span> <span style="color: #19177C">n</span><span style="color: #666666">=</span><span style="color: #008000">len</span>(<span style="color: #19177C">s0</span>)
+            <span style="color: #B00040">real</span><span style="color: #666666">*8</span> <span style="color: #008000; font-weight: bold">dimension</span>(<span style="color: #19177C">n</span>),<span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #008000; font-weight: bold">::</span> <span style="color: #19177C">s0</span>
+            <span style="color: #B00040">real</span><span style="color: #666666">*8</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #008000; font-weight: bold">::</span> <span style="color: #19177C">dt</span>
+        <span style="color: #008000; font-weight: bold">end subroutine </span><span style="color: #19177C">set_ic_and_dt</span>
+        <span style="color: #008000; font-weight: bold">subroutine </span><span style="color: #19177C">set_const_ic_and_dt</span>(<span style="color: #19177C">n</span>,<span style="color: #19177C">s0</span>,<span style="color: #19177C">dt</span>)
+            <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">set_const_ic_and_dt</span>
+            <span style="color: #B00040">integer </span><span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #008000; font-weight: bold">::</span> <span style="color: #19177C">n</span>
+            <span style="color: #B00040">real</span><span style="color: #666666">*8</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #008000; font-weight: bold">::</span> <span style="color: #19177C">s0</span>
+            <span style="color: #B00040">real</span><span style="color: #666666">*8</span> <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #008000; font-weight: bold">::</span> <span style="color: #19177C">dt</span>
+        <span style="color: #008000; font-weight: bold">end subroutine </span><span style="color: #19177C">set_const_ic_and_dt</span>
+        <span style="color: #008000; font-weight: bold">subroutine </span><span style="color: #19177C">set_u</span>(<span style="color: #19177C">n</span>,<span style="color: #19177C">u</span>)
+            <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">set_u</span>
+            <span style="color: #B00040">integer</span>, <span style="color: #008000; font-weight: bold">optional</span>,<span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>),<span style="color: #19177C">check</span>(<span style="color: #008000">len</span>(<span style="color: #19177C">u</span>)<span style="color: #666666">&gt;=</span><span style="color: #19177C">n</span>),<span style="color: #19177C">depend</span>(<span style="color: #19177C">u</span>) <span style="color: #008000; font-weight: bold">::</span> <span style="color: #19177C">n</span><span style="color: #666666">=</span><span style="color: #008000">len</span>(<span style="color: #19177C">u</span>)
+            <span style="color: #B00040">real</span><span style="color: #666666">*8</span> <span style="color: #008000; font-weight: bold">dimension</span>(<span style="color: #19177C">n</span>),<span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #008000; font-weight: bold">::</span> <span style="color: #19177C">u</span>
+        <span style="color: #008000; font-weight: bold">end subroutine </span><span style="color: #19177C">set_u</span>
+        <span style="color: #008000; font-weight: bold">subroutine </span><span style="color: #19177C">advance_one_timestep</span> <span style="color: #408080; font-style: italic">! in :ODEFieldSolvercpp:signatures_capi2cpp.f</span>
+            <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">advance_one_timestep</span>
+        <span style="color: #008000; font-weight: bold">end subroutine </span><span style="color: #19177C">advance_one_timestep</span>
+        <span style="color: #008000; font-weight: bold">subroutine </span><span style="color: #19177C">get_s</span>(<span style="color: #19177C">n</span>,<span style="color: #19177C">s</span>)
+            <span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>) <span style="color: #19177C">get_s</span>
+            <span style="color: #B00040">integer</span>, <span style="color: #008000; font-weight: bold">optional</span>,<span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>),<span style="color: #19177C">check</span>(<span style="color: #008000">len</span>(<span style="color: #19177C">s</span>)<span style="color: #666666">&gt;=</span><span style="color: #19177C">n</span>),<span style="color: #19177C">depend</span>(<span style="color: #19177C">s</span>) <span style="color: #008000; font-weight: bold">::</span> <span style="color: #19177C">n</span><span style="color: #666666">=</span><span style="color: #008000">len</span>(<span style="color: #19177C">s</span>)
+            <span style="color: #B00040">real</span><span style="color: #666666">*8</span> <span style="color: #008000; font-weight: bold">dimension</span>(<span style="color: #19177C">n</span>),<span style="color: #008000; font-weight: bold">intent</span>(<span style="color: #19177C">c</span>,<span style="color: #19177C">in</span>,<span style="color: #19177C">out</span>) <span style="color: #008000; font-weight: bold">::</span> <span style="color: #19177C">s</span>
+        <span style="color: #008000; font-weight: bold">end subroutine </span><span style="color: #19177C">get_s</span>
+    <span style="color: #008000; font-weight: bold">end interface</span>
+<span style="color: #008000; font-weight: bold">end </span><span style="color: #19177C">python</span> <span style="color: #008000; font-weight: bold">module </span><span style="color: #19177C">ODEFieldSolvercpp</span>
+
+<span style="color: #408080; font-style: italic">! This file was auto-generated with f2py (version:2).</span>
+<span style="color: #408080; font-style: italic">! See http://cens.ioc.ee/projects/f2pye/</span>
+</pre></div>
+<p>
+Those who are familiar with FORTRAN 90 modules can write such
+code by hand instead of first writing FORTRAN 77 headers and letting
+F2PY generate the module.
+
+<p>
+
+<h4>Building the extension module  <a name="___sec19"></a></h4>
+
+<p>
+With the aid of the FORTRAN 90 specification of the C functions, F2PY
+can compile and link the extension module by a command like
+
+<p>
+
+
+<!-- code=bash (from !bc sys) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">Terminal&gt; F2PY -c --fcompiler<span style="color: #666666">=</span>gfortran -I.. --build-dir tmp1 <span style="color: #BB6622; font-weight: bold">\ </span>
+         -DF2PY_REPORT_ON_ARRAY_COPY<span style="color: #666666">=</span>1 <span style="color: #BB6622; font-weight: bold">\ </span>
+          ODEFieldSolvercpp.pyf ../ODEFieldSolver.cpp capi2cpp.cpp
+</pre></div>
+<p>
+The <code>-DF2PY_REPORT_ON_ARRAY_COPY=1</code> option is handy for letting F2PY
+notify us if arrays are copied when transferred from Python to C,
+as we want to avoid time-consuming copies. The C++ class is assumed
+to be in the parent directory (note <code>-I..</code> and the <code>../</code> prefix
+in the filename). All the files generated
+and built by F2PY will reside in the <code>tmp1</code> directory for later
+inspection if run into build problems.
+
+<p>
+The result of the above compile command is a C/C++ extension module
+in the file <code>ODEFieldSolvercpp.so</code>. The module can be loaded
+into Python and examined for content:
+
+<p>
+
+
+<!-- code=text (from !bc ipy) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">&gt;&gt;&gt; import ODEFieldSolvercpp
+&gt;&gt;&gt; dir(ODEFieldSolvercpp)
+[&#39;__doc__&#39;, &#39;__file__&#39;, &#39;__name__&#39;, &#39;__package__&#39;, &#39;__version__&#39;,
+ &#39;advance_one_timestep&#39;, &#39;get_s&#39;, &#39;set_const_ic_and_dt&#39;,
+ &#39;set_ic_and_dt&#39;, &#39;set_u&#39;]
+&gt;&gt;&gt; print ODEFieldSolvercpp.__doc__
+This module &#39;ODEFieldSolvercpp&#39; is auto-generated with F2PY (version:2).
+Functions:
+  set_ic_and_dt(s0,dt,n=len(s0))
+  set_const_ic_and_dt(n,s0,dt)
+  set_u(u,n=len(u))
+  advance_one_timestep()
+  s = get_s(s,n=len(s))
+</pre></div>
+<p>
+A word of caution is required for newcomers to F2PY: it is extremely
+important to <em>study the doc strings</em> of the various functions before
+trying to call them from Python. The reason is that F2PY drops
+unnecessary arguments, such as array lengths (since these are
+contained in NumPy array objects), and all output arguments are
+returned and removed from the subroutine's argument list.
+The function arguments and return values are therefore different
+in Python and C!
+For example, the <code>set_ic_and_dt</code> function only needs <code>s0</code> transferred
+from Python since <code>n</code> can be deduced from the F2PY-generated
+interface. The signature of this function, as seen from Python,
+is then
+
+<p>
+
+
+<!-- code=text (from !bc ipy) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">&gt;&gt;&gt; print ODEFieldSolvercpp.set_ic_and_dt.__doc__
+set_ic_and_dt - Function signature:
+  set_ic_and_dt(s0,dt,[n])
+Required arguments:
+  s0 : input rank-1 array(&#39;d&#39;) with bounds (n)
+  dt : input float
+Optional arguments:
+  n := len(s0) input int
+</pre></div>
+<p>
+Furthermore, the <code>get_s</code> function has specified its <code>s</code>
+argument as input and output (<code>intent(c,in,out)</code>) and the
+doc string shows the correct call syntax:
+
+<p>
+
+
+<!-- code=text (from !bc ipy) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">&gt;&gt;&gt; print ODEFieldSolvercpp.get_s.__doc__
+get_s - Function signature:
+  s = get_s(s,[n])
+Required arguments:
+  s : input rank-1 array(&#39;d&#39;) with bounds (n)
+Optional arguments:
+  n := len(s) input int
+Return objects:
+  s : rank-1 array(&#39;d&#39;) with bounds (n)
+</pre></div>
+<p>
+
+
+<h4>Main program in Python  <a name="___sec20"></a></h4>
+
+<p>
+The Python code for calling the C++ functions in the <code>ODEFieldSolvercpp</code>
+module can take the following form:`
+
+<p>
+
+
+<!-- code=python (from !bc pypro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">ODEFieldSolvercpp</span> <span style="color: #008000; font-weight: bold">as</span> <span style="color: #0000FF; font-weight: bold">cpp</span>
+<span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">numpy</span>
+
+s0 <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>array([<span style="color: #666666">0</span>, <span style="color: #666666">1</span>, <span style="color: #666666">4</span>], <span style="color: #008000">float</span>)
+u  <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>array([<span style="color: #666666">0</span>, <span style="color: #666666">1</span>, <span style="color: #666666">1</span>], <span style="color: #008000">float</span>)
+n  <span style="color: #666666">=</span> s0<span style="color: #666666">.</span>size
+s  <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>zeros(n)
+
+cpp<span style="color: #666666">.</span>set_ic_and_dt(s0, dt<span style="color: #666666">=0.1</span>)
+<span style="color: #008000; font-weight: bold">for</span> n <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #666666">1</span>, <span style="color: #666666">8</span>):
+    cpp<span style="color: #666666">.</span>set_u(u)
+    cpp<span style="color: #666666">.</span>advance_one_timestep()
+    s <span style="color: #666666">=</span> cpp<span style="color: #666666">.</span>get_s(s)
+    <span style="color: #008000; font-weight: bold">print</span> n, s
+</pre></div>
+<p>
+
+
+<h3>A pure C version of the C++ class  <a name="___sec21"></a></h3>
+
+<p>
+It may be illustrative to also see a pure C code that implements
+the same type of actions as the C++ class.
+The class variables are here global variables in a library and
+all the class functions are stand-alone C functions working with
+these global variables. A bit more sophisticated implementation
+would collect the global variables in a global struct instead, so
+that the functions work with the struct.
+The advantage of a pure C code is that F2PY can interface all parts
+of this code directly without any need to make a C API to C++ code.
+(Having said that, we should add that making a C API to C++ codes
+is often a good exercise as it tends to emphasize faster computing with
+arrays rather than with special (potentially small) C++ objects.
+Python interfacing of C++ this way may lead to sound redesign of
+the C++ code.)
+
+<p>
+The pure C implementation goes as follows:
+
+<p>
+
+
+<!-- code=c (from !bc cpro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #BC7A00">#include &lt;stdlib.h&gt;</span>
+<span style="color: #BC7A00">#include &lt;stdio.h&gt;</span>
+
+<span style="color: #408080; font-style: italic">/* global variables */</span>
+<span style="color: #B00040">double</span><span style="color: #666666">*</span> s;
+<span style="color: #B00040">double</span><span style="color: #666666">*</span> s_1;
+<span style="color: #B00040">double</span><span style="color: #666666">*</span> u;
+<span style="color: #B00040">double</span> dt;
+<span style="color: #B00040">int</span> n;
+
+<span style="color: #B00040">void</span> <span style="color: #0000FF">redim</span>(<span style="color: #B00040">int</span> n_)
+{
+  n <span style="color: #666666">=</span> n_;
+  s <span style="color: #666666">=</span>   malloc(<span style="color: #008000; font-weight: bold">sizeof</span>(<span style="color: #B00040">double</span>)<span style="color: #666666">*</span>n);
+  s_1 <span style="color: #666666">=</span> malloc(<span style="color: #008000; font-weight: bold">sizeof</span>(<span style="color: #B00040">double</span>)<span style="color: #666666">*</span>n);
+  u <span style="color: #666666">=</span>   malloc(<span style="color: #008000; font-weight: bold">sizeof</span>(<span style="color: #B00040">double</span>)<span style="color: #666666">*</span>n);
+}
+
+<span style="color: #B00040">void</span> <span style="color: #0000FF">deallocate</span>()
+{
+  free(s); free(s_1); free(u);
+}
+
+<span style="color: #408080; font-style: italic">/* Note: do not mix upper and lower case letters as in set_IC_...</span>
+<span style="color: #408080; font-style: italic">   This leads to undefined symbols when f2py compiles the code.</span>
+<span style="color: #408080; font-style: italic">*/</span>
+
+<span style="color: #B00040">void</span> <span style="color: #0000FF">set_ic_and_dt</span>(<span style="color: #B00040">int</span> n_, <span style="color: #B00040">double</span><span style="color: #666666">*</span> s0, <span style="color: #B00040">double</span> dt_)
+{
+  <span style="color: #B00040">int</span> i;
+  redim(n_);
+  dt <span style="color: #666666">=</span> dt_;
+  <span style="color: #008000; font-weight: bold">for</span> (i<span style="color: #666666">=0</span>; i<span style="color: #666666">&lt;</span>n; i<span style="color: #666666">++</span>) {
+    s_1[i] <span style="color: #666666">=</span> s0[i];
+  }
+}
+
+<span style="color: #B00040">void</span> <span style="color: #0000FF">set_const_ic_and_dt</span>(<span style="color: #B00040">int</span> n_, <span style="color: #B00040">double</span> s0, <span style="color: #B00040">double</span> dt_)
+{
+  <span style="color: #B00040">int</span> i;
+  redim(n_);
+  dt <span style="color: #666666">=</span> dt;
+  <span style="color: #008000; font-weight: bold">for</span> (i<span style="color: #666666">=0</span>; i<span style="color: #666666">&lt;</span>n; i<span style="color: #666666">++</span>) {
+    s_1[i] <span style="color: #666666">=</span> s0;
+  }
+}
+
+<span style="color: #B00040">void</span> <span style="color: #0000FF">set_u</span>(<span style="color: #B00040">int</span> n_, <span style="color: #B00040">double</span><span style="color: #666666">*</span> u_)
+{
+  <span style="color: #B00040">int</span> i;
+  <span style="color: #008000; font-weight: bold">for</span> (i<span style="color: #666666">=0</span>; i<span style="color: #666666">&lt;</span>n; i<span style="color: #666666">++</span>) {
+    u[i] <span style="color: #666666">=</span> u_[i];
+  }
+}
+
+<span style="color: #B00040">double</span> <span style="color: #0000FF">g</span>(<span style="color: #B00040">double</span> s_, <span style="color: #B00040">double</span> u_) {
+  <span style="color: #408080; font-style: italic">/* return s_*u_*(1 - s_); */</span>
+  <span style="color: #008000; font-weight: bold">return</span> s_;
+}
+
+<span style="color: #B00040">void</span> <span style="color: #0000FF">advance_one_timestep</span>()
+{
+  <span style="color: #408080; font-style: italic">/* Use the Forward Euler time integration for simplicity */</span>
+  <span style="color: #B00040">int</span> i;
+  <span style="color: #008000; font-weight: bold">for</span> (i<span style="color: #666666">=0</span>; i<span style="color: #666666">&lt;</span>n; i<span style="color: #666666">++</span>) {
+    s[i] <span style="color: #666666">=</span> s_1[i] <span style="color: #666666">+</span> dt<span style="color: #666666">*</span>g(s_1[i], u[i]);
+    <span style="color: #408080; font-style: italic">/* For debugging: */</span>
+    <span style="color: #408080; font-style: italic">/* printf(&quot;i=%d, s_1=%g, dt=%g, g=%g, s=%g\n&quot;,</span>
+<span style="color: #408080; font-style: italic">       i, s_1[i], dt, g(s_1[i], u[i]), s[i]); */</span>
+  }
+  <span style="color: #408080; font-style: italic">/* Update for next time step */</span>
+  <span style="color: #008000; font-weight: bold">for</span> (i<span style="color: #666666">=0</span>; i<span style="color: #666666">&lt;</span>n; i<span style="color: #666666">++</span>) { s_1[i] <span style="color: #666666">=</span> s[i]; }
+
+}
+
+<span style="color: #B00040">void</span> <span style="color: #0000FF">get_s</span>(<span style="color: #B00040">int</span> n_, <span style="color: #B00040">double</span><span style="color: #666666">*</span> s_)
+{
+  <span style="color: #B00040">int</span> i;
+  <span style="color: #008000; font-weight: bold">for</span> (i<span style="color: #666666">=0</span>; i<span style="color: #666666">&lt;</span>n; i<span style="color: #666666">++</span>) {
+    s_[i] <span style="color: #666666">=</span> s[i];
+  }
+}
+</pre></div>
+<p>
+
+By writing the corresponding FORTRAN 77 signatures, F2PY can generate
+a FORTRAN 90 module specification of the extension module, and this
+code can be compiled as explained above.
+We refer to the files in the <a href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/ODEFieldSolver/f2py-c">f2py-c</a>
+directory for details.
+
+<p>
+
+
+<h3>Wrapping with SWIG  <a name="___sec22"></a></h3>
+
+<p>
+Next, we emply the tool <a href="http://www.swig.org">SWIG</a> to wrap the C++ class
+directly and make it available as a Python class.
+SWIG is also used in DOLFIN and Instant, as demonstrated
+in the section <a href="#fext:dolfin:cpp">How to interface a C++/DOLFIN code from Python</a>.
+Useful references on SWIG in a FEniCS context
+are <a href="#Logg_et_al_2010">[2]</a> <a href="#Logg_et_al_2012a">[11]</a> <a href="#Wilbers_et_al_2012">[12]</a> <a href="#Hake_et_al_2012">[13]</a>.
+
+<p>
+<!-- NOTE: when using mako (as we do) as preprocessor, % at the beginning -->
+<!-- of lines becomes problematic. That is why we in the SWIG code -->
+<!-- replace % by %% in the first column. -->
+
+<p>
+To use SWIG, you must first write an <em>interface file</em> (ending in <code>.i</code>)
+that tells SWIG about the parts of the C++ code you want to access
+from Python. The next step is to run SWIG to generate (a lot of) wrapper
+code in C. The final step is to compile the wrapper code and your C++ code
+and link with required libraries.
+
+<p>
+A first attempt to write an interface for our <code>ODEFieldSolver</code> class
+consists in listing just the class declaration:
+
+<p>
+
+
+<!-- code=c++ (from !bc cppcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #666666">%</span>module ODEFieldSolver
+<span style="color: #666666">%</span>{
+<span style="color: #BC7A00">#include &lt;arrayobject.h&gt;</span>
+<span style="color: #BC7A00">#include &lt;sstream&gt;</span>
+<span style="color: #BC7A00">#include &quot;ODEFieldSolver.h&quot;</span>
+<span style="color: #666666">%</span>}
+
+
+<span style="color: #666666">%</span>init <span style="color: #666666">%</span>{
+import_array();
+<span style="color: #666666">%</span>}
+
+<span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ODEFieldSolver</span> {
+  <span style="color: #B00040">int</span> n;                <span style="color: #408080; font-style: italic">// no of points (or regions)</span>
+  <span style="color: #B00040">double</span><span style="color: #666666">*</span> s;            <span style="color: #408080; font-style: italic">// discrete values of unknown s)</span>
+  <span style="color: #B00040">double</span><span style="color: #666666">*</span> s_1;          <span style="color: #408080; font-style: italic">// s at the previous time level</span>
+  <span style="color: #B00040">double</span><span style="color: #666666">*</span> u;            <span style="color: #408080; font-style: italic">// discrete values of external field u</span>
+  <span style="color: #B00040">double</span> dt;            <span style="color: #408080; font-style: italic">// time step size</span>
+
+  <span style="color: #A0A000">public:</span>
+  ODEFieldSolver();
+ <span style="color: #666666">~</span>ODEFieldSolver();
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">redim</span>(<span style="color: #B00040">int</span> n);    <span style="color: #408080; font-style: italic">// allocate data structures</span>
+  <span style="color: #B00040">int</span> <span style="color: #0000FF">size</span>();           <span style="color: #408080; font-style: italic">// return the no of points/regions</span>
+  <span style="color: #008000; font-weight: bold">virtual</span> <span style="color: #B00040">double</span> <span style="color: #0000FF">g</span>(<span style="color: #B00040">double</span> s, <span style="color: #B00040">double</span> u);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">set_dt</span>(<span style="color: #B00040">double</span> dt);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">set_IC</span>(<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> in_array);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">set_u</span> (<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> in_array);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">set_IC</span>(<span style="color: #B00040">double</span> const_value);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">set_u</span> (<span style="color: #B00040">double</span> const_value);
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">advance_one_timestep</span>();
+
+  <span style="color: #B00040">void</span> <span style="color: #0000FF">get_s</span>  (<span style="color: #B00040">int</span><span style="color: #666666">&amp;</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> out_array);
+};
+</pre></div>
+<p>
+
+All SWIG commands start with <code>%</code>. The <code>%module</code> command defines the
+name of the module. Following this command comes a list of header files
+needed by the module. The <code>%init</code> command includes code that should be
+executed when the module is imported in Python. When using NumPy arrays
+in C++ code we always need to call the <code>import_array</code> function to
+initialize the NumPy package (removal of this statement will
+result in a segmentation fault!).  The rest of the code defines the
+interface that should be wrapped, that is; the declaration of the
+class <code>ODEFieldSolver</code>.
+
+<p>
+SWIG is meant to automate interfacing of C and C++ code, and there is
+mainly only one thing that needs to be addressed manually: the
+handling of pointers to arrays. Consider for instance the <code>set_IC</code>
+function. Here, <code>in_array</code> is a pointer to the first element of a
+double precision array of length <code>n</code>.  However, the fact that
+<code>in_array</code> is an array is not explicitly stated in C++, and therefore
+SWIG simply by default handles the pointer as a plain pointer, and
+this is not what we want. SWIG does, however, offer typemaps for
+changing this default behavior.  With typemaps we can specify that the
+pointer <code>in_array</code> is a NumPy array object (<code>PyObject</code>) when it comes
+from Python, and we can extract the underlying data pointer
+(<code>double*</code>) and communicate it to C.
+
+<p>
+To enable NumPy arrays to be passed to the functions <code>set_IC</code> and
+<code>set_u</code> we provide the following typemap.
+
+<p>
+
+
+<!-- code=c++ (from !bc cppcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #666666">%</span>typemap(in) (<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> array){
+  <span style="color: #008000; font-weight: bold">if</span> (<span style="color: #666666">!</span>PyArray_Check($input)) {
+    PyErr_SetString(PyExc_TypeError, <span style="color: #BA2121">&quot;Not a NumPy array&quot;</span>);
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000">NULL</span>; ;
+  }
+  PyArrayObject<span style="color: #666666">*</span> pyarray;
+  pyarray <span style="color: #666666">=</span> (PyArrayObject<span style="color: #666666">*</span>)$input;
+  <span style="color: #008000; font-weight: bold">if</span> (<span style="color: #666666">!</span>(PyArray_TYPE(pyarray) <span style="color: #666666">==</span> NPY_DOUBLE)) {
+    PyErr_SetString(PyExc_TypeError, <span style="color: #BA2121">&quot;Not a NumPy array of doubles&quot;</span>);
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000">NULL</span>; ;
+  }
+  $<span style="color: #666666">1</span> <span style="color: #666666">=</span> <span style="color: #B00040">int</span>(pyarray<span style="color: #666666">-&gt;</span>dimensions[<span style="color: #666666">0</span>]);
+  $<span style="color: #666666">2</span> <span style="color: #666666">=</span> (<span style="color: #B00040">double</span><span style="color: #666666">*</span>)pyarray<span style="color: #666666">-&gt;</span>data;
+}
+</pre></div>
+<p>
+
+Typemap code often looks complicated, at least when viewed for the
+first time. The logic is straightforward, though, once some basic
+knowledge of the C API of Python and NumPy is acquired. The idea
+with the typemap is to recognize a set of arguments in C/C++, here
+<code>n</code> and <code>in_array</code>, and then execute some C/C++ code to transform
+a Python object to the C/C++ arguments.
+In the present example we want to map a NumPy array object
+to an integer <code>n</code> (the array size) and a plain C array <code>in_array</code>
+(the array data). All Python objects, when viewed in C, are of type
+<code>PyObject</code>. We can think of <code>PyObject</code> as a superclass for all the different
+object types in Python. The special NumPy array object type is
+<code>PyArrayObject</code>.
+
+<p>
+SWIG has some special variables prefixed with <code>$</code>, which in the
+present example are <code>$input</code> for the incoming NumPy array object, and
+<code>$1</code> and <code>$2</code> for the outgoing C/C++ arguments <code>n</code> and <code>in_array</code>.
+The first <code>if</code> statement checks that the incoming array is of right
+type, and if not, a <code>TypeError</code> exception is raised.  The <code>return
+NULL</code> statement is essential for this exception to work.  The next
+step is to cast the <code>PyObject</code> pointer in <code>$input</code> to the correct
+array object type, <code>PyArrayObject</code>, because we need this object to
+call C functionality in the NumPy object to extract the data and the
+array size.  For safety reasons, we insert a test that the array data
+are of type <code>NPY_DOUBLE</code> so that the array element types in Python and
+C match.  Then we come to the final and most essential point:
+extracting data from the NumPy array object and storing them in <code>n</code>
+(<code>$1</code>) and <code>in_array</code> (<code>$2</code>):
+
+<p>
+
+
+<!-- code=c (from !bc ccod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">  $<span style="color: #666666">1</span> <span style="color: #666666">=</span> <span style="color: #B00040">int</span>(pyarray<span style="color: #666666">-&gt;</span>dimensions[<span style="color: #666666">0</span>]);
+  $<span style="color: #666666">2</span> <span style="color: #666666">=</span> (<span style="color: #B00040">double</span><span style="color: #666666">*</span>)pyarray<span style="color: #666666">-&gt;</span>data;
+</pre></div>
+<p>
+
+
+<!-- begin inline comment -->
+[<b>hpl 2</b>: <em>Kent, I don't understand this <code>typecheck</code> stuff - can you explain
+a bit more??</em>]
+<!-- end inline comment -->
+
+
+<p>
+Because we have overloaded the <code>set_IC</code> function, we also need to provide
+SWIG with a <code>typecheck</code> to determine which of the C++ functions to use.
+A suitable typecheck is:
+<p>
+
+<!-- code=c++ (from !bc cppcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #666666">%</span>typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> array) {
+$<span style="color: #666666">1</span> <span style="color: #666666">=</span> PyArray_Check($input) <span style="color: #666666">?</span> <span style="color: #666666">1</span> <span style="color: #666666">:</span> <span style="color: #666666">0</span>;
+}
+</pre></div>
+<p>
+
+The function
+<p>
+
+<!-- code=c++ (from !bc cppcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #B00040">void</span> <span style="color: #0000FF">get_s</span>(<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span> <span style="color: #666666">*</span>array);
+</pre></div>
+<p>
+should return NumPy arrays when called from Python as
+<p>
+
+<!-- code=c++ (from !bc cppcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">s <span style="color: #666666">=</span> odesolver.get_s()
+</pre></div>
+<p>
+That is, we would like to be able to call this function from Python
+without providing and input array, and instead get an output
+array. This means that an array must be created before being passed to
+C++ and then returned to Python. To accomplish this we hide the
+function by calling it <code>_get_s</code>. Then we extend the interface using
+the <code>%extend</code> and <code>%pythoncode</code> directives with a Python function
+<code>get_s</code>.  The Python function <code>get_s</code> allocate an array before passing
+it to the hidden <code>_get_s</code> function and thereafter it
+returns the array. The code is
+
+<p>
+
+
+<!-- code=c++ (from !bc cppcod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #408080; font-style: italic">/* Wrap ODEFieldSolver::get_s in a Python function */</span>
+<span style="color: #666666">%</span>rename (_get_s) ODEFieldSolver<span style="color: #666666">::</span>get_s;
+
+<span style="color: #666666">%</span>extend ODEFieldSolver{
+ <span style="color: #666666">%</span>pythoncode<span style="color: #666666">%</span>{
+    def get_s(self)<span style="color: #666666">:</span>
+      import numpy as np
+      a <span style="color: #666666">=</span> np.zeros(self.size())
+      self._get_s(a)
+      <span style="color: #008000; font-weight: bold">return</span> a
+ <span style="color: #666666">%</span>}
+}
+</pre></div>
+<p>
+
+To summarize, the complete
+SWIG interface file for wrapping the <code>ODEFieldSolver</code> class is
+listed next.
+
+<p>
+
+
+<!-- code=c++ (from !bc cpppro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #666666">%</span>module ODEFieldSolver
+<span style="color: #666666">%</span>{
+<span style="color: #BC7A00">#include &lt;arrayobject.h&gt;</span>
+<span style="color: #BC7A00">#include &lt;sstream&gt;</span>
+<span style="color: #BC7A00">#include &quot;ODEFieldSolver.h&quot;</span>
+<span style="color: #666666">%</span>}
+
+
+<span style="color: #666666">%</span>init <span style="color: #666666">%</span>{
+import_array();
+<span style="color: #666666">%</span>}
+
+<span style="color: #666666">%</span>typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> array) {
+$<span style="color: #666666">1</span> <span style="color: #666666">=</span> PyArray_Check($input) <span style="color: #666666">?</span> <span style="color: #666666">1</span> <span style="color: #666666">:</span> <span style="color: #666666">0</span>;
+}
+
+<span style="color: #666666">%</span>typemap(in) (<span style="color: #B00040">int</span> n, <span style="color: #B00040">double</span><span style="color: #666666">*</span> array){
+  <span style="color: #008000; font-weight: bold">if</span> (<span style="color: #666666">!</span>PyArray_Check($input)) {
+    PyErr_SetString(PyExc_TypeError, <span style="color: #BA2121">&quot;Not a NumPy array&quot;</span>);
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000">NULL</span>; ;
+  }
+  PyArrayObject<span style="color: #666666">*</span> pyarray;
+  pyarray <span style="color: #666666">=</span> (PyArrayObject<span style="color: #666666">*</span>)$input;
+  <span style="color: #008000; font-weight: bold">if</span> (<span style="color: #666666">!</span>(PyArray_TYPE(pyarray) <span style="color: #666666">==</span> NPY_DOUBLE)) {
+    PyErr_SetString(PyExc_TypeError, <span style="color: #BA2121">&quot;Not a NumPy array of doubles&quot;</span>);
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000">NULL</span>; ;
+  }
+  $<span style="color: #666666">1</span> <span style="color: #666666">=</span> <span style="color: #B00040">int</span>(pyarray<span style="color: #666666">-&gt;</span>dimensions[<span style="color: #666666">0</span>]);
+  $<span style="color: #666666">2</span> <span style="color: #666666">=</span> (<span style="color: #B00040">double</span><span style="color: #666666">*</span>)pyarray<span style="color: #666666">-&gt;</span>data;
+}
+
+<span style="color: #408080; font-style: italic">/* Wrap ODEFieldSolver::get_s in a Python function */</span>
+<span style="color: #666666">%</span>rename (_get_s) ODEFieldSolver<span style="color: #666666">::</span>get_s;
+
+<span style="color: #666666">%</span>extend ODEFieldSolver{
+ <span style="color: #666666">%</span>pythoncode<span style="color: #666666">%</span>{
+    def get_s(self)<span style="color: #666666">:</span>
+      import numpy as np
+      a <span style="color: #666666">=</span> np.zeros(self.size())
+      self._get_s(a)
+      <span style="color: #008000; font-weight: bold">return</span> a
+ <span style="color: #666666">%</span>}
+}
+
+<span style="color: #666666">%</span>include std_string.i
+<span style="color: #666666">%</span>include <span style="color: #BA2121">&quot;ODEFieldSolver.h&quot;</span>
+</pre></div>
+<p>
+
+To make SWIG generate the wrapper code, we run
+
+<p>
+
+
+<!-- code=bash (from !bc sys) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">swig -python -c++  -I. -I.. ODEFieldSolver.i
+</pre></div>
+<p>
+SWIG supports many languages and we therefore specify what languages
+we need wrapper code for by the <code>-python</code> and <code>-c++</code> flags. Further,
+<code>-I</code> is used to specify where SWIG should look for interface files
+(with extension <code>.i</code>).  The C++ class files are located in
+the parent directory.
+SWIG will from this command generate two files
+<code>ODEFieldSolver.py</code> and <code>ODEFieldSolver_wrap.cxx</code>. The latter
+needs to be compiled and
+linked with the <code>ODEFieldSolver</code> code to form a shared library
+with name <code>_ODEFieldSolver.so</code>. The <code>ODEFieldSolver.py</code> file
+is the module to use from Python and this is nothing but
+a Python class wrapper to <code>_ODEFieldSolver.so</code> module.
+Building the shared library is most conveniently done
+via a standard <code>setup.py</code> script. The following <code>setup.py</code> file provides
+an appropriate recipe for writing this kind of files:
+
+<p>
+
+
+<!-- code=python (from !bc pypro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">os</span><span style="color: #666666">,</span> <span style="color: #0000FF; font-weight: bold">numpy</span>
+<span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">distutils.core</span> <span style="color: #008000; font-weight: bold">import</span> setup, Extension
+name <span style="color: #666666">=</span> <span style="color: #BA2121">&#39;ODEFieldSolver&#39;</span>
+swig_cmd <span style="color: #666666">=</span><span style="color: #BA2121">&#39;swig -python   -c++  -I.. -I.  </span><span style="color: #BB6688; font-weight: bold">%s</span><span style="color: #BA2121">.i&#39;</span> <span style="color: #666666">%</span> name
+os<span style="color: #666666">.</span>system(swig_cmd)
+sources <span style="color: #666666">=</span> [<span style="color: #BA2121">&#39;../</span><span style="color: #BB6688; font-weight: bold">%s</span><span style="color: #BA2121">.cpp&#39;</span> <span style="color: #666666">%</span> name, <span style="color: #BA2121">&#39;</span><span style="color: #BB6688; font-weight: bold">%s</span><span style="color: #BA2121">_wrap.cxx&#39;</span> <span style="color: #666666">%</span> name]
+setup(name<span style="color: #666666">=</span>name,
+      ext_modules<span style="color: #666666">=</span> [
+          Extension(<span style="color: #BA2121">&#39;_&#39;</span> <span style="color: #666666">+</span> name,
+                    sources,
+                    include_dirs<span style="color: #666666">=</span>[<span style="color: #BA2121">&#39;..&#39;</span>,
+                                  numpy<span style="color: #666666">.</span>get_include() <span style="color: #666666">+</span> <span style="color: #BA2121">&quot;/numpy&quot;</span>])])
+</pre></div>
+<p>
+
+To create and install the extension module
+locally in the current working directory (<code>.</code>),
+we run
+
+<p>
+
+
+<!-- code=bash (from !bc shpro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">python setup.py install --install-platlib<span style="color: #666666">=</span>.
+</pre></div>
+<p>
+Now we can do <code>import ODEFieldSolver</code> in Python and access the
+C++ class as a Python class.
+
+<p>
+The FEniCS solver for the parabolic PDE can be implemented as
+a class:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ParabolicSolver</span>:
+  <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">__init__</span>(<span style="color: #008000">self</span>, N, dt):
+    <span style="color: #BA2121; font-style: italic">&quot;&quot;&quot;Set up PDE problem for NxN mesh and time step dt.&quot;&quot;&quot;</span>
+    <span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">dolfin</span> <span style="color: #008000; font-weight: bold">import</span> UnitSquareMesh, FunctionSpace, TrialFunction, \ 
+         TestFunction, Function, dx, dot, grad
+
+    mesh <span style="color: #666666">=</span> UnitSquareMesh(N,N)
+    <span style="color: #008000">self</span><span style="color: #666666">.</span>V <span style="color: #666666">=</span> V <span style="color: #666666">=</span> FunctionSpace(mesh, <span style="color: #BA2121">&quot;Lagrange&quot;</span>, <span style="color: #666666">1</span>)
+
+    u <span style="color: #666666">=</span> TrialFunction(V)
+    v <span style="color: #666666">=</span> TestFunction(V)
+
+    a <span style="color: #666666">=</span> u<span style="color: #666666">*</span>v<span style="color: #666666">*</span>dx <span style="color: #666666">+</span> dt<span style="color: #666666">*</span>dot(grad(u), grad(v))<span style="color: #666666">*</span>dx
+
+    <span style="color: #008000">self</span><span style="color: #666666">.</span>a <span style="color: #666666">=</span> a
+    <span style="color: #008000">self</span><span style="color: #666666">.</span>dt <span style="color: #666666">=</span> dt
+    <span style="color: #008000">self</span><span style="color: #666666">.</span>mesh <span style="color: #666666">=</span> mesh
+    <span style="color: #008000">self</span><span style="color: #666666">.</span>U <span style="color: #666666">=</span> Function(V)
+
+  <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">advance_one_timestep</span>(<span style="color: #008000">self</span>, f, u_1):
+    <span style="color: #BA2121; font-style: italic">&quot;&quot;&quot;</span>
+<span style="color: #BA2121; font-style: italic">    Solve the PDE for one time step.</span>
+<span style="color: #BA2121; font-style: italic">    f: the source term in the PDE.</span>
+<span style="color: #BA2121; font-style: italic">    u_1: solution at the previous time step.</span>
+<span style="color: #BA2121; font-style: italic">    &quot;&quot;&quot;</span>
+    <span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">dolfin</span> <span style="color: #008000; font-weight: bold">import</span> TestFunction, dx, solve
+
+    V, a, dt <span style="color: #666666">=</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>V, <span style="color: #008000">self</span><span style="color: #666666">.</span>a, <span style="color: #008000">self</span><span style="color: #666666">.</span>dt  <span style="color: #408080; font-style: italic"># strip off self prefix</span>
+    v <span style="color: #666666">=</span> TestFunction(V)
+    L <span style="color: #666666">=</span> (u_1 <span style="color: #666666">+</span> dt<span style="color: #666666">*</span>f)<span style="color: #666666">*</span>v<span style="color: #666666">*</span>dx
+
+    solve(<span style="color: #008000">self</span><span style="color: #666666">.</span>a <span style="color: #666666">==</span> L, <span style="color: #008000">self</span><span style="color: #666666">.</span>U)
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>U
+</pre></div>
+<p>
+
+The following pseudo code illustrates how to work with this code and
+the ODE solver:
+<p>
+
+<!-- code=text (from !bc ccq) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">for i in range(num_time_steps):   # time loop
+    &lt;compute f&gt;
+    &lt;call ParabolicSolver&#39;s advance_one_time_step&gt;
+    &lt;compute g&gt;
+    &lt;call the ODE solver&gt;
+</pre></div>
+<p>
+A complete code goes as follows:
+
+<p>
+
+
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">dolfin</span>
+<span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">numpy</span>
+
+<span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">F</span>(S, U):
+  <span style="color: #008000; font-weight: bold">if</span> <span style="color: #008000">isinstance</span>(S, dolfin<span style="color: #666666">.</span>Function) <span style="color: #AA22FF; font-weight: bold">and</span> <span style="color: #008000">isinstance</span>(U, dolfin<span style="color: #666666">.</span>Function):
+    <span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">dolfin</span> <span style="color: #008000; font-weight: bold">import</span> <span style="color: #666666">*</span>
+    f <span style="color: #666666">=</span> sin(S)<span style="color: #666666">*</span>exp(U)
+    <span style="color: #008000; font-weight: bold">return</span> f
+  <span style="color: #008000; font-weight: bold">if</span> <span style="color: #008000">isinstance</span>(S, numpy<span style="color: #666666">.</span>ndarray) <span style="color: #AA22FF; font-weight: bold">and</span> <span style="color: #008000">isinstance</span>(U, numpy<span style="color: #666666">.</span>ndarray):
+    <span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">numpy</span> <span style="color: #008000; font-weight: bold">import</span> <span style="color: #666666">*</span>
+    f <span style="color: #666666">=</span> sin(S)<span style="color: #666666">*</span>exp(U)
+    <span style="color: #008000; font-weight: bold">return</span> f
+
+<span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ParabolicSolver</span>:
+  <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">__init__</span>(<span style="color: #008000">self</span>, N, dt):
+    <span style="color: #BA2121; font-style: italic">&quot;&quot;&quot;Set up PDE problem for NxN mesh and time step dt.&quot;&quot;&quot;</span>
+    <span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">dolfin</span> <span style="color: #008000; font-weight: bold">import</span> UnitSquareMesh, FunctionSpace, TrialFunction, \ 
+         TestFunction, Function, dx, dot, grad
+
+    mesh <span style="color: #666666">=</span> UnitSquareMesh(N,N)
+    <span style="color: #008000">self</span><span style="color: #666666">.</span>V <span style="color: #666666">=</span> V <span style="color: #666666">=</span> FunctionSpace(mesh, <span style="color: #BA2121">&quot;Lagrange&quot;</span>, <span style="color: #666666">1</span>)
+
+    u <span style="color: #666666">=</span> TrialFunction(V)
+    v <span style="color: #666666">=</span> TestFunction(V)
+
+    a <span style="color: #666666">=</span> u<span style="color: #666666">*</span>v<span style="color: #666666">*</span>dx <span style="color: #666666">+</span> dt<span style="color: #666666">*</span>dot(grad(u), grad(v))<span style="color: #666666">*</span>dx
+
+    <span style="color: #008000">self</span><span style="color: #666666">.</span>a <span style="color: #666666">=</span> a
+    <span style="color: #008000">self</span><span style="color: #666666">.</span>dt <span style="color: #666666">=</span> dt
+    <span style="color: #008000">self</span><span style="color: #666666">.</span>mesh <span style="color: #666666">=</span> mesh
+    <span style="color: #008000">self</span><span style="color: #666666">.</span>U <span style="color: #666666">=</span> Function(V)
+
+  <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">advance_one_timestep</span>(<span style="color: #008000">self</span>, f, u_1):
+    <span style="color: #BA2121; font-style: italic">&quot;&quot;&quot;</span>
+<span style="color: #BA2121; font-style: italic">    Solve the PDE for one time step.</span>
+<span style="color: #BA2121; font-style: italic">    f: the source term in the PDE.</span>
+<span style="color: #BA2121; font-style: italic">    u_1: solution at the previous time step.</span>
+<span style="color: #BA2121; font-style: italic">    &quot;&quot;&quot;</span>
+    <span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">dolfin</span> <span style="color: #008000; font-weight: bold">import</span> TestFunction, dx, solve
+
+    V, a, dt <span style="color: #666666">=</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>V, <span style="color: #008000">self</span><span style="color: #666666">.</span>a, <span style="color: #008000">self</span><span style="color: #666666">.</span>dt  <span style="color: #408080; font-style: italic"># strip off self prefix</span>
+    v <span style="color: #666666">=</span> TestFunction(V)
+    L <span style="color: #666666">=</span> (u_1 <span style="color: #666666">+</span> dt<span style="color: #666666">*</span>f)<span style="color: #666666">*</span>v<span style="color: #666666">*</span>dx
+
+    solve(<span style="color: #008000">self</span><span style="color: #666666">.</span>a <span style="color: #666666">==</span> L, <span style="color: #008000">self</span><span style="color: #666666">.</span>U)
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>U
+
+<span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">dolfin</span>
+<span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">numpy</span>
+
+N <span style="color: #666666">=</span> <span style="color: #666666">12</span>     <span style="color: #408080; font-style: italic"># mesh partition</span>
+dt <span style="color: #666666">=</span> <span style="color: #666666">0.01</span>  <span style="color: #408080; font-style: italic"># time step</span>
+parabolicsolver <span style="color: #666666">=</span> ParabolicSolver(N, dt)
+U1 <span style="color: #666666">=</span> dolfin<span style="color: #666666">.</span>Function(parabolicsolver<span style="color: #666666">.</span>V)
+U0 <span style="color: #666666">=</span> dolfin<span style="color: #666666">.</span>Function(parabolicsolver<span style="color: #666666">.</span>V)
+U0<span style="color: #666666">.</span>vector()[:] <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>random<span style="color: #666666">.</span>random(parabolicsolver<span style="color: #666666">.</span>V<span style="color: #666666">.</span>dim())
+
+Q <span style="color: #666666">=</span> dolfin<span style="color: #666666">.</span>FunctionSpace(parabolicsolver<span style="color: #666666">.</span>mesh, <span style="color: #BA2121">&quot;DG&quot;</span>, <span style="color: #666666">0</span>)
+S0_ex <span style="color: #666666">=</span> dolfin<span style="color: #666666">.</span>Expression(<span style="color: #BA2121">&quot;x[0]&quot;</span>)
+S0 <span style="color: #666666">=</span> dolfin<span style="color: #666666">.</span>interpolate(S0_ex, Q)
+S1 <span style="color: #666666">=</span> dolfin<span style="color: #666666">.</span>Function(Q)
+
+<span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">ODEFieldSolver</span>  <span style="color: #408080; font-style: italic"># import module wrapping the ODE solver</span>
+odesolver <span style="color: #666666">=</span> ODEFieldSolver<span style="color: #666666">.</span>ODEFieldSolver()
+odesolver<span style="color: #666666">.</span>redim(S0<span style="color: #666666">.</span>vector()<span style="color: #666666">.</span>size(<span style="color: #666666">0</span>))
+odesolver<span style="color: #666666">.</span>set_IC(S0<span style="color: #666666">.</span>vector()<span style="color: #666666">.</span>array())
+plot <span style="color: #666666">=</span> <span style="color: #008000">True</span>
+
+<span style="color: #008000; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #666666">0</span>, <span style="color: #666666">23</span>):  <span style="color: #408080; font-style: italic"># time loop</span>
+  f <span style="color: #666666">=</span> F(S0, U0)
+  U1 <span style="color: #666666">=</span> parabolicsolver<span style="color: #666666">.</span>advance_one_timestep(f, U0)
+
+  U1c <span style="color: #666666">=</span> dolfin<span style="color: #666666">.</span>project(U1, Q)
+
+  odesolver<span style="color: #666666">.</span>set_u(U1c<span style="color: #666666">.</span>vector()<span style="color: #666666">.</span>array())
+  odesolver<span style="color: #666666">.</span>advance_one_timestep()
+  S1<span style="color: #666666">.</span>vector()[:] <span style="color: #666666">=</span> odesolver<span style="color: #666666">.</span>get_s()
+
+  U0 <span style="color: #666666">=</span> U1
+  S0 <span style="color: #666666">=</span> S1
+
+  <span style="color: #008000; font-weight: bold">if</span> plot:
+    dolfin<span style="color: #666666">.</span>plot(U1, title<span style="color: #666666">=</span><span style="color: #BA2121">&quot;U&quot;</span>)
+    dolfin<span style="color: #666666">.</span>plot(S1, title<span style="color: #666666">=</span><span style="color: #BA2121">&quot;S&quot;</span>)
+    dolfin<span style="color: #666666">.</span>interactive()
+</pre></div>
+<p>
+
+
+<h3>Wrapping with Cython  <a name="___sec23"></a></h3>
+
+<p>
+Cython can also be used to wrap C/C++ code.
+To this end we define the C++ class in a  <code>.pyx</code> file:
+
+<p>
+
+
+<!-- code=cython (from !bc cycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">cimport</span> <span style="color: #0000FF; font-weight: bold">numpy</span> <span style="color: #008000; font-weight: bold">as</span> <span style="color: #0000FF; font-weight: bold">cnp</span>
+<span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">numpy</span> <span style="color: #008000; font-weight: bold">as</span> <span style="color: #0000FF; font-weight: bold">np</span>
+
+<span style="color: #008000; font-weight: bold">cdef</span> <span style="color: #008000; font-weight: bold">extern</span> <span style="color: #008000; font-weight: bold">from</span> <span style="color: #BA2121">&quot;ODEFieldSolver.h&quot;</span>:
+
+    cppclass ODEFieldSolver_ <span style="color: #BA2121">&quot;ODEFieldSolver&quot;</span>:
+        ODEFieldSolver()
+        void redim(<span style="color: #008000">int</span> n)
+        <span style="color: #008000">int</span> size()
+        double g(double s, double u)
+        void set_dt(double dt)
+        void set_IC(<span style="color: #008000">int</span> n, double<span style="color: #666666">*</span> array)
+        void set_const_IC(double s0)
+        void set_u (<span style="color: #008000">int</span> n, double<span style="color: #666666">*</span> array)
+        void set_IC(double val)
+        void set_u (double const_value)
+        void advance_one_timestep()
+        void get_s  (<span style="color: #008000">int</span> n, double<span style="color: #666666">*</span> array)
+</pre></div>
+<p>
+
+Here, we redefine the name to <code>ODEFieldSolver_</code> such that we may shadow the
+underlying class with the following Python class.
+
+<p>
+
+
+<!-- code=cython (from !bc cycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">cdef</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF">ODEFieldSolver</span>:
+    <span style="color: #008000; font-weight: bold">cdef</span> <span style="color: #B00040">ODEFieldSolver_</span>  *<span style="color: #0000FF">wrapped</span>
+
+    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">__init__</span>(<span style="color: #008000">self</span>):
+        <span style="color: #008000">self</span><span style="color: #666666">.</span>wrapped <span style="color: #666666">=</span> new ODEFieldSolver_()
+
+    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">__dealloc__</span>(<span style="color: #008000">self</span>):
+        <span style="color: #008000; font-weight: bold">if</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>wrapped <span style="color: #666666">!=</span> <span style="color: #008000">NULL</span>:
+            <span style="color: #008000; font-weight: bold">del</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>wrapped
+</pre></div>
+<p>
+
+We have a pointer called <code>wrapped</code> to the underlying SWIG-generated
+C interface to the C++ code.
+Simple functions like e.g. <code>redim</code> are straightforward to wrap,
+
+<p>
+
+
+<!-- code=cython (from !bc cycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">redim</span>(<span style="color: #008000">self</span>, n):
+        <span style="color: #008000">self</span><span style="color: #666666">.</span>wrapped<span style="color: #666666">.</span>redim(n)
+</pre></div>
+<p>
+
+For the <code>set_IC</code> function we need to check that the input argument is a contiguous 1-dimensional numpy array
+of type <code>double</code>. This is spesified as <code>cnp.ndarray[double, ndim=1, mode='c']</code>. Further, we check that
+the length of the input array is the same as <code>self.wrapped.size</code> before we pass the input array to the
+underlying C++ object.
+
+<p>
+
+
+<!-- code=cython (from !bc cycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">set_IC</span>(<span style="color: #008000">self</span>, cnp<span style="color: #666666">.</span>ndarray[double, ndim<span style="color: #666666">=1</span>, mode<span style="color: #666666">=</span><span style="color: #BA2121">&#39;c&#39;</span>] array):
+        <span style="color: #008000; font-weight: bold">if</span> array<span style="color: #666666">.</span>shape[<span style="color: #666666">0</span>] <span style="color: #666666">!=</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>wrapped<span style="color: #666666">.</span>size():
+            <span style="color: #008000; font-weight: bold">raise</span> <span style="color: #D2413A; font-weight: bold">ValueError</span>(<span style="color: #BA2121">&#39;incorrect dimension on array&#39;</span>)
+        <span style="color: #008000">self</span><span style="color: #666666">.</span>wrapped<span style="color: #666666">.</span>set_IC(array<span style="color: #666666">.</span>shape[<span style="color: #666666">0</span>], <span style="color: #666666">&amp;</span>array[<span style="color: #666666">0</span>])
+</pre></div>
+<p>
+
+We allow the user to employ the <code>get_s</code> function both with and without an input
+argument, refered to as <code>out</code>. If the user does not supply any input,
+i.e., <code>if out is None</code> then we create an array of appropriate type and size. Otherwise,
+we check that <code>out</code> has the appropriate type and size before the array is passed to
+the C++ object's <code>get_s</code> function. At the end, we simply return <code>out</code>.
+
+<p>
+
+
+<!-- code=cython (from !bc cycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">    <span style="color: #008000; font-weight: bold">def</span> <span style="color: #0000FF">get_s</span>(<span style="color: #008000">self</span>,
+              cnp<span style="color: #666666">.</span>ndarray[double, ndim<span style="color: #666666">=1</span>, mode<span style="color: #666666">=</span><span style="color: #BA2121">&#39;c&#39;</span>] out<span style="color: #666666">=</span><span style="color: #008000">None</span>):
+        <span style="color: #008000; font-weight: bold">if</span> out <span style="color: #AA22FF; font-weight: bold">is</span> <span style="color: #008000">None</span>:
+            out <span style="color: #666666">=</span> np<span style="color: #666666">.</span>empty(<span style="color: #008000">self</span><span style="color: #666666">.</span>wrapped<span style="color: #666666">.</span>size(), dtype<span style="color: #666666">=</span>np<span style="color: #666666">.</span>double)
+        <span style="color: #008000; font-weight: bold">elif</span> out<span style="color: #666666">.</span>shape[<span style="color: #666666">0</span>] <span style="color: #666666">!=</span> <span style="color: #008000">self</span><span style="color: #666666">.</span>wrapped<span style="color: #666666">.</span>size():
+            <span style="color: #008000; font-weight: bold">raise</span> <span style="color: #D2413A; font-weight: bold">ValueError</span>(<span style="color: #BA2121">&#39;incorrect dimension on out&#39;</span>)
+        <span style="color: #008000">self</span><span style="color: #666666">.</span>wrapped<span style="color: #666666">.</span>get_s(out<span style="color: #666666">.</span>shape[<span style="color: #666666">0</span>], <span style="color: #666666">&amp;</span>out[<span style="color: #666666">0</span>])
+        <span style="color: #008000; font-weight: bold">return</span> out
+</pre></div>
+<p>
+
+Finally, the module is built as
+
+<p>
+
+
+<!-- code=python (from !bc pypro) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">distutils.core</span> <span style="color: #008000; font-weight: bold">import</span> setup
+<span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">distutils.extension</span> <span style="color: #008000; font-weight: bold">import</span> Extension
+<span style="color: #008000; font-weight: bold">from</span> <span style="color: #0000FF; font-weight: bold">Cython.Distutils</span> <span style="color: #008000; font-weight: bold">import</span> build_ext
+
+setup(
+    cmdclass <span style="color: #666666">=</span> {<span style="color: #BA2121">&#39;build_ext&#39;</span>: build_ext},
+    ext_modules <span style="color: #666666">=</span> [Extension(<span style="color: #BA2121">&quot;ODEFieldSolver&quot;</span>, 
+                             [<span style="color: #BA2121">&quot;ODEFieldSolver.pyx&quot;</span>, <span style="color: #BA2121">&quot;../ODEFieldSolver.cpp&quot;</span>],
+                             include_dirs<span style="color: #666666">=</span>[<span style="color: #BA2121">&#39;..&#39;</span>],
+                             language<span style="color: #666666">=</span><span style="color: #BA2121">&#39;c++&#39;</span>)]
+)
+</pre></div>
+<p>
+
+<b>Acknowledgment.</b>
+The first author want to thank Alison L. Marsden,
+Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
+Example 2 and 3, and for hosting the first author during the summer
+2012. Furthermore, Dag Sverre Seljebotn provided the code for the
+Cython wrapping in example 3. Mikael Mortensen provided the code for
+the Probe in Example 1.
+
+<p>
+
+<!-- !split -->
+
+<h2>References  <a name="___sec24"></a></h2>
+
+<p>
+
+
+<ol>
+ <li> <a name="langtangen2012fenics"></a> <b>H. P. Langtangen</b>. 
+    A FEniCS Tutorial,
+    <em>Automated Solution of Differential Equations by the Finite Element Method</em>,
+    edited by <b>A. Logg, K.-A. Mardal and G. N. Wells</b>,
+    Springer,
+    2012.</li>
+ <li> <a name="Logg_et_al_2010"></a> <b>A. Logg and G. N. Wells</b>. 
+    DOLFIN: Automated Finite Element Computing,
+    <em>ACM Transactions on Mathematical Software</em>,
+    37(2),
+    2010.</li>
+ <li> <a name="Logg_et_al2012b"></a> <b>A. Logg, K.-A. Mardal and G. N. Wells</b>. 
+    Automated Solution of Differential Equations by the Finite Element Method,
+    Springer,
+    2012.</li>
+ <li> <a name="Cebral_et_al2011a"></a> <b>J. Cebral, F. Mut, J. Weir and C. Putman</b>. 
+    Association of Hemodynamic Characteristics and Cerebral Aneurysm Rupture,
+    <em>American Journal of Neuroradiology</em>,
+    32(2),
+    pp. 264-270,
+    2011.</li>
+ <li> <a name="Cebral_et_al2011b"></a> <b>J. Cebral, F. Mut, J. Weir and C. Putman</b>. 
+    Quantitative Characterization of the Hemodynamic Environment in Ruptured and Unruptured Brain Aneurysms,
+    <em>American Journal of Neuroradiology</em>,
+    32(1),
+    pp. 145-151,
+    2011.</li>
+ <li> <a name="Xiang_et_al_2011"></a> <b>J. Xiang, S. K. Natarajan, M. Tremmel, D. Ma, J. Mocco, L. N. Hopkins, A. Siddiqui, E. I. Levy and H. Meng</b>. 
+    Hemodynamic-Morphologi Discriminants for Intracranial Aneurysm Rupture,
+    <em>Stroke</em>,
+    42,
+    pp. 144-152,
+    2011.</li>
+ <li> <a name="Valen-Sendstad_et_al_2011"></a> <b>K. Valen-Sendstad, K.-A. Mardal, M. Mortensen, B. A. P. Reif and H. P. Langtangen</b>. 
+    Direct Numerical Simulation of Transitional Flow in a Patient-Specific Intracranial Aneurysm,
+    <em>Journal of Biomechanics</em>,
+    44(16),
+    pp. 2826-2832,
+    2011.</li>
+ <li> <a name="Marsden_et_al_2004"></a> <b>A. L. Marsden, M. Wang, J. E. Dennis and P. Moin.</b>. 
+    Optimal Aeroacoustic Shape Design Using the Surrogate Management Framework,
+    <em>Optimization and Engineering</em>,
+    5(2),
+    pp. 235-262,
+    2004.</li>
+ <li> <a name="Marsden_et_al_2008"></a> <b>A. L. Marsden, J. A. Feinstein and C. A. Taylor</b>. 
+    A Computational Framework for Derivative-Free Optimization of Cardiovascular Geometries,
+    <em>Computer Methods in Applied Mechanics and Engineering</em>,
+    197(21),
+    pp. 1890-1905,
+    2008.</li>
+<li> <a name="Marsden_et_al_2012"></a> <b>A. Marsden, W. Yang, J. Feinstein, S. Shadden and I. E. Vignon-Clementel</b>. 
+    Optimization of a Y-Graft Design for Improved Hepatic Flow Distribution in the Fontan Circulation,
+    <em>Annals of Biomedical Engineering</em>,
+    1,
+    pp. 508,
+    2012.</li>
+<li> <a name="Logg_et_al_2012a"></a> <b>A. Logg, G. N. Wells and J. E. Hake</b>. 
+    DOLFIN: a C++/Python Finite Element Library,
+    <em>Automated Solution of Differential Equations by the Finite Element Method</em>,
+    edited by <b>A. Logg, K.-A. Mardal and G. Wells</b>,
+    Springer,
+    2012.</li>
+<li> <a name="Wilbers_et_al_2012"></a> <b>I. Wilbers, K.-A. Mardal and M. S. Alnes</b>. 
+    Instant: Just-in-Time Compilation of C/C++ in Python,
+    <em>Automated Solution of Differential Equations by the Finite Element Method</em>,
+    edited by <b>A. Logg, K.-A. Mardal and G. Wells</b>,
+    Springer,
+    2012.</li>
+<li> <a name="Hake_et_al_2012"></a> <b>J. E. Hake and K.-A. Mardal</b>. 
+    Lessons Learned in Mixed Language Programming,
+    <em>Automated Solution of Differential Equations by the Finite Element Method</em>,
+    edited by <b>A. Logg, K.-A. Mardal and G. Wells</b>,
+    Springer,
+    2012.</li>
+</ol>
+
+
+<!-- ------------------- end of main content --------------- -->
+
+
+</body>
+</html>
+    
+
