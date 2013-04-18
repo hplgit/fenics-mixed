@@ -1178,8 +1178,9 @@ Finally, the module is built using a "`setup.py`": "${src_path}/ODEFieldSolver/c
 
 
 
-
-__Acknowledgment.__ The first author want to thank Alison L. Marsden,
+!split
+======== Acknowledgment ======== 
+The first author want to thank Alison L. Marsden,
 Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
 Example 2 and 3, and for hosting the first author during the summer
 2012. Furthermore, Dag Sverre Seljebotn provided the code for the
