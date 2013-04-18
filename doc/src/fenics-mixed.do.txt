@@ -1,7 +1,8 @@
 <%
 # Paths to Bitbucket repos are a bit tricky (what you see is not
 # what you want), so let's parameterize
-src_path = 'https://bitbucket.org/simula_cbc/fenics-ext/src/default'
+#old: src_path = 'https://bitbucket.org/simula_cbc/fenics-ext/src/default'
+src_path = 'http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed'
 %>
 
 TITLE: Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB
@@ -68,6 +69,17 @@ This tutorial is meant for FEniCS users. For introductions to FEniCS,
 see the gentle tutorial cite{langtangen2012fenics}, the paper
 cite{Logg_et_al_2010}, or the more comprehensive book about the FEniCS
 project cite{Logg_et_al2012b}.
+
+The present tutorial is found on GitHub:
+URL: "https://github.com/hplgit/fenics-mixed". The following command
+downloads all the files:
+
+!bc sys
+Terminal> git clone https://github.com/hplgit/fenics-mixed.git
+!ec
+The source code for the examples are located in the
+subdirectory "doc/src/src-fenics-mixed": "${src_path}".
+The code examples are tested with FEniCS version 1.2.
 
 
 !split
@@ -146,7 +158,7 @@ The `setIC()` function sets the initial conditions. Futhermore,
 `P1` and `P2` are the pressures at the two outlets at time `t`.
 The implementation details of class `NSSolver` are not essential to
 this document, so we just refer the reader to the relatively short
-"`NSSolver.py`": "${src_path}/src-fenics-mixed/ns/NSSolver.py" file.
+"`NSSolver.py`": "${src_path}/ns/NSSolver.py" file.
 #In the following, the most important knowledge about this file is
 #that `u_` and `p_` contains the most recently computed velocity and
 #pressure fields, respectively (the available solution).
@@ -176,7 +188,7 @@ where
 !bt
 \[ Q = \int_{\partial \Omega_o} v \cdot n  ds \]
 !et
-is the volume flux throught the boundary $\partial\Omega_o$
+is the volume flux through the boundary $\partial\Omega_o$
 (easily computed in the FEniCS
 solver). The parameters $C$ and $R_d$ must be prescribed along with
 the initial value of $P$.
@@ -198,7 +210,7 @@ The computational model for $P$ is implemented in FORTRAN. (Our
 specific model is a simple one; the problem setting is that another
 research group is continuously developing such models, and their software
 is in FORTRAN.) The solver in FORTRAN is implemented in a file
-`PMODEL.f` with the content
+"`PMODEL.f`": "${src_path}/ns/f77/PMODEL.f" with the content
 
 @@@CODE src-fenics-mixed/ns/f77/PMODEL.f
 Given `P_1` as the value of `P` at time `t`, the subroutine computes
@@ -234,8 +246,8 @@ the FORTRAN file to analyze and compile. Our convention is to
 compile F2PY modules in a subdirectory of the FORTRAN code,
 which explains why the file here has name `../PMODEL.f`.
 
-A little test code can compare the FORTRAN ODE solver with a couple
-of manual lines in Python:
+A little "test code": "${src_path}/ns/f77/f2py/test.py" can compare
+the FORTRAN ODE solver with a couple of manual lines in Python:
 
 @@@CODE src-fenics-mixed/ns/f77/f2py/test.py
 Note that F2PY turns all upper case letters into lower case when
@@ -244,11 +256,11 @@ nose unit test. Running `nosetests` in that directory finds all
 `test_*` functions in all files and executes these functions.
 
 Instead of calling the FORTRAN function directly with many parameters,
-we wrap a class around the function such that the syntax of
-each call to compute $P$ becomes simpler. The idea is to let
-parameters that are constant through the fluid flow simulation
-be attributes in the class so that it is sufficient to provide the varying
-parameters in the call to `PMODEL`. The Python code hopefully
+we wrap a class around the function such that the syntax of each call
+to compute $P$ becomes simpler. The idea is to let parameters that are
+constant through the fluid flow simulation be attributes in the class
+so that it is sufficient to provide the varying parameters in the call
+to `PMODEL`. The "Python code": "${src_path}/ns/BCModel.py" hopefully
 explains this idea clearly:
 
 @@@CODE src-fenics-mixed/ns/BCModel.py  fromto: class BCModel@import nose
@@ -263,13 +275,14 @@ from time step to time step in the fluid solver.
 
 ===== Coupling the Python FEniCS solver with the FORTRAN routine =====
 
-It remains to make the final glue between the FEniCS solver and
-the FORTRAN subroutine. In the FEniCS solver, we import the
-`BCModel` class and make a list of such objects, with one element
-for each outlet boundary where we want to use the ODE model. Then
-we invoke a time loop where new $u$ and $p$ are computed, then
-we compute the flux $Q$, and finally we compute new outlet
-pressures by calling up each ODE solver in turn.
+It remains to make the final glue between the FEniCS solver and the
+FORTRAN subroutine. In the FEniCS solver, we import the `BCModel`
+class and make a list of such objects, with one element for each
+outlet boundary where we want to use the ODE model. Then we invoke a
+time loop where new $u$ and $p$ are computed, then we compute the flux
+$Q$, and finally we compute new outlet pressures by calling up each
+ODE solver in turn. All this code is collected in the file
+"`CoupledSolver.py`": "${src_path}/ns/CoupledSolver.py":
 
 @@@CODE src-fenics-mixed/ns/CoupledSolver.py
 
@@ -322,7 +335,7 @@ FEniCS flow solver with a MATLAB/Octave toolbox for solving
 optimization problems based on Kriging and the surrogate managment
 method.  Our task is to minimize the fluid velocity in a certain
 region by placing a porous media within the domain. We can choose the
-size, placement and permability of the porous media, but are not
+size, placement and permeability of the porous media, but are not
 allowed to affect the pressure drop from the inlet to the outlet
 much. Figures ref{fext:ex3:fig1} and ref{fext:ex3:fig2} show the flow
 velocity with two different placements of two different porous media.
@@ -375,20 +388,21 @@ $u_x$ is the $x$ component of $u$.
 
 The MATLAB/Octave code for the surrogate management and Kriging is
 based on "Dace": "http://www2.imm.dtu.dk/~hbn/dace/", but has been
-extended by Alison Marsden et. al. cite{Marsden_et_al_2004, Marsden_et_al_2008, Marsden_et_al_2012}
-to implement surrogate management.
-This algorithm
-consists of four main steps 1) search, 2) poll, 3) refine and 4) run
-simulations, with a flow chart appearing in Figure ref{fext:ex3:fig3}.
-The two first steps find new sample points $K_0$,
-$x_0$, and $c$, while refine increases the resolution in the
-parameter space, and finally the fourth step runs simulations with the new
-sample points.
+extended by Alison Marsden et. al. cite{Marsden_et_al_2004,
+Marsden_et_al_2008, Marsden_et_al_2012} to implement surrogate
+management.  This algorithm consists of four main steps 1) search, 2)
+poll, 3) refine and 4) run simulations, with a flow chart appearing in
+Figure ref{fext:ex3:fig3}.  The two first steps find new sample points
+$K_0$, $x_0$, and $c$, while refine increases the resolution in the
+parameter space, and finally the fourth step runs simulations with the
+new sample points.
 
-FIGURE:[fig-fenics-mixed/SMF.png, width=600] The flow chart of the surrogate managment method. label{fext:ex3:fig3}
+FIGURE:[fig-fenics-mixed/SMF.png, width=600] The flow chart of the surrogate management method. label{fext:ex3:fig3}
 
-The main algorithm is implemented in Python and listed below.
-It calls three key Python functions: `search`, `poll`, and `refine`,
+The main algorithm is implemented in Python (file
+"`opimize_flow_by_SMF.py`":
+"${src_path}/opt-flow/optimize_flow_by_SMF.py") and listed below.  It
+calls three key Python functions: `search`, `poll`, and `refine`,
 which make calls to the MATLAB/Octave package.
 
 @@@CODE src-fenics-mixed/opt-flow/optimize_flow_by_SMF.py fromto: main loop@initialize
@@ -408,8 +422,9 @@ pytave.feval(0, "addpath", "SMF")
 
 ===== The FEniCS PDE solver =====
 
-The FEniCS solver first defines the inflow condition (class `EssentialBC`),
-the `K` coefficient in the PDEs, and the Dirichlet boundary:
+The "FEniCS solver": "${src_path}/opt-flow/flow_problem.py" first
+defines the inflow condition (class `EssentialBC`), the `K`
+coefficient in the PDEs, and the Dirichlet boundary:
 
 @@@CODE src-fenics-mixed/opt-flow/flow_problem.py fromto: class Essential@class FlowProblem
 The core of the solver is the following class:
@@ -484,13 +499,6 @@ the field at this point, and class `Probe` will be much more
 efficient than the standard FEniCS point evaluation of fields (which
 performs a lot of searching to find the element containing the point).
 
-[hpl: I did some renaming of the interface: `like_.py`
-`num_components` instead
-of `value_size`, `get_value` instead of `get_probe`, `num_eval_calls`
-instead of `number_of_evaluations`, `get_point` instead of
-`coordinates`, and the argument `i` is now `component`. Check if
-the meaning is correct. The C++ .cpp file is not changed except
-for the function names.]
 
 ===== The C++ class =====
 
@@ -506,11 +514,13 @@ structures for help with fast function evaluations.
 Note that `eval` does not return any value, it just records the
 value.
 
-The reader may consult the corresponding "`Probe.cpp`": "${src_path}/src-fenics-mixed/probe/Probe/Probe.cpp" file for all implementation details. Obviously, this type
-of code requires familiarity with the DOLFIN classes, but looking at
-the DOLFIN code itself is a good starting point for learning about
-those classes, the associated implementation conventions, and other
-programming tools that the DOLFIN library makes use of.
+The reader may consult the corresponding "`Probe.cpp`":
+"${src_path}/probe/Probe/Probe.cpp" file for all implementation
+details. Obviously, this type of code requires familiarity with the
+DOLFIN classes, but looking at the DOLFIN code itself is a good
+starting point for learning about those classes, the associated
+implementation conventions, and other programming tools that the
+DOLFIN library makes use of.
 
 ===== Compiling and linking at the Python DOLFIN level =====
 
@@ -594,7 +604,7 @@ the `import` directive simply provides SWIG with the necessary type
 information.
 
 We refer to the complete file "`instant_test_probe.py`":
-"${src_path}/src-fenics-mixed/probe/instant_test_probe.py" for how all of the
+"${src_path}/probe/instant_test_probe.py" for how all of the
 information about is put together and executed in order to build the
 extension module using plain Instant functionality.
 
@@ -634,7 +644,8 @@ The superscript $n$ denotes the time level, and $\Delta t$ is the time step.
 The solver for the parabolic problem is implemented in FEniCS, while
 the ODE solver is implemented in a homemade C++ code. We will glue
 these two different solvers together using Python. The C++ code consists
-basically of the class `ODEFieldSolver` declared in a file `ODEFieldSolver.h`:
+basically of the class `ODEFieldSolver` declared in a file
+"`ODEFieldSolver.h`": "${src_path}/ODEFieldSolver/ODEFieldSolver.h":
 
 !bc cppcod
 class ODEFieldSolver {
@@ -661,7 +672,9 @@ class ODEFieldSolver {
 The `set_IC` functions set the initial condition of the ODE system, and
 `set_u` provides the $u$ field (the "environment") to the ODE system.
 Note that there are two versions of `set_IC` and `set_u`: one for
-a constant value one for spatial variations.
+a constant value one for spatial variations. We refer to
+the "`ODEFieldSolver.cpp`": "${src_path}/ODEFieldSolver/ODEFieldSolver.cpp"
+file for implementational details.
 
 The mathematics behind the shown class is to have $n$ regional or pointwise
 values of $u$ and $s$, and then solve $s_t = g(s,u)$ in each region
@@ -727,7 +740,8 @@ set of functions is
 
 These functions must make use of a global variable holding a
 `ODEFieldSolver` object and interact with this object as appropriate.
-The complete code of the C API then becomes
+The "complete code of the C API":
+"${src_path}/ODEFieldSolver/f2py-cpp/capi2cpp.cpp" then becomes
 
 @@@CODE src-fenics-mixed/ODEFieldSolver/f2py-cpp/capi2cpp.cpp
 
@@ -892,24 +906,9 @@ Return objects:
 === Main program in Python ===
 
 The Python code for calling the C++ functions in the `ODEFieldSolvercpp`
-module can take the following form:`
+module can take the following form:
 
-!bc pypro
-import ODEFieldSolvercpp as cpp
-import numpy
-
-s0 = numpy.array([0, 1, 4], float)
-u  = numpy.array([0, 1, 1], float)
-n  = s0.size
-s  = numpy.zeros(n)
-
-cpp.set_ic_and_dt(s0, dt=0.1)
-for n in range(1, 8):
-    cpp.set_u(u)
-    cpp.advance_one_timestep()
-    s = cpp.get_s(s)
-    print n, s
-!ec
+@@@CODE src-fenics-mixed/ODEFieldSolver/f2py-cpp/app.py fromto: import ODE@
 
 ===== A pure C version of the C++ class =====
 
@@ -935,13 +934,13 @@ The pure C implementation goes as follows:
 By writing the corresponding FORTRAN 77 signatures, F2PY can generate
 a FORTRAN 90 module specification of the extension module, and this
 code can be compiled as explained above.
-We refer to the files in the "f2py-c": "${src_path}/src-fenics-mixed/ODEFieldSolver/f2py-c"
+We refer to the files in the "f2py-c": "${src_path}/ODEFieldSolver/f2py-c"
 directory for details.
 
 
 ===== Wrapping with SWIG =====
 
-Next, we emply the tool "SWIG":"http://www.swig.org" to wrap the C++ class
+Next, we employ the tool "SWIG":"http://www.swig.org" to wrap the C++ class
 directly and make it available as a Python class.
 SWIG is also used in DOLFIN and Instant, as demonstrated
 in Section ref{fext:dolfin:cpp}.
@@ -1059,9 +1058,6 @@ extracting data from the NumPy array object and storing them in `n`
   $2 = (double*)pyarray->data;
 !ec
 
-[hpl: Kent, I don't understand this `typecheck` stuff - can you explain
-a bit more??]
-
 Because we have overloaded the `set_IC` function, we also need to provide
 SWIG with a `typecheck` to determine which of the C++ functions to use.
 A suitable typecheck is:
@@ -1101,18 +1097,17 @@ swig -python -c++  -I. -I.. ODEFieldSolver.i
 SWIG supports many languages and we therefore specify what languages
 we need wrapper code for by the `-python` and `-c++` flags. Further,
 `-I` is used to specify where SWIG should look for interface files
-(with extension `.i`).  The C++ class files are located in
-the parent directory.
-SWIG will from this command generate two files
-`ODEFieldSolver.py` and `ODEFieldSolver_wrap.cxx`. The latter
-needs to be compiled and
-linked with the `ODEFieldSolver` code to form a shared library
-with name `_ODEFieldSolver.so`. The `ODEFieldSolver.py` file
-is the module to use from Python and this is nothing but
-a Python class wrapper to `_ODEFieldSolver.so` module.
-Building the shared library is most conveniently done
-via a standard `setup.py` script. The following `setup.py` file provides
-an appropriate recipe for writing this kind of files:
+(with extension `.i`).  The C++ class files are located in the parent
+directory.  SWIG will from this command generate two files
+`ODEFieldSolver.py` and `ODEFieldSolver_wrap.cxx`. The latter needs to
+be compiled and linked with the `ODEFieldSolver` code to form a shared
+library with name `_ODEFieldSolver.so`. The `ODEFieldSolver.py` file
+is the module to use from Python and this is nothing but a Python
+class wrapper to `_ODEFieldSolver.so` module.  Building the shared
+library is most conveniently done via a standard `setup.py`
+script. The following "`setup.py`":
+"${src_path}/ODEFieldSolver/swig/setup.py" file provides an
+appropriate recipe for writing this kind of files:
 
 @@@CODE src-fenics-mixed/ODEFieldSolver/swig/setup.py
 
@@ -1138,7 +1133,7 @@ for i in range(num_time_steps):   # time loop
     <compute g>
     <call the ODE solver>
 !ec
-A complete code goes as follows:
+A "complete code": "${src_path}/ODEFieldSolver/swig/test_coupled_solver.py" goes as follows:
 
 @@@CODE src-fenics-mixed/ODEFieldSolver/swig/test_coupled_solver.py fromto: import dolfin@
 
@@ -1146,12 +1141,12 @@ A complete code goes as follows:
 ===== Wrapping with Cython =====
 
 Cython can also be used to wrap C/C++ code.
-To this end we define the C++ class in a  `.pyx` file:
+To this end we define the C++ class in a  `.pyx` "file":"${src_path}/ODEFieldSolver/cython/ODEFieldSolver.pyx":
 
 @@@CODE src-fenics-mixed/ODEFieldSolver/cython/ODEFieldSolver.pyx fromto: @cdef class
 
 Here, we redefine the name to `ODEFieldSolver_` such that we may shadow the
-underlying class with the following Python class.
+underlying class with the following Python class:
 
 @@@CODE src-fenics-mixed/ODEFieldSolver/cython/ODEFieldSolver.pyx fromto: cdef class@redim
 
@@ -1177,7 +1172,7 @@ the C++ object's `get_s` function. At the end, we simply return `out`.
 
 @@@CODE src-fenics-mixed/ODEFieldSolver/cython/ODEFieldSolver.pyx fromto: def get_s@
 
-Finally, the module is built as
+Finally, the module is built using a "`setup.py`": "${src_path}/ODEFieldSolver/cython/setup.py" script for mixing Python, Cython, and C++ code:
 
 @@@CODE src-fenics-mixed/ODEFieldSolver/cython/setup.py
 

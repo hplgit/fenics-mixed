@@ -76,7 +76,8 @@ s^n &amp;= s^{n-1} + \Delta t g(u^n, s^{n-1}) ,\end{split}\]</div>
 <p>The solver for the parabolic problem is implemented in FEniCS, while
 the ODE solver is implemented in a homemade C++ code. We will glue
 these two different solvers together using Python. The C++ code consists
-basically of the class <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> declared in a file <tt class="docutils literal"><span class="pre">ODEFieldSolver.h</span></tt>:</p>
+basically of the class <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> declared in a file
+<a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/ODEFieldSolver.h">ODEFieldSolver.h</a>:</p>
 <div class="highlight-c++"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ODEFieldSolver</span> <span class="p">{</span>
   <span class="kt">int</span> <span class="n">n</span><span class="p">;</span>                <span class="c1">// no of points (or regions)</span>
   <span class="kt">double</span><span class="o">*</span> <span class="n">s</span><span class="p">;</span>            <span class="c1">// discrete values of unknown s)</span>
@@ -102,7 +103,9 @@ basically of the class <tt class="docutils literal"><span class="pre">ODEFieldSo
 <p>The <tt class="docutils literal"><span class="pre">set_IC</span></tt> functions set the initial condition of the ODE system, and
 <tt class="docutils literal"><span class="pre">set_u</span></tt> provides the <span class="math">\(u\)</span> field (the &#8220;environment&#8221;) to the ODE system.
 Note that there are two versions of <tt class="docutils literal"><span class="pre">set_IC</span></tt> and <tt class="docutils literal"><span class="pre">set_u</span></tt>: one for
-a constant value one for spatial variations.</p>
+a constant value one for spatial variations. We refer to
+the <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/ODEFieldSolver.cpp">ODEFieldSolver.cpp</a>
+file for implementational details.</p>
 <p>The mathematics behind the shown class is to have <span class="math">\(n\)</span> regional or pointwise
 values of <span class="math">\(u\)</span> and <span class="math">\(s\)</span>, and then solve <span class="math">\(s_t = g(s,u)\)</span> in each region
 or at each point. In the present case we will solve for <span class="math">\(s\)</span> at
@@ -164,7 +167,7 @@ in the <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt>
 </div></blockquote>
 <p>These functions must make use of a global variable holding a
 <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> object and interact with this object as appropriate.
-The complete code of the C API then becomes</p>
+The <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-cpp/capi2cpp.cpp">complete code of the C API</a> then becomes</p>
 <div class="highlight-c++"><div class="highlight"><pre><span class="cp">#include &quot;ODEFieldSolver.h&quot;</span>
 
 <span class="n">ODEFieldSolver</span> <span class="n">solver</span> <span class="o">=</span> <span class="n">ODEFieldSolver</span><span class="p">();</span>
@@ -395,20 +398,20 @@ doc string shows the correct call syntax:</p>
 <div class="section" id="main-program-in-python">
 <h3>Main program in Python<a class="headerlink" href="#main-program-in-python" title="Permalink to this headline">¶</a></h3>
 <p>The Python code for calling the C++ functions in the <tt class="docutils literal"><span class="pre">ODEFieldSolvercpp</span></tt>
-module can take the following form:`</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">ODEFieldSolvercpp</span> <span class="kn">as</span> <span class="nn">cpp</span>
+module can take the following form:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">ODEFieldSolvercpp</span> <span class="kn">as</span> <span class="nn">solver</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 
-<span class="n">s0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span>
-<span class="n">u</span>  <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span>
-<span class="n">n</span>  <span class="o">=</span> <span class="n">s0</span><span class="o">.</span><span class="n">size</span>
-<span class="n">s</span>  <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">s0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span>  <span class="c"># ensure float elements!</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">s0</span><span class="o">.</span><span class="n">size</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
-<span class="n">cpp</span><span class="o">.</span><span class="n">set_ic_and_dt</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">solver</span><span class="o">.</span><span class="n">set_ic_and_dt</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="n">cpp</span><span class="o">.</span><span class="n">set_u</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-    <span class="n">cpp</span><span class="o">.</span><span class="n">advance_one_timestep</span><span class="p">()</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">cpp</span><span class="o">.</span><span class="n">get_s</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">set_u</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+    <span class="n">solver</span><span class="o">.</span><span class="n">advance_one_timestep</span><span class="p">()</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">get_s</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
     <span class="k">print</span> <span class="n">n</span><span class="p">,</span> <span class="n">s</span>
 </pre></div>
 </div>
@@ -518,17 +521,17 @@ the C++ code.)</p>
 <p>By writing the corresponding FORTRAN 77 signatures, F2PY can generate
 a FORTRAN 90 module specification of the extension module, and this
 code can be compiled as explained above.
-We refer to the files in the <a class="reference external" href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/ODEFieldSolver/f2py-c">f2py-c</a>
+We refer to the files in the <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-c">f2py-c</a>
 directory for details.</p>
 </div>
 <div class="section" id="wrapping-with-swig">
 <h2>Wrapping with SWIG<a class="headerlink" href="#wrapping-with-swig" title="Permalink to this headline">¶</a></h2>
-<p>Next, we emply the tool <a class="reference external" href="http://www.swig.org">SWIG</a> to wrap the C++ class
+<p>Next, we employ the tool <a class="reference external" href="http://www.swig.org">SWIG</a> to wrap the C++ class
 directly and make it available as a Python class.
 SWIG is also used in DOLFIN and Instant, as demonstrated
 in the section <a class="reference internal" href="._part0003_fenics-mixed.html#fext-dolfin-cpp"><em>How to interface a C++/DOLFIN code from Python</em></a>.
 Useful references on SWIG in a FEniCS context
-are <a class="reference internal" href="._part0005_fenics-mixed.html#ref02">[Ref02]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref11">[Ref11]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref12">[Ref12]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref13">[Ref13]</a>.</p>
+are <a class="reference internal" href="._part0005_fenics-mixed.html#ref02">[Ref02]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref08">[Ref08]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref09">[Ref09]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref10">[Ref10]</a>.</p>
 <p>To use SWIG, you must first write an <em>interface file</em> (ending in <tt class="docutils literal"><span class="pre">.i</span></tt>)
 that tells SWIG about the parts of the C++ code you want to access
 from Python. The next step is to run SWIG to generate (a lot of) wrapper
@@ -639,8 +642,6 @@ extracting data from the NumPy array object and storing them in <tt class="docut
 <div class="highlight-c"><pre>$1 = int(pyarray-&gt;dimensions[0]);
 $2 = (double*)pyarray-&gt;data;</pre>
 </div>
-<p>(<strong>hpl 2</strong>: Kent, I don&#8217;t understand this <tt class="docutils literal"><span class="pre">typecheck</span></tt> stuff - can you explain
-a bit more??)</p>
 <p>Because we have overloaded the <tt class="docutils literal"><span class="pre">set_IC</span></tt> function, we also need to provide
 SWIG with a <tt class="docutils literal"><span class="pre">typecheck</span></tt> to determine which of the C++ functions to use.
 A suitable typecheck is:</p>
@@ -736,18 +737,16 @@ $1 = PyArray_Check($input) ? 1 : 0;
 <p>SWIG supports many languages and we therefore specify what languages
 we need wrapper code for by the <tt class="docutils literal"><span class="pre">-python</span></tt> and <tt class="docutils literal"><span class="pre">-c++</span></tt> flags. Further,
 <tt class="docutils literal"><span class="pre">-I</span></tt> is used to specify where SWIG should look for interface files
-(with extension <tt class="docutils literal"><span class="pre">.i</span></tt>).  The C++ class files are located in
-the parent directory.
-SWIG will from this command generate two files
-<tt class="docutils literal"><span class="pre">ODEFieldSolver.py</span></tt> and <tt class="docutils literal"><span class="pre">ODEFieldSolver_wrap.cxx</span></tt>. The latter
-needs to be compiled and
-linked with the <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> code to form a shared library
-with name <tt class="docutils literal"><span class="pre">_ODEFieldSolver.so</span></tt>. The <tt class="docutils literal"><span class="pre">ODEFieldSolver.py</span></tt> file
-is the module to use from Python and this is nothing but
-a Python class wrapper to <tt class="docutils literal"><span class="pre">_ODEFieldSolver.so</span></tt> module.
-Building the shared library is most conveniently done
-via a standard <tt class="docutils literal"><span class="pre">setup.py</span></tt> script. The following <tt class="docutils literal"><span class="pre">setup.py</span></tt> file provides
-an appropriate recipe for writing this kind of files:</p>
+(with extension <tt class="docutils literal"><span class="pre">.i</span></tt>).  The C++ class files are located in the parent
+directory.  SWIG will from this command generate two files
+<tt class="docutils literal"><span class="pre">ODEFieldSolver.py</span></tt> and <tt class="docutils literal"><span class="pre">ODEFieldSolver_wrap.cxx</span></tt>. The latter needs to
+be compiled and linked with the <tt class="docutils literal"><span class="pre">ODEFieldSolver</span></tt> code to form a shared
+library with name <tt class="docutils literal"><span class="pre">_ODEFieldSolver.so</span></tt>. The <tt class="docutils literal"><span class="pre">ODEFieldSolver.py</span></tt> file
+is the module to use from Python and this is nothing but a Python
+class wrapper to <tt class="docutils literal"><span class="pre">_ODEFieldSolver.so</span></tt> module.  Building the shared
+library is most conveniently done via a standard <tt class="docutils literal"><span class="pre">setup.py</span></tt>
+script. The following <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/swig/setup.py">setup.py</a> file provides an
+appropriate recipe for writing this kind of files:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">numpy</span>
 <span class="kn">from</span> <span class="nn">distutils.core</span> <span class="kn">import</span> <span class="n">setup</span><span class="p">,</span> <span class="n">Extension</span>
 <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;ODEFieldSolver&#39;</span>
@@ -816,7 +815,7 @@ the ODE solver:</p>
     &lt;call the ODE solver&gt;
 </pre></div>
 </div>
-<p>A complete code goes as follows:</p>
+<p>A <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/swig/test_coupled_solver.py">complete code</a> goes as follows:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">dolfin</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 
@@ -908,7 +907,7 @@ the ODE solver:</p>
 <div class="section" id="wrapping-with-cython">
 <h2>Wrapping with Cython<a class="headerlink" href="#wrapping-with-cython" title="Permalink to this headline">¶</a></h2>
 <p>Cython can also be used to wrap C/C++ code.
-To this end we define the C++ class in a  <tt class="docutils literal"><span class="pre">.pyx</span></tt> file:</p>
+To this end we define the C++ class in a  <tt class="docutils literal"><span class="pre">.pyx</span></tt> <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/cython/ODEFieldSolver.pyx">file</a>:</p>
 <div class="highlight-cython"><div class="highlight"><pre><span class="k">cimport</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">cnp</span>
 <span class="k">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -930,7 +929,7 @@ To this end we define the C++ class in a  <tt class="docutils literal"><span cla
 </pre></div>
 </div>
 <p>Here, we redefine the name to <tt class="docutils literal"><span class="pre">ODEFieldSolver_</span></tt> such that we may shadow the
-underlying class with the following Python class.</p>
+underlying class with the following Python class:</p>
 <div class="highlight-cython"><div class="highlight"><pre><span class="k">cdef</span> <span class="k">class</span> <span class="nf">ODEFieldSolver</span><span class="p">:</span>
     <span class="k">cdef</span> <span class="kt">ODEFieldSolver_</span>  *<span class="nf">wrapped</span>
 
@@ -974,7 +973,7 @@ the C++ object&#8217;s <tt class="docutils literal"><span class="pre">get_s</spa
     <span class="k">return</span> <span class="n">out</span>
 </pre></div>
 </div>
-<p>Finally, the module is built as</p>
+<p>Finally, the module is built using a <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/cython/setup.py">setup.py</a> script for mixing Python, Cython, and C++ code:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">distutils.core</span> <span class="kn">import</span> <span class="n">setup</span>
 <span class="kn">from</span> <span class="nn">distutils.extension</span> <span class="kn">import</span> <span class="n">Extension</span>
 <span class="kn">from</span> <span class="nn">Cython.Distutils</span> <span class="kn">import</span> <span class="n">build_ext</span>

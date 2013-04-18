@@ -39,13 +39,6 @@ the field at this point, and class ``Probe`` will be much more
 efficient than the standard FEniCS point evaluation of fields (which
 performs a lot of searching to find the element containing the point).
 
-(**hpl 1**: I did some renaming of the interface: ``like_.py``
-``num_components`` instead
-of ``value_size``, ``get_value`` instead of ``get_probe``, ``num_eval_calls``
-instead of ``number_of_evaluations``, ``get_point`` instead of
-``coordinates``, and the argument ``i`` is now ``component``. Check if
-the meaning is correct. The C++ .cpp file is not changed except
-for the function names.)
 
 The C++ class
 -------------
@@ -98,11 +91,12 @@ structures for help with fast function evaluations.
 Note that ``eval`` does not return any value, it just records the
 value.
 
-The reader may consult the corresponding `Probe.cpp <https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/Probe/Probe.cpp>`_ file for all implementation details. Obviously, this type
-of code requires familiarity with the DOLFIN classes, but looking at
-the DOLFIN code itself is a good starting point for learning about
-those classes, the associated implementation conventions, and other
-programming tools that the DOLFIN library makes use of.
+The reader may consult the corresponding `Probe.cpp <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/probe/Probe/Probe.cpp>`_ file for all implementation
+details. Obviously, this type of code requires familiarity with the
+DOLFIN classes, but looking at the DOLFIN code itself is a good
+starting point for learning about those classes, the associated
+implementation conventions, and other programming tools that the
+DOLFIN library makes use of.
 
 Compiling and linking at the Python DOLFIN level
 ------------------------------------------------
@@ -271,7 +265,7 @@ whereas ``include`` makes SWIG generate wrappers for the code included,
 the ``import`` directive simply provides SWIG with the necessary type
 information.
 
-We refer to the complete file `instant_test_probe.py <https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/instant_test_probe.py>`_ for how all of the
+We refer to the complete file `instant_test_probe.py <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/probe/instant_test_probe.py>`_ for how all of the
 information about is put together and executed in order to build the
 extension module using plain Instant functionality.
 

@@ -156,7 +156,7 @@ FEniCS flow solver with a MATLAB/Octave toolbox for solving
 optimization problems based on Kriging and the surrogate managment
 method.  Our task is to minimize the fluid velocity in a certain
 region by placing a porous media within the domain. We can choose the
-size, placement and permability of the porous media, but are not
+size, placement and permeability of the porous media, but are not
 allowed to affect the pressure drop from the inlet to the outlet
 much. Figures <a class="reference internal" href="#fext-ex3-fig1"><em>Velocity problem around a porous media with </em></a> and <a class="reference internal" href="#fext-ex3-fig2"><em>Velocity problem around a porous media with near optimal values: </em></a> show the flow
 velocity with two different placements of two different porous media.</p>
@@ -202,21 +202,21 @@ term <span class="math">\(\Delta u\)</span>.</p>
 <span class="math">\(u_x\)</span> is the <span class="math">\(x\)</span> component of <span class="math">\(u\)</span>.</p>
 <p>The MATLAB/Octave code for the surrogate management and Kriging is
 based on <a class="reference external" href="http://www2.imm.dtu.dk/~hbn/dace/">Dace</a>, but has been
-extended by Alison Marsden et. al. <a class="reference internal" href="._part0005_fenics-mixed.html#ref08">[Ref08]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref09">[Ref09]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref10">[Ref10]</a>
-to implement surrogate management.
-This algorithm
-consists of four main steps 1) search, 2) poll, 3) refine and 4) run
-simulations, with a flow chart appearing in Figure <a class="reference internal" href="#fext-ex3-fig3"><em>The flow chart of the surrogate managment method</em></a>.
-The two first steps find new sample points <span class="math">\(K_0\)</span>,
-<span class="math">\(x_0\)</span>, and <span class="math">\(c\)</span>, while refine increases the resolution in the
-parameter space, and finally the fourth step runs simulations with the new
-sample points.</p>
+extended by Alison Marsden et. al. cite{Marsden_et_al_2004,
+Marsden_et_al_2008, Marsden_et_al_2012} to implement surrogate
+management.  This algorithm consists of four main steps 1) search, 2)
+poll, 3) refine and 4) run simulations, with a flow chart appearing in
+Figure <a class="reference internal" href="#fext-ex3-fig3"><em>The flow chart of the surrogate management method</em></a>.  The two first steps find new sample points
+<span class="math">\(K_0\)</span>, <span class="math">\(x_0\)</span>, and <span class="math">\(c\)</span>, while refine increases the resolution in the
+parameter space, and finally the fourth step runs simulations with the
+new sample points.</p>
 <div class="figure" id="fext-ex3-fig3">
 <img alt="_images/SMF.png" src="_images/SMF.png" style="width: 600px;" />
-<p class="caption"><em>The flow chart of the surrogate managment method</em></p>
+<p class="caption"><em>The flow chart of the surrogate management method</em></p>
 </div>
-<p>The main algorithm is implemented in Python and listed below.
-It calls three key Python functions: <tt class="docutils literal"><span class="pre">search</span></tt>, <tt class="docutils literal"><span class="pre">poll</span></tt>, and <tt class="docutils literal"><span class="pre">refine</span></tt>,
+<p>The main algorithm is implemented in Python (file
+<a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/opt-flow/optimize_flow_by_SMF.py">opimize_flow_by_SMF.py</a>) and listed below.  It
+calls three key Python functions: <tt class="docutils literal"><span class="pre">search</span></tt>, <tt class="docutils literal"><span class="pre">poll</span></tt>, and <tt class="docutils literal"><span class="pre">refine</span></tt>,
 which make calls to the MATLAB/Octave package.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="c"># main loop</span>
 <span class="k">while</span> <span class="n">nit</span> <span class="o">&lt;=</span> <span class="n">max_nit</span> <span class="ow">and</span> <span class="n">refine_ok</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">converged</span><span class="p">:</span>
@@ -294,8 +294,9 @@ Octave about the directory (<tt class="docutils literal"><span class="pre">SMF</
 </div>
 <div class="section" id="the-fenics-pde-solver">
 <h2>The FEniCS PDE solver<a class="headerlink" href="#the-fenics-pde-solver" title="Permalink to this headline">¶</a></h2>
-<p>The FEniCS solver first defines the inflow condition (class <tt class="docutils literal"><span class="pre">EssentialBC</span></tt>),
-the <tt class="docutils literal"><span class="pre">K</span></tt> coefficient in the PDEs, and the Dirichlet boundary:</p>
+<p>The <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/opt-flow/flow_problem.py">FEniCS solver</a> first
+defines the inflow condition (class <tt class="docutils literal"><span class="pre">EssentialBC</span></tt>), the <tt class="docutils literal"><span class="pre">K</span></tt>
+coefficient in the PDEs, and the Dirichlet boundary:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">EssentialBC</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">DOLFIN_EPS</span><span class="p">:</span>

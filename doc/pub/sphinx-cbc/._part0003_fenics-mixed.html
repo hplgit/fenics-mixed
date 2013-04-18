@@ -85,13 +85,6 @@ point. For long time series there can be a lot of evaluations of
 the field at this point, and class <tt class="docutils literal"><span class="pre">Probe</span></tt> will be much more
 efficient than the standard FEniCS point evaluation of fields (which
 performs a lot of searching to find the element containing the point).</p>
-<p>(<strong>hpl 1</strong>: I did some renaming of the interface: <tt class="docutils literal"><span class="pre">like_.py</span></tt>
-<tt class="docutils literal"><span class="pre">num_components</span></tt> instead
-of <tt class="docutils literal"><span class="pre">value_size</span></tt>, <tt class="docutils literal"><span class="pre">get_value</span></tt> instead of <tt class="docutils literal"><span class="pre">get_probe</span></tt>, <tt class="docutils literal"><span class="pre">num_eval_calls</span></tt>
-instead of <tt class="docutils literal"><span class="pre">number_of_evaluations</span></tt>, <tt class="docutils literal"><span class="pre">get_point</span></tt> instead of
-<tt class="docutils literal"><span class="pre">coordinates</span></tt>, and the argument <tt class="docutils literal"><span class="pre">i</span></tt> is now <tt class="docutils literal"><span class="pre">component</span></tt>. Check if
-the meaning is correct. The C++ .cpp file is not changed except
-for the function names.)</p>
 <div class="section" id="the-c-class">
 <h2>The C++ class<a class="headerlink" href="#the-c-class" title="Permalink to this headline">¶</a></h2>
 <p>Class <tt class="docutils literal"><span class="pre">Probe</span></tt> is a fairly short C++ code that makes use of various
@@ -138,11 +131,12 @@ rest of the class contains short convenience functions and data
 structures for help with fast function evaluations.
 Note that <tt class="docutils literal"><span class="pre">eval</span></tt> does not return any value, it just records the
 value.</p>
-<p>The reader may consult the corresponding <a class="reference external" href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/Probe/Probe.cpp">Probe.cpp</a> file for all implementation details. Obviously, this type
-of code requires familiarity with the DOLFIN classes, but looking at
-the DOLFIN code itself is a good starting point for learning about
-those classes, the associated implementation conventions, and other
-programming tools that the DOLFIN library makes use of.</p>
+<p>The reader may consult the corresponding <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/probe/Probe/Probe.cpp">Probe.cpp</a> file for all implementation
+details. Obviously, this type of code requires familiarity with the
+DOLFIN classes, but looking at the DOLFIN code itself is a good
+starting point for learning about those classes, the associated
+implementation conventions, and other programming tools that the
+DOLFIN library makes use of.</p>
 </div>
 <div class="section" id="compiling-and-linking-at-the-python-dolfin-level">
 <h2>Compiling and linking at the Python DOLFIN level<a class="headerlink" href="#compiling-and-linking-at-the-python-dolfin-level" title="Permalink to this headline">¶</a></h2>
@@ -296,7 +290,7 @@ need shared pointers for <tt class="docutils literal"><span class="pre">dolfin::
 whereas <tt class="docutils literal"><span class="pre">include</span></tt> makes SWIG generate wrappers for the code included,
 the <tt class="docutils literal"><span class="pre">import</span></tt> directive simply provides SWIG with the necessary type
 information.</p>
-<p>We refer to the complete file <a class="reference external" href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/instant_test_probe.py">instant_test_probe.py</a> for how all of the
+<p>We refer to the complete file <a class="reference external" href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/probe/instant_test_probe.py">instant_test_probe.py</a> for how all of the
 information about is put together and executed in order to build the
 extension module using plain Instant functionality.</p>
 </div>

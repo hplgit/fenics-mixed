@@ -112,7 +112,7 @@ The ``setIC()`` function sets the initial conditions. Futhermore,
 ``P1`` and ``P2`` are the pressures at the two outlets at time ``t``.
 The implementation details of class ``NSSolver`` are not essential to
 this document, so we just refer the reader to the relatively short
-`NSSolver.py <https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/ns/NSSolver.py>`_ file.
+`NSSolver.py <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/NSSolver.py>`_ file.
 
 .. In the following, the most important knowledge about this file is
 
@@ -153,7 +153,7 @@ where
 .. math::
          Q = \int_{\partial \Omega_o} v \cdot n  ds 
 
-is the volume flux throught the boundary :math:`\partial\Omega_o`
+is the volume flux through the boundary :math:`\partial\Omega_o`
 (easily computed in the FEniCS
 solver). The parameters :math:`C` and :math:`R_d` must be prescribed along with
 the initial value of :math:`P`.
@@ -176,7 +176,7 @@ The computational model for :math:`P` is implemented in FORTRAN. (Our
 specific model is a simple one; the problem setting is that another
 research group is continuously developing such models, and their software
 is in FORTRAN.) The solver in FORTRAN is implemented in a file
-``PMODEL.f`` with the content
+`PMODEL.f <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/f77/PMODEL.f>`_ with the content
 
 
 .. code-block:: fortran
@@ -232,8 +232,8 @@ the FORTRAN file to analyze and compile. Our convention is to
 compile F2PY modules in a subdirectory of the FORTRAN code,
 which explains why the file here has name ``../PMODEL.f``.
 
-A little test code can compare the FORTRAN ODE solver with a couple
-of manual lines in Python:
+A little `test code <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/f77/f2py/test.py>`_ can compare
+the FORTRAN ODE solver with a couple of manual lines in Python:
 
 
 .. code-block:: python
@@ -266,11 +266,11 @@ nose unit test. Running ``nosetests`` in that directory finds all
 ``test_*`` functions in all files and executes these functions.
 
 Instead of calling the FORTRAN function directly with many parameters,
-we wrap a class around the function such that the syntax of
-each call to compute :math:`P` becomes simpler. The idea is to let
-parameters that are constant through the fluid flow simulation
-be attributes in the class so that it is sufficient to provide the varying
-parameters in the call to ``PMODEL``. The Python code hopefully
+we wrap a class around the function such that the syntax of each call
+to compute :math:`P` becomes simpler. The idea is to let parameters that are
+constant through the fluid flow simulation be attributes in the class
+so that it is sufficient to provide the varying parameters in the call
+to ``PMODEL``. The `Python code <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/BCModel.py>`_ hopefully
 explains this idea clearly:
 
 
@@ -299,13 +299,14 @@ from time step to time step in the fluid solver.
 Coupling the Python FEniCS solver with the FORTRAN routine
 ----------------------------------------------------------
 
-It remains to make the final glue between the FEniCS solver and
-the FORTRAN subroutine. In the FEniCS solver, we import the
-``BCModel`` class and make a list of such objects, with one element
-for each outlet boundary where we want to use the ODE model. Then
-we invoke a time loop where new :math:`u` and :math:`p` are computed, then
-we compute the flux :math:`Q`, and finally we compute new outlet
-pressures by calling up each ODE solver in turn.
+It remains to make the final glue between the FEniCS solver and the
+FORTRAN subroutine. In the FEniCS solver, we import the ``BCModel``
+class and make a list of such objects, with one element for each
+outlet boundary where we want to use the ODE model. Then we invoke a
+time loop where new :math:`u` and :math:`p` are computed, then we compute the flux
+:math:`Q`, and finally we compute new outlet pressures by calling up each
+ODE solver in turn. All this code is collected in the file
+`CoupledSolver.py <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/CoupledSolver.py>`_:
 
 
 .. code-block:: python

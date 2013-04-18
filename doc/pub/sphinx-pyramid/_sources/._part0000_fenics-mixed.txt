@@ -67,4 +67,17 @@ see the gentle tutorial [Ref01]_, the paper
 [Ref02]_, or the more comprehensive book about the FEniCS
 project [Ref03]_.
 
+The present tutorial is found on GitHub:
+`<https://github.com/hplgit/fenics-mixed>`_. The following command
+downloads all the files:
+
+
+.. code-block:: console
+
+        Terminal> git clone https://github.com/hplgit/fenics-mixed.git
+
+The source code for the examples are located in the
+subdirectory `doc/src/src-fenics-mixed <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed>`_.
+The code examples are tested with FEniCS version 1.2.
+
 

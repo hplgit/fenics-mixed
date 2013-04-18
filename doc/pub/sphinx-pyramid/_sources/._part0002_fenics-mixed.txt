@@ -66,7 +66,7 @@ FEniCS flow solver with a MATLAB/Octave toolbox for solving
 optimization problems based on Kriging and the surrogate managment
 method.  Our task is to minimize the fluid velocity in a certain
 region by placing a porous media within the domain. We can choose the
-size, placement and permability of the porous media, but are not
+size, placement and permeability of the porous media, but are not
 allowed to affect the pressure drop from the inlet to the outlet
 much. Figures :ref:`fext:ex3:fig1` and :ref:`fext:ex3:fig2` show the flow
 velocity with two different placements of two different porous media.
@@ -160,15 +160,14 @@ Here, :math:`u` and :math:`p` are functions of :math:`K_0`, :math:`x_0`, and :ma
 
 The MATLAB/Octave code for the surrogate management and Kriging is
 based on `Dace <http://www2.imm.dtu.dk/~hbn/dace/>`_, but has been
-extended by Alison Marsden et. al. [Ref08]_ [Ref09]_ [Ref10]_
-to implement surrogate management.
-This algorithm
-consists of four main steps 1) search, 2) poll, 3) refine and 4) run
-simulations, with a flow chart appearing in Figure :ref:`fext:ex3:fig3`.
-The two first steps find new sample points :math:`K_0`,
-:math:`x_0`, and :math:`c`, while refine increases the resolution in the
-parameter space, and finally the fourth step runs simulations with the new
-sample points.
+extended by Alison Marsden et. al. cite{Marsden_et_al_2004,
+Marsden_et_al_2008, Marsden_et_al_2012} to implement surrogate
+management.  This algorithm consists of four main steps 1) search, 2)
+poll, 3) refine and 4) run simulations, with a flow chart appearing in
+Figure :ref:`fext:ex3:fig3`.  The two first steps find new sample points
+:math:`K_0`, :math:`x_0`, and :math:`c`, while refine increases the resolution in the
+parameter space, and finally the fourth step runs simulations with the
+new sample points.
 
 
 .. _fext:ex3:fig3:
@@ -176,11 +175,12 @@ sample points.
 .. figure:: fig-fenics-mixed/SMF.png
    :width: 600
 
-   *The flow chart of the surrogate managment method*
+   *The flow chart of the surrogate management method*
 
 
-The main algorithm is implemented in Python and listed below.
-It calls three key Python functions: ``search``, ``poll``, and ``refine``,
+The main algorithm is implemented in Python (file
+`opimize_flow_by_SMF.py <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/opt-flow/optimize_flow_by_SMF.py>`_) and listed below.  It
+calls three key Python functions: ``search``, ``poll``, and ``refine``,
 which make calls to the MATLAB/Octave package.
 
 
@@ -269,8 +269,9 @@ Octave about the directory (``SMF``) where these files can be found:
 The FEniCS PDE solver
 ---------------------
 
-The FEniCS solver first defines the inflow condition (class ``EssentialBC``),
-the ``K`` coefficient in the PDEs, and the Dirichlet boundary:
+The `FEniCS solver <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/opt-flow/flow_problem.py>`_ first
+defines the inflow condition (class ``EssentialBC``), the ``K``
+coefficient in the PDEs, and the Dirichlet boundary:
 
 
 .. code-block:: python

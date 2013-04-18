@@ -38,7 +38,8 @@ The superscript :math:`n` denotes the time level, and :math:`\Delta t` is the ti
 The solver for the parabolic problem is implemented in FEniCS, while
 the ODE solver is implemented in a homemade C++ code. We will glue
 these two different solvers together using Python. The C++ code consists
-basically of the class ``ODEFieldSolver`` declared in a file ``ODEFieldSolver.h``:
+basically of the class ``ODEFieldSolver`` declared in a file
+`ODEFieldSolver.h <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/ODEFieldSolver.h>`_:
 
 
 .. code-block:: c++
@@ -67,7 +68,9 @@ basically of the class ``ODEFieldSolver`` declared in a file ``ODEFieldSolver.h`
 The ``set_IC`` functions set the initial condition of the ODE system, and
 ``set_u`` provides the :math:`u` field (the "environment") to the ODE system.
 Note that there are two versions of ``set_IC`` and ``set_u``: one for
-a constant value one for spatial variations.
+a constant value one for spatial variations. We refer to
+the `ODEFieldSolver.cpp <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/ODEFieldSolver.cpp>`_
+file for implementational details.
 
 The mathematics behind the shown class is to have :math:`n` regional or pointwise
 values of :math:`u` and :math:`s`, and then solve :math:`s_t = g(s,u)` in each region
@@ -142,7 +145,7 @@ set of functions is
 
 These functions must make use of a global variable holding a
 ``ODEFieldSolver`` object and interact with this object as appropriate.
-The complete code of the C API then becomes
+The `complete code of the C API <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-cpp/capi2cpp.cpp>`_ then becomes
 
 
 .. code-block:: c++
@@ -398,24 +401,24 @@ Main program in Python
 ~~~~~~~~~~~~~~~~~~~~~~
 
 The Python code for calling the C++ functions in the ``ODEFieldSolvercpp``
-module can take the following form:`
+module can take the following form:
 
 
 .. code-block:: python
 
-        import ODEFieldSolvercpp as cpp
+        import ODEFieldSolvercpp as solver 
         import numpy
         
-        s0 = numpy.array([0, 1, 4], float)
-        u  = numpy.array([0, 1, 1], float)
-        n  = s0.size
-        s  = numpy.zeros(n)
+        s0 = numpy.array([0, 1, 4], float)  # ensure float elements!
+        u = numpy.array([0, 1, 1], float)
+        n = s0.size
+        s = numpy.zeros(n)
         
-        cpp.set_ic_and_dt(s0, dt=0.1)
+        solver.set_ic_and_dt(s0, dt=0.1)
         for n in range(1, 8):
-            cpp.set_u(u)
-            cpp.advance_one_timestep()
-            s = cpp.get_s(s)
+            solver.set_u(u)
+            solver.advance_one_timestep()
+            s = solver.get_s(s)
             print n, s
 
 
@@ -529,19 +532,19 @@ The pure C implementation goes as follows:
 By writing the corresponding FORTRAN 77 signatures, F2PY can generate
 a FORTRAN 90 module specification of the extension module, and this
 code can be compiled as explained above.
-We refer to the files in the `f2py-c <https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/ODEFieldSolver/f2py-c>`_
+We refer to the files in the `f2py-c <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-c>`_
 directory for details.
 
 
 Wrapping with SWIG
 ------------------
 
-Next, we emply the tool `SWIG <http://www.swig.org>`_ to wrap the C++ class
+Next, we employ the tool `SWIG <http://www.swig.org>`_ to wrap the C++ class
 directly and make it available as a Python class.
 SWIG is also used in DOLFIN and Instant, as demonstrated
 in the section :ref:`fext:dolfin:cpp`.
 Useful references on SWIG in a FEniCS context
-are [Ref02]_ [Ref11]_ [Ref12]_ [Ref13]_.
+are [Ref02]_ [Ref08]_ [Ref09]_ [Ref10]_.
 
 .. NOTE: when using mako (as we do) as preprocessor, % at the beginning
 
@@ -678,9 +681,6 @@ extracting data from the NumPy array object and storing them in ``n``
           $2 = (double*)pyarray->data;
 
 
-(**hpl 2**: Kent, I don't understand this ``typecheck`` stuff - can you explain
-a bit more??)
-
 Because we have overloaded the ``set_IC`` function, we also need to provide
 SWIG with a ``typecheck`` to determine which of the C++ functions to use.
 A suitable typecheck is:
@@ -796,18 +796,16 @@ To make SWIG generate the wrapper code, we run
 SWIG supports many languages and we therefore specify what languages
 we need wrapper code for by the ``-python`` and ``-c++`` flags. Further,
 ``-I`` is used to specify where SWIG should look for interface files
-(with extension ``.i``).  The C++ class files are located in
-the parent directory.
-SWIG will from this command generate two files
-``ODEFieldSolver.py`` and ``ODEFieldSolver_wrap.cxx``. The latter
-needs to be compiled and
-linked with the ``ODEFieldSolver`` code to form a shared library
-with name ``_ODEFieldSolver.so``. The ``ODEFieldSolver.py`` file
-is the module to use from Python and this is nothing but
-a Python class wrapper to ``_ODEFieldSolver.so`` module.
-Building the shared library is most conveniently done
-via a standard ``setup.py`` script. The following ``setup.py`` file provides
-an appropriate recipe for writing this kind of files:
+(with extension ``.i``).  The C++ class files are located in the parent
+directory.  SWIG will from this command generate two files
+``ODEFieldSolver.py`` and ``ODEFieldSolver_wrap.cxx``. The latter needs to
+be compiled and linked with the ``ODEFieldSolver`` code to form a shared
+library with name ``_ODEFieldSolver.so``. The ``ODEFieldSolver.py`` file
+is the module to use from Python and this is nothing but a Python
+class wrapper to ``_ODEFieldSolver.so`` module.  Building the shared
+library is most conveniently done via a standard ``setup.py``
+script. The following `setup.py <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/swig/setup.py>`_ file provides an
+appropriate recipe for writing this kind of files:
 
 
 .. code-block:: python
@@ -891,7 +889,7 @@ the ODE solver:
             <compute g>
             <call the ODE solver>
 
-A complete code goes as follows:
+A `complete code <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/swig/test_coupled_solver.py>`_ goes as follows:
 
 
 .. code-block:: python
@@ -988,7 +986,7 @@ Wrapping with Cython
 --------------------
 
 Cython can also be used to wrap C/C++ code.
-To this end we define the C++ class in a  ``.pyx`` file:
+To this end we define the C++ class in a  ``.pyx`` `file <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/cython/ODEFieldSolver.pyx>`_:
 
 
 .. code-block:: cython
@@ -1014,7 +1012,7 @@ To this end we define the C++ class in a  ``.pyx`` file:
 
 
 Here, we redefine the name to ``ODEFieldSolver_`` such that we may shadow the
-underlying class with the following Python class.
+underlying class with the following Python class:
 
 
 .. code-block:: cython
@@ -1075,7 +1073,7 @@ the C++ object's ``get_s`` function. At the end, we simply return ``out``.
                 return out
 
 
-Finally, the module is built as
+Finally, the module is built using a `setup.py <http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/cython/setup.py>`_ script for mixing Python, Cython, and C++ code:
 
 
 .. code-block:: python

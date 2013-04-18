@@ -241,6 +241,22 @@ see the gentle tutorial <a href="#langtangen2012fenics">[1]</a>, the paper
 project <a href="#Logg_et_al2012b">[3]</a>.
 
 <p>
+The present tutorial is found on GitHub:
+<a href="https://github.com/hplgit/fenics-mixed"><tt>https://github.com/hplgit/fenics-mixed</tt></a>. The following command
+downloads all the files:
+
+<p>
+
+
+<!-- code=bash (from !bc sys) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%">Terminal&gt; git clone https://github.com/hplgit/fenics-mixed.git
+</pre></div>
+<p>
+The source code for the examples are located in the
+subdirectory <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed">doc/src/src-fenics-mixed</a>.
+The code examples are tested with FEniCS version 1.2.
+
+<p>
 
 <!-- !split -->
 
@@ -360,7 +376,7 @@ The <code>setIC()</code> function sets the initial conditions. Futhermore,
 <code>P1</code> and <code>P2</code> are the pressures at the two outlets at time <code>t</code>.
 The implementation details of class <code>NSSolver</code> are not essential to
 this document, so we just refer the reader to the relatively short
-<a href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/ns/NSSolver.py"><tt>NSSolver.py</tt></a> file.
+<a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/NSSolver.py"><tt>NSSolver.py</tt></a> file.
 <!-- In the following, the most important knowledge about this file is -->
 <!-- that <code>u_</code> and <code>p_</code> contains the most recently computed velocity and -->
 <!-- pressure fields, respectively (the available solution). -->
@@ -394,7 +410,7 @@ where
 <p>
 $$ Q = \int_{\partial \Omega_o} v \cdot n  ds $$
 
-is the volume flux throught the boundary \( \partial\Omega_o \)
+is the volume flux through the boundary \( \partial\Omega_o \)
 (easily computed in the FEniCS
 solver). The parameters \( C \) and \( R_d \) must be prescribed along with
 the initial value of \( P \).
@@ -418,7 +434,7 @@ The computational model for \( P \) is implemented in FORTRAN. (Our
 specific model is a simple one; the problem setting is that another
 research group is continuously developing such models, and their software
 is in FORTRAN.) The solver in FORTRAN is implemented in a file
-<code>PMODEL.f</code> with the content
+<a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/f77/PMODEL.f"><tt>PMODEL.f</tt></a> with the content
 
 <p>
 
@@ -481,8 +497,8 @@ compile F2PY modules in a subdirectory of the FORTRAN code,
 which explains why the file here has name <code>../PMODEL.f</code>.
 
 <p>
-A little test code can compare the FORTRAN ODE solver with a couple
-of manual lines in Python:
+A little <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/f77/f2py/test.py">test code</a> can compare
+the FORTRAN ODE solver with a couple of manual lines in Python:
 
 <p>
 
@@ -518,11 +534,11 @@ nose unit test. Running <code>nosetests</code> in that directory finds all
 
 <p>
 Instead of calling the FORTRAN function directly with many parameters,
-we wrap a class around the function such that the syntax of
-each call to compute \( P \) becomes simpler. The idea is to let
-parameters that are constant through the fluid flow simulation
-be attributes in the class so that it is sufficient to provide the varying
-parameters in the call to <code>PMODEL</code>. The Python code hopefully
+we wrap a class around the function such that the syntax of each call
+to compute \( P \) becomes simpler. The idea is to let parameters that are
+constant through the fluid flow simulation be attributes in the class
+so that it is sufficient to provide the varying parameters in the call
+to <code>PMODEL</code>. The <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/BCModel.py">Python code</a> hopefully
 explains this idea clearly:
 
 <p>
@@ -557,13 +573,14 @@ from time step to time step in the fluid solver.
 <h3>Coupling the Python FEniCS solver with the FORTRAN routine  <a name="___sec4"></a></h3>
 
 <p>
-It remains to make the final glue between the FEniCS solver and
-the FORTRAN subroutine. In the FEniCS solver, we import the
-<code>BCModel</code> class and make a list of such objects, with one element
-for each outlet boundary where we want to use the ODE model. Then
-we invoke a time loop where new \( u \) and \( p \) are computed, then
-we compute the flux \( Q \), and finally we compute new outlet
-pressures by calling up each ODE solver in turn.
+It remains to make the final glue between the FEniCS solver and the
+FORTRAN subroutine. In the FEniCS solver, we import the <code>BCModel</code>
+class and make a list of such objects, with one element for each
+outlet boundary where we want to use the ODE model. Then we invoke a
+time loop where new \( u \) and \( p \) are computed, then we compute the flux
+\( Q \), and finally we compute new outlet pressures by calling up each
+ODE solver in turn. All this code is collected in the file
+<a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ns/CoupledSolver.py"><tt>CoupledSolver.py</tt></a>:
 
 <p>
 
@@ -686,7 +703,7 @@ FEniCS flow solver with a MATLAB/Octave toolbox for solving
 optimization problems based on Kriging and the surrogate managment
 method.  Our task is to minimize the fluid velocity in a certain
 region by placing a porous media within the domain. We can choose the
-size, placement and permability of the porous media, but are not
+size, placement and permeability of the porous media, but are not
 allowed to affect the pressure drop from the inlet to the outlet
 much. Figures <a href="#fext:ex3:fig1">3</a> and <a href="#fext:ex3:fig2">4</a> show the flow
 velocity with two different placements of two different porous media.
@@ -759,28 +776,28 @@ Here, \( u \) and \( p \) are functions of \( K_0 \), \( x_0 \), and \( c \), an
 <p>
 The MATLAB/Octave code for the surrogate management and Kriging is
 based on <a href="http://www2.imm.dtu.dk/~hbn/dace/">Dace</a>, but has been
-extended by Alison Marsden et. al. <a href="#Marsden_et_al_2004">[8]</a> <a href="#Marsden_et_al_2008">[9]</a> <a href="#Marsden_et_al_2012">[10]</a>
-to implement surrogate management.
-This algorithm
-consists of four main steps 1) search, 2) poll, 3) refine and 4) run
-simulations, with a flow chart appearing in Figure <a href="#fext:ex3:fig3">5</a>.
-The two first steps find new sample points \( K_0 \),
-\( x_0 \), and \( c \), while refine increases the resolution in the
-parameter space, and finally the fourth step runs simulations with the new
-sample points.
+extended by Alison Marsden et. al. cite{Marsden_et_al_2004,
+Marsden_et_al_2008, Marsden_et_al_2012} to implement surrogate
+management.  This algorithm consists of four main steps 1) search, 2)
+poll, 3) refine and 4) run simulations, with a flow chart appearing in
+Figure <a href="#fext:ex3:fig3">5</a>.  The two first steps find new sample points
+\( K_0 \), \( x_0 \), and \( c \), while refine increases the resolution in the
+parameter space, and finally the fourth step runs simulations with the
+new sample points.
 
 <p>
 
 <center> <!-- figure -->
 <hr class="figure">
-<center><p class="caption">Figure 5:  The flow chart of the surrogate managment method. <a name="fext:ex3:fig3"></a> </p></center>
+<center><p class="caption">Figure 5:  The flow chart of the surrogate management method. <a name="fext:ex3:fig3"></a> </p></center>
 <p><img src="fig-fenics-mixed/SMF.png" align="bottom" width=600></p>
 </center>
 
 <p>
 
-The main algorithm is implemented in Python and listed below.
-It calls three key Python functions: <code>search</code>, <code>poll</code>, and <code>refine</code>,
+The main algorithm is implemented in Python (file
+<a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/opt-flow/optimize_flow_by_SMF.py"><tt>opimize_flow_by_SMF.py</tt></a>) and listed below.  It
+calls three key Python functions: <code>search</code>, <code>poll</code>, and <code>refine</code>,
 which make calls to the MATLAB/Octave package.
 
 <p>
@@ -876,8 +893,9 @@ Octave about the directory (<code>SMF</code>) where these files can be found:
 <h3>The FEniCS PDE solver  <a name="___sec8"></a></h3>
 
 <p>
-The FEniCS solver first defines the inflow condition (class <code>EssentialBC</code>),
-the <code>K</code> coefficient in the PDEs, and the Dirichlet boundary:
+The <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/opt-flow/flow_problem.py">FEniCS solver</a> first
+defines the inflow condition (class <code>EssentialBC</code>), the <code>K</code>
+coefficient in the PDEs, and the Dirichlet boundary:
 
 <p>
 
@@ -1080,18 +1098,6 @@ performs a lot of searching to find the element containing the point).
 
 <p>
 
-<!-- begin inline comment -->
-[<b>hpl 1</b>: <em>I did some renaming of the interface: <code>like_.py</code>
-<code>num_components</code> instead
-of <code>value_size</code>, <code>get_value</code> instead of <code>get_probe</code>, <code>num_eval_calls</code>
-instead of <code>number_of_evaluations</code>, <code>get_point</code> instead of
-<code>coordinates</code>, and the argument <code>i</code> is now <code>component</code>. Check if
-the meaning is correct. The C++ .cpp file is not changed except
-for the function names.</em>]
-<!-- end inline comment -->
-
-
-<p>
 
 <h3>The C++ class  <a name="___sec12"></a></h3>
 
@@ -1147,11 +1153,12 @@ Note that <code>eval</code> does not return any value, it just records the
 value.
 
 <p>
-The reader may consult the corresponding <a href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/Probe/Probe.cpp"><tt>Probe.cpp</tt></a> file for all implementation details. Obviously, this type
-of code requires familiarity with the DOLFIN classes, but looking at
-the DOLFIN code itself is a good starting point for learning about
-those classes, the associated implementation conventions, and other
-programming tools that the DOLFIN library makes use of.
+The reader may consult the corresponding <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/probe/Probe/Probe.cpp"><tt>Probe.cpp</tt></a> file for all implementation
+details. Obviously, this type of code requires familiarity with the
+DOLFIN classes, but looking at the DOLFIN code itself is a good
+starting point for learning about those classes, the associated
+implementation conventions, and other programming tools that the
+DOLFIN library makes use of.
 
 <p>
 
@@ -1333,7 +1340,7 @@ the <code>import</code> directive simply provides SWIG with the necessary type
 information.
 
 <p>
-We refer to the complete file <a href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/probe/instant_test_probe.py"><tt>instant_test_probe.py</tt></a> for how all of the
+We refer to the complete file <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/probe/instant_test_probe.py"><tt>instant_test_probe.py</tt></a> for how all of the
 information about is put together and executed in order to build the
 extension module using plain Instant functionality.
 
@@ -1380,7 +1387,8 @@ The superscript \( n \) denotes the time level, and \( \Delta t \) is the time s
 The solver for the parabolic problem is implemented in FEniCS, while
 the ODE solver is implemented in a homemade C++ code. We will glue
 these two different solvers together using Python. The C++ code consists
-basically of the class <code>ODEFieldSolver</code> declared in a file <code>ODEFieldSolver.h</code>:
+basically of the class <code>ODEFieldSolver</code> declared in a file
+<a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/ODEFieldSolver.h"><tt>ODEFieldSolver.h</tt></a>:
 
 <p>
 
@@ -1411,7 +1419,9 @@ basically of the class <code>ODEFieldSolver</code> declared in a file <code>ODEF
 The <code>set_IC</code> functions set the initial condition of the ODE system, and
 <code>set_u</code> provides the \( u \) field (the "environment") to the ODE system.
 Note that there are two versions of <code>set_IC</code> and <code>set_u</code>: one for
-a constant value one for spatial variations.
+a constant value one for spatial variations. We refer to
+the <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/ODEFieldSolver.cpp"><tt>ODEFieldSolver.cpp</tt></a>
+file for implementational details.
 
 <p>
 The mathematics behind the shown class is to have \( n \) regional or pointwise
@@ -1496,7 +1506,7 @@ set of functions is
 
 These functions must make use of a global variable holding a
 <code>ODEFieldSolver</code> object and interact with this object as appropriate.
-The complete code of the C API then becomes
+The <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-cpp/capi2cpp.cpp">complete code of the C API</a> then becomes
 
 <p>
 
@@ -1781,25 +1791,25 @@ Return objects:
 
 <p>
 The Python code for calling the C++ functions in the <code>ODEFieldSolvercpp</code>
-module can take the following form:`
+module can take the following form:
 
 <p>
 
 
-<!-- code=python (from !bc pypro) typeset with pygments style "default" -->
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">ODEFieldSolvercpp</span> <span style="color: #008000; font-weight: bold">as</span> <span style="color: #0000FF; font-weight: bold">cpp</span>
+<!-- code=python (from !bc pycod) typeset with pygments style "default" -->
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">ODEFieldSolvercpp</span> <span style="color: #008000; font-weight: bold">as</span> <span style="color: #0000FF; font-weight: bold">solver</span> 
 <span style="color: #008000; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">numpy</span>
 
-s0 <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>array([<span style="color: #666666">0</span>, <span style="color: #666666">1</span>, <span style="color: #666666">4</span>], <span style="color: #008000">float</span>)
-u  <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>array([<span style="color: #666666">0</span>, <span style="color: #666666">1</span>, <span style="color: #666666">1</span>], <span style="color: #008000">float</span>)
-n  <span style="color: #666666">=</span> s0<span style="color: #666666">.</span>size
-s  <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>zeros(n)
+s0 <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>array([<span style="color: #666666">0</span>, <span style="color: #666666">1</span>, <span style="color: #666666">4</span>], <span style="color: #008000">float</span>)  <span style="color: #408080; font-style: italic"># ensure float elements!</span>
+u <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>array([<span style="color: #666666">0</span>, <span style="color: #666666">1</span>, <span style="color: #666666">1</span>], <span style="color: #008000">float</span>)
+n <span style="color: #666666">=</span> s0<span style="color: #666666">.</span>size
+s <span style="color: #666666">=</span> numpy<span style="color: #666666">.</span>zeros(n)
 
-cpp<span style="color: #666666">.</span>set_ic_and_dt(s0, dt<span style="color: #666666">=0.1</span>)
+solver<span style="color: #666666">.</span>set_ic_and_dt(s0, dt<span style="color: #666666">=0.1</span>)
 <span style="color: #008000; font-weight: bold">for</span> n <span style="color: #AA22FF; font-weight: bold">in</span> <span style="color: #008000">range</span>(<span style="color: #666666">1</span>, <span style="color: #666666">8</span>):
-    cpp<span style="color: #666666">.</span>set_u(u)
-    cpp<span style="color: #666666">.</span>advance_one_timestep()
-    s <span style="color: #666666">=</span> cpp<span style="color: #666666">.</span>get_s(s)
+    solver<span style="color: #666666">.</span>set_u(u)
+    solver<span style="color: #666666">.</span>advance_one_timestep()
+    s <span style="color: #666666">=</span> solver<span style="color: #666666">.</span>get_s(s)
     <span style="color: #008000; font-weight: bold">print</span> n, s
 </pre></div>
 <p>
@@ -1918,7 +1928,7 @@ The pure C implementation goes as follows:
 By writing the corresponding FORTRAN 77 signatures, F2PY can generate
 a FORTRAN 90 module specification of the extension module, and this
 code can be compiled as explained above.
-We refer to the files in the <a href="https://bitbucket.org/simula_cbc/fenics-ext/src/default/src-fenics-mixed/ODEFieldSolver/f2py-c">f2py-c</a>
+We refer to the files in the <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-c">f2py-c</a>
 directory for details.
 
 <p>
@@ -1927,12 +1937,12 @@ directory for details.
 <h3>Wrapping with SWIG  <a name="___sec22"></a></h3>
 
 <p>
-Next, we emply the tool <a href="http://www.swig.org">SWIG</a> to wrap the C++ class
+Next, we employ the tool <a href="http://www.swig.org">SWIG</a> to wrap the C++ class
 directly and make it available as a Python class.
 SWIG is also used in DOLFIN and Instant, as demonstrated
 in the section <a href="#fext:dolfin:cpp">How to interface a C++/DOLFIN code from Python</a>.
 Useful references on SWIG in a FEniCS context
-are <a href="#Logg_et_al_2010">[2]</a> <a href="#Logg_et_al_2012a">[11]</a> <a href="#Wilbers_et_al_2012">[12]</a> <a href="#Hake_et_al_2012">[13]</a>.
+are <a href="#Logg_et_al_2010">[2]</a> <a href="#Logg_et_al_2012a">[8]</a> <a href="#Wilbers_et_al_2012">[9]</a> <a href="#Hake_et_al_2012">[10]</a>.
 
 <p>
 <!-- NOTE: when using mako (as we do) as preprocessor, % at the beginning -->
@@ -2078,14 +2088,6 @@ extracting data from the NumPy array object and storing them in <code>n</code>
 </pre></div>
 <p>
 
-
-<!-- begin inline comment -->
-[<b>hpl 2</b>: <em>Kent, I don't understand this <code>typecheck</code> stuff - can you explain
-a bit more??</em>]
-<!-- end inline comment -->
-
-
-<p>
 Because we have overloaded the <code>set_IC</code> function, we also need to provide
 SWIG with a <code>typecheck</code> to determine which of the C++ functions to use.
 A suitable typecheck is:
@@ -2210,18 +2212,16 @@ To make SWIG generate the wrapper code, we run
 SWIG supports many languages and we therefore specify what languages
 we need wrapper code for by the <code>-python</code> and <code>-c++</code> flags. Further,
 <code>-I</code> is used to specify where SWIG should look for interface files
-(with extension <code>.i</code>).  The C++ class files are located in
-the parent directory.
-SWIG will from this command generate two files
-<code>ODEFieldSolver.py</code> and <code>ODEFieldSolver_wrap.cxx</code>. The latter
-needs to be compiled and
-linked with the <code>ODEFieldSolver</code> code to form a shared library
-with name <code>_ODEFieldSolver.so</code>. The <code>ODEFieldSolver.py</code> file
-is the module to use from Python and this is nothing but
-a Python class wrapper to <code>_ODEFieldSolver.so</code> module.
-Building the shared library is most conveniently done
-via a standard <code>setup.py</code> script. The following <code>setup.py</code> file provides
-an appropriate recipe for writing this kind of files:
+(with extension <code>.i</code>).  The C++ class files are located in the parent
+directory.  SWIG will from this command generate two files
+<code>ODEFieldSolver.py</code> and <code>ODEFieldSolver_wrap.cxx</code>. The latter needs to
+be compiled and linked with the <code>ODEFieldSolver</code> code to form a shared
+library with name <code>_ODEFieldSolver.so</code>. The <code>ODEFieldSolver.py</code> file
+is the module to use from Python and this is nothing but a Python
+class wrapper to <code>_ODEFieldSolver.so</code> module.  Building the shared
+library is most conveniently done via a standard <code>setup.py</code>
+script. The following <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/swig/setup.py"><tt>setup.py</tt></a> file provides an
+appropriate recipe for writing this kind of files:
 
 <p>
 
@@ -2312,7 +2312,7 @@ the ODE solver:
     &lt;call the ODE solver&gt;
 </pre></div>
 <p>
-A complete code goes as follows:
+A <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/swig/test_coupled_solver.py">complete code</a> goes as follows:
 
 <p>
 
@@ -2411,7 +2411,7 @@ plot <span style="color: #666666">=</span> <span style="color: #008000">True</sp
 
 <p>
 Cython can also be used to wrap C/C++ code.
-To this end we define the C++ class in a  <code>.pyx</code> file:
+To this end we define the C++ class in a  <code>.pyx</code> <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/cython/ODEFieldSolver.pyx">file</a>:
 
 <p>
 
@@ -2439,7 +2439,7 @@ To this end we define the C++ class in a  <code>.pyx</code> file:
 <p>
 
 Here, we redefine the name to <code>ODEFieldSolver_</code> such that we may shadow the
-underlying class with the following Python class.
+underlying class with the following Python class:
 
 <p>
 
@@ -2507,7 +2507,7 @@ the C++ object's <code>get_s</code> function. At the end, we simply return <code
 </pre></div>
 <p>
 
-Finally, the module is built as
+Finally, the module is built using a <a href="http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed/ODEFieldSolver/cython/setup.py"><tt>setup.py</tt></a> script for mixing Python, Cython, and C++ code:
 
 <p>
 
@@ -2584,31 +2584,13 @@ the Probe in Example 1.
     44(16),
     pp. 2826-2832,
     2011.</li>
- <li> <a name="Marsden_et_al_2004"></a> <b>A. L. Marsden, M. Wang, J. E. Dennis and P. Moin.</b>. 
-    Optimal Aeroacoustic Shape Design Using the Surrogate Management Framework,
-    <em>Optimization and Engineering</em>,
-    5(2),
-    pp. 235-262,
-    2004.</li>
- <li> <a name="Marsden_et_al_2008"></a> <b>A. L. Marsden, J. A. Feinstein and C. A. Taylor</b>. 
-    A Computational Framework for Derivative-Free Optimization of Cardiovascular Geometries,
-    <em>Computer Methods in Applied Mechanics and Engineering</em>,
-    197(21),
-    pp. 1890-1905,
-    2008.</li>
-<li> <a name="Marsden_et_al_2012"></a> <b>A. Marsden, W. Yang, J. Feinstein, S. Shadden and I. E. Vignon-Clementel</b>. 
-    Optimization of a Y-Graft Design for Improved Hepatic Flow Distribution in the Fontan Circulation,
-    <em>Annals of Biomedical Engineering</em>,
-    1,
-    pp. 508,
-    2012.</li>
-<li> <a name="Logg_et_al_2012a"></a> <b>A. Logg, G. N. Wells and J. E. Hake</b>. 
+ <li> <a name="Logg_et_al_2012a"></a> <b>A. Logg, G. N. Wells and J. E. Hake</b>. 
     DOLFIN: a C++/Python Finite Element Library,
     <em>Automated Solution of Differential Equations by the Finite Element Method</em>,
     edited by <b>A. Logg, K.-A. Mardal and G. Wells</b>,
     Springer,
     2012.</li>
-<li> <a name="Wilbers_et_al_2012"></a> <b>I. Wilbers, K.-A. Mardal and M. S. Alnes</b>. 
+ <li> <a name="Wilbers_et_al_2012"></a> <b>I. Wilbers, K.-A. Mardal and M. S. Alnes</b>. 
     Instant: Just-in-Time Compilation of C/C++ in Python,
     <em>Automated Solution of Differential Equations by the Finite Element Method</em>,
     edited by <b>A. Logg, K.-A. Mardal and G. Wells</b>,

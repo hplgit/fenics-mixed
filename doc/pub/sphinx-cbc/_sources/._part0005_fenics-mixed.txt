@@ -51,41 +51,20 @@ References
    2011.
 
 .. [Ref08]
-   **A. L. Marsden, M. Wang, J. E. Dennis and P. Moin.**. Optimal Aeroacoustic Shape Design Using the Surrogate Management Framework,
-   *Optimization and Engineering*,
-   5(2),
-   pp. 235-262,
-   2004.
-
-.. [Ref09]
-   **A. L. Marsden, J. A. Feinstein and C. A. Taylor**. A Computational Framework for Derivative-Free Optimization of Cardiovascular Geometries,
-   *Computer Methods in Applied Mechanics and Engineering*,
-   197(21),
-   pp. 1890-1905,
-   2008.
-
-.. [Ref10]
-   **A. Marsden, W. Yang, J. Feinstein, S. Shadden and I. E. Vignon-Clementel**. Optimization of a Y-Graft Design for Improved Hepatic Flow Distribution in the Fontan Circulation,
-   *Annals of Biomedical Engineering*,
-   1,
-   pp. 508,
-   2012.
-
-.. [Ref11]
    **A. Logg, G. N. Wells and J. E. Hake**. DOLFIN: a C++/Python Finite Element Library,
    Automated Solution of Differential Equations by the Finite Element Method,
    edited by **A. Logg, K.-A. Mardal and G. Wells**,
    Springer,
    2012.
 
-.. [Ref12]
+.. [Ref09]
    **I. Wilbers, K.-A. Mardal and M. S. Alnes**. Instant: Just-in-Time Compilation of C/C++ in Python,
    Automated Solution of Differential Equations by the Finite Element Method,
    edited by **A. Logg, K.-A. Mardal and G. Wells**,
    Springer,
    2012.
 
-.. [Ref13]
+.. [Ref10]
    **J. E. Hake and K.-A. Mardal**. Lessons Learned in Mixed Language Programming,
    Automated Solution of Differential Equations by the Finite Element Method,
    edited by **A. Logg, K.-A. Mardal and G. Wells**,
