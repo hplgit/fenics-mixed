@@ -1,4 +1,4 @@
-fenics-mixed
-============
+### fenics-mixed
 
-Tutorial on how to combine FEniCS applications in Python with software written on other languages.
+[Tutorial](http://hplgit.github.io/fenics-mixed/doc/web/index.html) on how to combine FEniCS applications in Python with software written in other languages.
+
