@@ -2,7 +2,7 @@
 # Compile fenics-mixed.do.txt to HTML
 
 # plain HTML
-doconce format html fenics-mixed --html-style=bloodish #--pygments-html-linenos
+doconce format html fenics-mixed --html_style=bloodish #--pygments_html_linenos
 if [ $? -ne 0 ]; then echo 'could not compile'; exit; fi
 cp fenics-mixed.html ../pub
 cp -r fig-fenics-mixed ../pub/
@@ -27,7 +27,7 @@ cp -r sphinx-rootdir/sphinx-* ../pub/
 #firefox ../pub/sphinx/index.html &
 
 # Content
-#doconce format html index0 --html-style=bloodish
+#doconce format html index0 --html_style=bloodish
 #cp index0.html ../web/index.html
 #doconce sphinx_dir author="K.-A. Mardal and H. P. Langtangen" version=1.0 theme=fenics index0
 #python automake_sphinx.py
