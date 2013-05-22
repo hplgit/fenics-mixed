@@ -1,74 +1,12 @@
 .. !split
 
-References
-==========
-
-
-.. [Ref01]
-   **H. P. Langtangen**. A FEniCS Tutorial,
-   Automated Solution of Differential Equations by the Finite Element Method,
-   edited by **A. Logg, K.-A. Mardal and G. N. Wells**,
-   Springer,
-   2012.
-
-.. [Ref02]
-   **A. Logg and G. N. Wells**. DOLFIN: Automated Finite Element Computing,
-   *ACM Transactions on Mathematical Software*,
-   37(2),
-   2010.
-
-.. [Ref03]
-   **A. Logg, K.-A. Mardal and G. N. Wells**. Automated Solution of Differential Equations by the Finite Element Method,
-   Springer,
-   2012.
-
-.. [Ref04]
-   **J. Cebral, F. Mut, J. Weir and C. Putman**. Association of Hemodynamic Characteristics and Cerebral Aneurysm Rupture,
-   *American Journal of Neuroradiology*,
-   32(2),
-   pp. 264-270,
-   2011.
-
-.. [Ref05]
-   **J. Cebral, F. Mut, J. Weir and C. Putman**. Quantitative Characterization of the Hemodynamic Environment in Ruptured and Unruptured Brain Aneurysms,
-   *American Journal of Neuroradiology*,
-   32(1),
-   pp. 145-151,
-   2011.
-
-.. [Ref06]
-   **J. Xiang, S. K. Natarajan, M. Tremmel, D. Ma, J. Mocco, L. N. Hopkins, A. Siddiqui, E. I. Levy and H. Meng**. Hemodynamic-Morphologi Discriminants for Intracranial Aneurysm Rupture,
-   *Stroke*,
-   42,
-   pp. 144-152,
-   2011.
-
-.. [Ref07]
-   **K. Valen-Sendstad, K.-A. Mardal, M. Mortensen, B. A. P. Reif and H. P. Langtangen**. Direct Numerical Simulation of Transitional Flow in a Patient-Specific Intracranial Aneurysm,
-   *Journal of Biomechanics*,
-   44(16),
-   pp. 2826-2832,
-   2011.
-
-.. [Ref08]
-   **A. Logg, G. N. Wells and J. E. Hake**. DOLFIN: a C++/Python Finite Element Library,
-   Automated Solution of Differential Equations by the Finite Element Method,
-   edited by **A. Logg, K.-A. Mardal and G. Wells**,
-   Springer,
-   2012.
-
-.. [Ref09]
-   **I. Wilbers, K.-A. Mardal and M. S. Alnes**. Instant: Just-in-Time Compilation of C/C++ in Python,
-   Automated Solution of Differential Equations by the Finite Element Method,
-   edited by **A. Logg, K.-A. Mardal and G. Wells**,
-   Springer,
-   2012.
-
-.. [Ref10]
-   **J. E. Hake and K.-A. Mardal**. Lessons Learned in Mixed Language Programming,
-   Automated Solution of Differential Equations by the Finite Element Method,
-   edited by **A. Logg, K.-A. Mardal and G. Wells**,
-   Springer,
-   2012.
+Acknowledgment
+==============
+The first author want to thank Alison L. Marsden,
+Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
+Example 2 and 3, and for hosting the first author during the summer
+2012. Furthermore, Dag Sverre Seljebotn provided the code for the
+Cython wrapping in example 3. Mikael Mortensen provided the code for
+the Probe in Example 1.
 
 

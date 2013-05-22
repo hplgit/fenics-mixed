@@ -115,9 +115,9 @@ the most recently computed ``s`` values:
 Wrapping with F2PY
 ------------------
 
-The easiest way to interface FORTRAN, C, and C++ code is to use F2PY.
-Although F2PY was made for interfacing FORTRAN and most of the documentation
-is written with FORTRAN codes in mind, it is convenient to interface
+The easiest way to interface Fortran, C, and C++ code is to use F2PY.
+Although F2PY was made for interfacing Fortran and most of the documentation
+is written with Fortran codes in mind, it is convenient to interface
 C and C++ too. Or more precisely, F2PY can interface a pure C API, not
 C++ classes. The idea is then to construct a set of C functions on top
 of the C++ classes for accessing high-level operations using the those classes.
@@ -188,15 +188,15 @@ The `complete code of the C API <https://github.com/hplgit/fenics-mixed/blob/mas
         }
 
 
-Writing corresponding FORTRAN signatures
+Writing corresponding Fortran signatures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The nice thing about F2PY is that it can automatically make a Python
 interface to this C code, where NumPy arrays can be passed to the
 functions taking plain C arrays as arguments. For this to work, F2PY
-needs a specification of all the C functions in terms of FORTRAN 90
+needs a specification of all the C functions in terms of Fortran 90
 module syntax. However, F2PY can generate this module for us if we
-specify the function signatures in plain FORTRAN 77. This is done as
+specify the function signatures in plain Fortran 77. This is done as
 follows:
 
 
@@ -243,12 +243,12 @@ follows:
 
 For each C function we
 
-  * write the corresponding FORTRAN subroutine or function header,
+  * write the corresponding Fortran subroutine or function header,
 
   * insert an F2PY-specific comment (``CF2PY``) that tells that the
     function is in C: ``intent(c)``,
 
-  * specify that all variables are in C: ``intent(c)`` (FORTRAN treats
+  * specify that all variables are in C: ``intent(c)`` (Fortran treats
     all arguments as pointers, so the specification of C variables is
     strictly needed only for non-pointers),
 
@@ -261,8 +261,8 @@ The ``s`` argument is needed for the function to avoid
 reallocating the returned array every time the function is call. Instead
 we reuse the storage provied in the ``s`` array.
 
-If the FORTRAN 77 signatures are in a file ``signatures_capi2cpp.f`` we
-can get F2PY to generate a FORTRAN 90 module in a file ``ODEFieldSolvercpp.pyf``
+If the Fortran 77 signatures are in a file ``signatures_capi2cpp.f`` we
+can get F2PY to generate a Fortran 90 module in a file ``ODEFieldSolvercpp.pyf``
 by the command
 
 
@@ -314,14 +314,14 @@ The module typically looks like
         ! This file was auto-generated with f2py (version:2).
         ! See http://cens.ioc.ee/projects/f2pye/
 
-Those who are familiar with FORTRAN 90 modules can write such
-code by hand instead of first writing FORTRAN 77 headers and letting
+Those who are familiar with Fortran 90 modules can write such
+code by hand instead of first writing Fortran 77 headers and letting
 F2PY generate the module.
 
 Building the extension module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-With the aid of the FORTRAN 90 specification of the C functions, F2PY
+With the aid of the Fortran 90 specification of the C functions, F2PY
 can compile and link the extension module by a command like
 
 
@@ -529,8 +529,8 @@ The pure C implementation goes as follows:
         }
 
 
-By writing the corresponding FORTRAN 77 signatures, F2PY can generate
-a FORTRAN 90 module specification of the extension module, and this
+By writing the corresponding Fortran 77 signatures, F2PY can generate
+a Fortran 90 module specification of the extension module, and this
 code can be compiled as explained above.
 We refer to the files in the `f2py-c <https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-c>`_
 directory for details.
@@ -544,7 +544,7 @@ directly and make it available as a Python class.
 SWIG is also used in DOLFIN and Instant, as demonstrated
 in the section :ref:`fext:dolfin:cpp`.
 Useful references on SWIG in a FEniCS context
-are [Ref02]_ [Ref08]_ [Ref09]_ [Ref10]_.
+are [Ref02]_ [Ref09]_ [Ref10]_ [Ref11]_.
 
 .. NOTE: when using mako (as we do) as preprocessor, % at the beginning
 
@@ -1091,14 +1091,5 @@ Finally, the module is built using a `setup.py <https://github.com/hplgit/fenics
         )
 
 
-
-
-
-*Acknowledgment.* The first author want to thank Alison L. Marsden,
-Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
-Example 2 and 3, and for hosting the first author during the summer
-2012. Furthermore, Dag Sverre Seljebotn provided the code for the
-Cython wrapping in example 3. Mikael Mortensen provided the code for
-the Probe in Example 1.
 
 

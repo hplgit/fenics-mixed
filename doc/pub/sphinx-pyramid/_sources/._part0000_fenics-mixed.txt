@@ -3,11 +3,11 @@
 
 
 
-Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB
+Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB
 ==========================================================================
 
 :Author: Kent-Andre Mardal (kent-and at simula.no), Hans Petter Langtangen (hpl at simula.no)
-:Date: Apr 18, 2013
+:Date: May 22, 2013
 
 Introduction
 ============
@@ -20,7 +20,7 @@ other types of software.  This is usually easy and convenient if the
 FEniCS solver is coded in Python and the other software is either
 written in Python or easily accessible from Python.
 
-Coupling of FEniCS solvers in Python with MATLAB, FORTRAN, C, or C++
+Coupling of FEniCS solvers in Python with MATLAB, Fortran, C, or C++
 codes is possible, and in principle straightforward, but there might
 be a lot of technical details in practice. Many potential FEniCS users
 already have substantial pieces of software in other more traditional
@@ -32,7 +32,7 @@ is seldom the focal point of a computational scientist.
 We have therefore written this document to provide some examples and
 associated detailed explanations on how the mentioned tools can be used to
 combine FEniCS solvers in Python with other code written in MATLAB,
-FORTRAN, C, and C++. We believe that even if the examples are
+Fortran, C, and C++. We believe that even if the examples are
 short and limited in complexity, the couplings are technically
 complicated and broad enough to cover a range of different situations
 in the real world.
@@ -42,7 +42,7 @@ case studies:
 
  1. *A flow problem with boundary conditions depending on a system of
     ODEs*. The ODE solver and the ODE system are implemented in
-    FORTRAN, and we use F2PY to generate wrapper code such that
+    Fortran, and we use F2PY to generate wrapper code such that
     the ODE solver is accessible from Python.
 
  2. *A flow optimization problem*. The goal here is to compute the

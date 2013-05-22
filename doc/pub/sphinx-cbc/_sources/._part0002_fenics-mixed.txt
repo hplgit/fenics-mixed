@@ -255,9 +255,9 @@ The search step is implemented as follows:
         	no_searches += 1
             return next_pts
 
-Here, ``dsmerge`` and ``krig_min_find_MADS_kent`` are functions
+Here, ``dsmerge`` and ``krig_min_find_MADS_oct`` are functions
 available in the MATLAB/Octave
-files ``dsmerge.m`` and ``krig_min_find_MADS_kent.m``. We need to notify
+files ``dsmerge.m`` and ``krig_min_find_MADS_oct.m``. We need to notify
 Octave about the directory (``SMF``) where these files can be found:
 
 

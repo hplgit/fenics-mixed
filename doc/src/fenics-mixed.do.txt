@@ -1179,7 +1179,7 @@ Finally, the module is built using a "`setup.py`": "${src_path}/ODEFieldSolver/c
 
 
 !split
-======== Acknowledgment ========
+======= Acknowledgment =======
 The first author want to thank Alison L. Marsden,
 Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
 Example 2 and 3, and for hosting the first author during the summer
@@ -1191,7 +1191,7 @@ the Probe in Example 1.
 !split
 ======= References =======
 
-BIBFILE: publish_references.pub
+BIBFILE: .publish_references.pub
 
 
 

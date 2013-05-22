@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     
-    <title>How to interface a C++/DOLFIN code from Python &mdash; Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+    <title>How to interface a C++/DOLFIN code from Python &mdash; Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -59,7 +59,7 @@
     });
   });
 </script>
-    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
+    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB" href="index.html" />
     <link rel="next" title="FEniCS solver coupled with ODE solver in C++" href="._part0004_fenics-mixed.html" />
     <link rel="prev" title="FEniCS solver with optimization in Octave" href="._part0002_fenics-mixed.html" /> 
   </head>
@@ -72,7 +72,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a>
+          <a class="brand" href="index.html">Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</a>
           <div class="nav-collapse collapse">
             <ul class="nav pull-right">
               
@@ -236,10 +236,6 @@ reads</p>
 
 <span class="k">namespace</span> <span class="n">dolfin</span>
 <span class="p">{</span>
-  <span class="k">class</span> <span class="nc">Function</span><span class="p">;</span>
-  <span class="k">class</span> <span class="nc">FunctionSpace</span><span class="p">;</span>
-  <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">Array</span><span class="p">;</span>
-
   <span class="k">class</span> <span class="nc">Probe</span>
   <span class="p">{</span>
   <span class="nl">public:</span>
@@ -322,7 +318,8 @@ for fast evaluations at some point <tt class="docutils literal"><span class="pre
 <span class="n">u0</span> <span class="o">=</span> <span class="n">interpolate</span><span class="p">(</span><span class="n">Expression</span><span class="p">(</span><span class="s">&#39;x[0]&#39;</span><span class="p">),</span> <span class="n">V</span><span class="p">)</span>
 <span class="c"># Fast evaluation of U0 at x:</span>
 <span class="n">probe</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">u0</span><span class="p">)</span>
-<span class="k">print</span> <span class="s">&quot;The value at &quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s">&quot; is &quot;</span><span class="p">,</span> <span class="n">probe</span><span class="o">.</span><span class="n">get_probe</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;The number of probes is &quot;</span><span class="p">,</span> <span class="n">probe</span><span class="o">.</span><span class="n">number_of_eval_calls</span><span class="p">()</span>
+<span class="k">print</span> <span class="s">&quot;The value at &quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s">&quot; is &quot;</span><span class="p">,</span> <span class="n">probe</span><span class="o">.</span><span class="n">get_values</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To summarize, with <tt class="docutils literal"><span class="pre">compile_extension_module</span></tt> the compilation and
@@ -422,7 +419,7 @@ declarations look like the following string:</p>
 </pre></div>
 </div>
 <p>The <tt class="docutils literal"><span class="pre">init</span></tt> part containing <tt class="docutils literal"><span class="pre">import_array</span></tt> is always needed when NumPy
-arrays are involved.  Thereafter, we include various SWIG interface
+<a class="reference internal" href="fenics-mixed.html#ref08">[Ref08]</a> arrays are involved.  Thereafter, we include various SWIG interface
 files (ending in <tt class="docutils literal"><span class="pre">.i</span></tt>) that we need in DOLFIN-related code. We also
 need shared pointers for <tt class="docutils literal"><span class="pre">dolfin::Function</span></tt> and
 <tt class="docutils literal"><span class="pre">dolfin::FunctionSpace</span></tt>. In addition we need header files for
@@ -456,7 +453,7 @@ extension module using plain Instant functionality.</p>
         <li><a href="genindex.html" title="General Index" >index</a></li>
         <li><a href="._part0004_fenics-mixed.html" title="FEniCS solver coupled with ODE solver in C++" >next</a></li>
         <li><a href="._part0002_fenics-mixed.html" title="FEniCS solver with optimization in Octave" >previous</a></li>
-        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a></li> 
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</a></li> 
       
     </ul>
   </div>

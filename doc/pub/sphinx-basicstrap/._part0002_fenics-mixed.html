@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     
-    <title>FEniCS solver with optimization in Octave &mdash; Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+    <title>FEniCS solver with optimization in Octave &mdash; Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -59,9 +59,9 @@
     });
   });
 </script>
-    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
+    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB" href="index.html" />
     <link rel="next" title="How to interface a C++/DOLFIN code from Python" href="._part0003_fenics-mixed.html" />
-    <link rel="prev" title="FEniCS solver with boundary conditions in FORTRAN" href="._part0001_fenics-mixed.html" /> 
+    <link rel="prev" title="FEniCS solver with boundary conditions in Fortran" href="._part0001_fenics-mixed.html" /> 
   </head>
   <body>
     <div class="navbar navbar-fixed-top ">
@@ -72,7 +72,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a>
+          <a class="brand" href="index.html">Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</a>
           <div class="nav-collapse collapse">
             <ul class="nav pull-right">
               
@@ -83,7 +83,7 @@
                 <a href="._part0003_fenics-mixed.html" title="How to interface a C++/DOLFIN code from Python" accesskey="N">next</a>
                 </li>
                 <li>
-                <a href="._part0001_fenics-mixed.html" title="FEniCS solver with boundary conditions in FORTRAN" accesskey="P">previous</a>
+                <a href="._part0001_fenics-mixed.html" title="FEniCS solver with boundary conditions in Fortran" accesskey="P">previous</a>
                 </li>
               
             </ul>
@@ -117,7 +117,7 @@
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="._part0001_fenics-mixed.html"
-                        title="previous chapter">FEniCS solver with boundary conditions in FORTRAN</a></p>
+                        title="previous chapter">FEniCS solver with boundary conditions in Fortran</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="._part0003_fenics-mixed.html"
                         title="next chapter">How to interface a C++/DOLFIN code from Python</a></p>
@@ -164,7 +164,7 @@
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="._part0001_fenics-mixed.html"
-                        title="previous chapter">FEniCS solver with boundary conditions in FORTRAN</a></p>
+                        title="previous chapter">FEniCS solver with boundary conditions in Fortran</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="._part0003_fenics-mixed.html"
                         title="next chapter">How to interface a C++/DOLFIN code from Python</a></p>
@@ -251,7 +251,7 @@ method.  Our task is to minimize the fluid velocity in a certain
 region by placing a porous media within the domain. We can choose the
 size, placement and permeability of the porous media, but are not
 allowed to affect the pressure drop from the inlet to the outlet
-much. Figures <a class="reference internal" href="#fext-ex3-fig1"><em>Velocity problem around a porous media with </em></a> and <a class="reference internal" href="#fext-ex3-fig2"><em>Velocity problem around a porous media with near optimal values: </em></a> show the flow
+much. Figures <a class="reference internal" href="fenics-mixed.html#fext-ex3-fig1"><em>Velocity problem around a porous media with </em></a> and <a class="reference internal" href="fenics-mixed.html#fext-ex3-fig2"><em>Velocity problem around a porous media with near optimal values: </em></a> show the flow
 velocity with two different placements of two different porous media.</p>
 <div class="figure" id="fext-ex3-fig1">
 <img alt="_images/opt_flow.png" src="_images/opt_flow.png" style="width: 500px;" />
@@ -299,7 +299,7 @@ extended by Alison Marsden et. al. cite{Marsden_et_al_2004,
 Marsden_et_al_2008, Marsden_et_al_2012} to implement surrogate
 management.  This algorithm consists of four main steps 1) search, 2)
 poll, 3) refine and 4) run simulations, with a flow chart appearing in
-Figure <a class="reference internal" href="#fext-ex3-fig3"><em>The flow chart of the surrogate management method</em></a>.  The two first steps find new sample points
+Figure <a class="reference internal" href="fenics-mixed.html#fext-ex3-fig3"><em>The flow chart of the surrogate management method</em></a>.  The two first steps find new sample points
 <span class="math">\(K_0\)</span>, <span class="math">\(x_0\)</span>, and <span class="math">\(c\)</span>, while refine increases the resolution in the
 parameter space, and finally the fourth step runs simulations with the
 new sample points.</p>
@@ -377,9 +377,9 @@ The search step is implemented as follows:</p>
     <span class="k">return</span> <span class="n">next_pts</span>
 </pre></div>
 </div>
-<p>Here, <tt class="docutils literal"><span class="pre">dsmerge</span></tt> and <tt class="docutils literal"><span class="pre">krig_min_find_MADS_kent</span></tt> are functions
+<p>Here, <tt class="docutils literal"><span class="pre">dsmerge</span></tt> and <tt class="docutils literal"><span class="pre">krig_min_find_MADS_oct</span></tt> are functions
 available in the MATLAB/Octave
-files <tt class="docutils literal"><span class="pre">dsmerge.m</span></tt> and <tt class="docutils literal"><span class="pre">krig_min_find_MADS_kent.m</span></tt>. We need to notify
+files <tt class="docutils literal"><span class="pre">dsmerge.m</span></tt> and <tt class="docutils literal"><span class="pre">krig_min_find_MADS_oct.m</span></tt>. We need to notify
 Octave about the directory (<tt class="docutils literal"><span class="pre">SMF</span></tt>) where these files can be found:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pytave</span><span class="o">.</span><span class="n">feval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&quot;addpath&quot;</span><span class="p">,</span> <span class="s">&quot;SMF&quot;</span><span class="p">)</span>
 </pre></div>
@@ -541,8 +541,8 @@ not have MATLAB installed and were unable to test these packages.</p>
       
         <li><a href="genindex.html" title="General Index" >index</a></li>
         <li><a href="._part0003_fenics-mixed.html" title="How to interface a C++/DOLFIN code from Python" >next</a></li>
-        <li><a href="._part0001_fenics-mixed.html" title="FEniCS solver with boundary conditions in FORTRAN" >previous</a></li>
-        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a></li> 
+        <li><a href="._part0001_fenics-mixed.html" title="FEniCS solver with boundary conditions in Fortran" >previous</a></li>
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</a></li> 
       
     </ul>
   </div>

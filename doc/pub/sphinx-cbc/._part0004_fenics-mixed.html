@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FEniCS solver coupled with ODE solver in C++ &mdash; Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+    <title>FEniCS solver coupled with ODE solver in C++ &mdash; Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,8 +26,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
-    <link rel="next" title="References" href="._part0005_fenics-mixed.html" />
+    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB" href="index.html" />
+    <link rel="next" title="Acknowledgment" href="._part0005_fenics-mixed.html" />
     <link rel="prev" title="How to interface a C++/DOLFIN code from Python" href="._part0003_fenics-mixed.html" /> 
   </head>
   <body>
@@ -38,12 +38,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="._part0005_fenics-mixed.html" title="References"
+          <a href="._part0005_fenics-mixed.html" title="Acknowledgment"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="._part0003_fenics-mixed.html" title="How to interface a C++/DOLFIN code from Python"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a> &raquo;</li> 
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -140,9 +140,9 @@ the most recently computed <tt class="docutils literal"><span class="pre">s</spa
 </div>
 <div class="section" id="wrapping-with-f2py">
 <h2>Wrapping with F2PY<a class="headerlink" href="#wrapping-with-f2py" title="Permalink to this headline">¶</a></h2>
-<p>The easiest way to interface FORTRAN, C, and C++ code is to use F2PY.
-Although F2PY was made for interfacing FORTRAN and most of the documentation
-is written with FORTRAN codes in mind, it is convenient to interface
+<p>The easiest way to interface Fortran, C, and C++ code is to use F2PY.
+Although F2PY was made for interfacing Fortran and most of the documentation
+is written with Fortran codes in mind, it is convenient to interface
 C and C++ too. Or more precisely, F2PY can interface a pure C API, not
 C++ classes. The idea is then to construct a set of C functions on top
 of the C++ classes for accessing high-level operations using the those classes.
@@ -208,13 +208,13 @@ The <a class="reference external" href="https://github.com/hplgit/fenics-mixed/b
 </div>
 </div>
 <div class="section" id="writing-corresponding-fortran-signatures">
-<h3>Writing corresponding FORTRAN signatures<a class="headerlink" href="#writing-corresponding-fortran-signatures" title="Permalink to this headline">¶</a></h3>
+<h3>Writing corresponding Fortran signatures<a class="headerlink" href="#writing-corresponding-fortran-signatures" title="Permalink to this headline">¶</a></h3>
 <p>The nice thing about F2PY is that it can automatically make a Python
 interface to this C code, where NumPy arrays can be passed to the
 functions taking plain C arrays as arguments. For this to work, F2PY
-needs a specification of all the C functions in terms of FORTRAN 90
+needs a specification of all the C functions in terms of Fortran 90
 module syntax. However, F2PY can generate this module for us if we
-specify the function signatures in plain FORTRAN 77. This is done as
+specify the function signatures in plain Fortran 77. This is done as
 follows:</p>
 <div class="highlight-fortran"><div class="highlight"><pre>      <span class="k">subroutine </span><span class="nv">set_ic_and_dt</span><span class="p">(</span><span class="nv">n</span><span class="p">,</span> <span class="nv">s0</span><span class="p">,</span> <span class="nv">dt</span><span class="p">)</span>
 <span class="nv">Cf2py</span> <span class="k">intent</span><span class="p">(</span><span class="nv">c</span><span class="p">)</span> <span class="nv">set_ic_and_dt</span>
@@ -258,10 +258,10 @@ follows:</p>
 <p>For each C function we</p>
 <blockquote>
 <div><ul class="simple">
-<li>write the corresponding FORTRAN subroutine or function header,</li>
+<li>write the corresponding Fortran subroutine or function header,</li>
 <li>insert an F2PY-specific comment (<tt class="docutils literal"><span class="pre">CF2PY</span></tt>) that tells that the
 function is in C: <tt class="docutils literal"><span class="pre">intent(c)</span></tt>,</li>
-<li>specify that all variables are in C: <tt class="docutils literal"><span class="pre">intent(c)</span></tt> (FORTRAN treats
+<li>specify that all variables are in C: <tt class="docutils literal"><span class="pre">intent(c)</span></tt> (Fortran treats
 all arguments as pointers, so the specification of C variables is
 strictly needed only for non-pointers),</li>
 <li>specify if we want the Python interface to return one or more output
@@ -273,8 +273,8 @@ meaning that we in Python can call this function as <tt class="docutils literal"
 The <tt class="docutils literal"><span class="pre">s</span></tt> argument is needed for the function to avoid
 reallocating the returned array every time the function is call. Instead
 we reuse the storage provied in the <tt class="docutils literal"><span class="pre">s</span></tt> array.</p>
-<p>If the FORTRAN 77 signatures are in a file <tt class="docutils literal"><span class="pre">signatures_capi2cpp.f</span></tt> we
-can get F2PY to generate a FORTRAN 90 module in a file <tt class="docutils literal"><span class="pre">ODEFieldSolvercpp.pyf</span></tt>
+<p>If the Fortran 77 signatures are in a file <tt class="docutils literal"><span class="pre">signatures_capi2cpp.f</span></tt> we
+can get F2PY to generate a Fortran 90 module in a file <tt class="docutils literal"><span class="pre">ODEFieldSolvercpp.pyf</span></tt>
 by the command</p>
 <div class="highlight-console"><div class="highlight"><pre><span class="go">Terminal&gt; F2PY -m ODEFieldSolvercpp -h ODEFieldSolvercpp.pyf \</span>
 <span class="go">          --overwrite-signature signatures_capi2cpp.f</span>
@@ -320,13 +320,13 @@ the Python interfaces to the C API.</p>
 <span class="c">! See http://cens.ioc.ee/projects/f2pye/</span>
 </pre></div>
 </div>
-<p>Those who are familiar with FORTRAN 90 modules can write such
-code by hand instead of first writing FORTRAN 77 headers and letting
+<p>Those who are familiar with Fortran 90 modules can write such
+code by hand instead of first writing Fortran 77 headers and letting
 F2PY generate the module.</p>
 </div>
 <div class="section" id="building-the-extension-module">
 <h3>Building the extension module<a class="headerlink" href="#building-the-extension-module" title="Permalink to this headline">¶</a></h3>
-<p>With the aid of the FORTRAN 90 specification of the C functions, F2PY
+<p>With the aid of the Fortran 90 specification of the C functions, F2PY
 can compile and link the extension module by a command like</p>
 <div class="highlight-console"><div class="highlight"><pre><span class="go">Terminal&gt; F2PY -c --fcompiler=gfortran -I.. --build-dir tmp1 \</span>
 <span class="go">         -DF2PY_REPORT_ON_ARRAY_COPY=1 \</span>
@@ -518,8 +518,8 @@ the C++ code.)</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>By writing the corresponding FORTRAN 77 signatures, F2PY can generate
-a FORTRAN 90 module specification of the extension module, and this
+<p>By writing the corresponding Fortran 77 signatures, F2PY can generate
+a Fortran 90 module specification of the extension module, and this
 code can be compiled as explained above.
 We refer to the files in the <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ODEFieldSolver/f2py-c">f2py-c</a>
 directory for details.</p>
@@ -529,9 +529,9 @@ directory for details.</p>
 <p>Next, we employ the tool <a class="reference external" href="http://www.swig.org">SWIG</a> to wrap the C++ class
 directly and make it available as a Python class.
 SWIG is also used in DOLFIN and Instant, as demonstrated
-in the section <a class="reference internal" href="._part0003_fenics-mixed.html#fext-dolfin-cpp"><em>How to interface a C++/DOLFIN code from Python</em></a>.
+in the section <a class="reference internal" href="fenics-mixed.html#fext-dolfin-cpp"><em>How to interface a C++/DOLFIN code from Python</em></a>.
 Useful references on SWIG in a FEniCS context
-are <a class="reference internal" href="._part0005_fenics-mixed.html#ref02">[Ref02]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref08">[Ref08]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref09">[Ref09]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref10">[Ref10]</a>.</p>
+are <a class="reference internal" href="fenics-mixed.html#ref02">[Ref02]</a> <a class="reference internal" href="fenics-mixed.html#ref09">[Ref09]</a> <a class="reference internal" href="fenics-mixed.html#ref10">[Ref10]</a> <a class="reference internal" href="fenics-mixed.html#ref11">[Ref11]</a>.</p>
 <p>To use SWIG, you must first write an <em>interface file</em> (ending in <tt class="docutils literal"><span class="pre">.i</span></tt>)
 that tells SWIG about the parts of the C++ code you want to access
 from Python. The next step is to run SWIG to generate (a lot of) wrapper
@@ -987,12 +987,6 @@ the C++ object&#8217;s <tt class="docutils literal"><span class="pre">get_s</spa
 <span class="p">)</span>
 </pre></div>
 </div>
-<p><em>Acknowledgment.</em> The first author want to thank Alison L. Marsden,
-Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
-Example 2 and 3, and for hosting the first author during the summer
-2012. Furthermore, Dag Sverre Seljebotn provided the code for the
-Cython wrapping in example 3. Mikael Mortensen provided the code for
-the Probe in Example 1.</p>
 </div>
 </div>
 
@@ -1010,7 +1004,7 @@ the Probe in Example 1.</p>
 <li><a class="reference internal" href="#">FEniCS solver coupled with ODE solver in C++</a><ul>
 <li><a class="reference internal" href="#wrapping-with-f2py">Wrapping with F2PY</a><ul>
 <li><a class="reference internal" href="#c-api-to-c-code">C API to C++ code</a></li>
-<li><a class="reference internal" href="#writing-corresponding-fortran-signatures">Writing corresponding FORTRAN signatures</a></li>
+<li><a class="reference internal" href="#writing-corresponding-fortran-signatures">Writing corresponding Fortran signatures</a></li>
 <li><a class="reference internal" href="#building-the-extension-module">Building the extension module</a></li>
 <li><a class="reference internal" href="#main-program-in-python">Main program in Python</a></li>
 </ul>
@@ -1027,7 +1021,7 @@ the Probe in Example 1.</p>
                         title="previous chapter">How to interface a C++/DOLFIN code from Python</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="._part0005_fenics-mixed.html"
-                        title="next chapter">References</a></p>
+                        title="next chapter">Acknowledgment</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/._part0004_fenics-mixed.txt"
@@ -1057,12 +1051,12 @@ the Probe in Example 1.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="._part0005_fenics-mixed.html" title="References"
+          <a href="._part0005_fenics-mixed.html" title="Acknowledgment"
              >next</a> |</li>
         <li class="right" >
           <a href="._part0003_fenics-mixed.html" title="How to interface a C++/DOLFIN code from Python"
              >previous</a> |</li>
-        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a> &raquo;</li> 
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</a> &raquo;</li> 
       </ul>
     </div>
 <div class="wrapper">

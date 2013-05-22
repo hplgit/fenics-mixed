@@ -55,10 +55,6 @@ reads
         
         namespace dolfin
         {
-          class Function;
-          class FunctionSpace;
-          template<typename T> class Array;
-        
           class Probe
           {
           public:
@@ -150,7 +146,8 @@ for fast evaluations at some point ``x``:
         u0 = interpolate(Expression('x[0]'), V)
         # Fast evaluation of U0 at x:
         probe.eval(u0)
-        print "The value at ", x, " is ", probe.get_probe(0)
+        print "The number of probes is ", probe.number_of_eval_calls()
+        print "The value at ", x, " is ", probe.get_values(0)
 
 To summarize, with ``compile_extension_module`` the compilation and
 linking of C++ and DOLFIN code to make accessible in Python is a matter
@@ -255,7 +252,7 @@ declarations look like the following string:
 
 
 The ``init`` part containing ``import_array`` is always needed when NumPy
-arrays are involved.  Thereafter, we include various SWIG interface
+[Ref08]_ arrays are involved.  Thereafter, we include various SWIG interface
 files (ending in ``.i``) that we need in DOLFIN-related code. We also
 need shared pointers for ``dolfin::Function`` and
 ``dolfin::FunctionSpace``. In addition we need header files for

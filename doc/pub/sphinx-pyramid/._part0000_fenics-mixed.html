@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB &mdash; Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+    <title>Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB &mdash; Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,9 +25,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
-    <link rel="next" title="FEniCS solver with boundary conditions in FORTRAN" href="._part0001_fenics-mixed.html" />
-    <link rel="prev" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
+    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB" href="index.html" />
+    <link rel="next" title="FEniCS solver with boundary conditions in Fortran" href="._part0001_fenics-mixed.html" />
+    <link rel="prev" title="Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB" href="index.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <!--[if lte IE 6]>
@@ -44,12 +44,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="._part0001_fenics-mixed.html" title="FEniCS solver with boundary conditions in FORTRAN"
+          <a href="._part0001_fenics-mixed.html" title="FEniCS solver with boundary conditions in Fortran"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB"
+          <a href="index.html" title="Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a> &raquo;</li> 
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -59,14 +59,14 @@
           <div class="body">
             
   <div class="section" id="combining-fenics-with-your-favorite-software-in-c-c-fortran-or-matlab">
-<h1>Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB<a class="headerlink" href="#combining-fenics-with-your-favorite-software-in-c-c-fortran-or-matlab" title="Permalink to this headline">¶</a></h1>
+<h1>Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB<a class="headerlink" href="#combining-fenics-with-your-favorite-software-in-c-c-fortran-or-matlab" title="Permalink to this headline">¶</a></h1>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body">Kent-Andre Mardal (kent-and at simula.no), Hans Petter Langtangen (hpl at simula.no)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Date:</th><td class="field-body">Apr 18, 2013</td>
+<tr class="field-even field"><th class="field-name">Date:</th><td class="field-body">May 22, 2013</td>
 </tr>
 </tbody>
 </table>
@@ -80,7 +80,7 @@ solving PDEs, and in those cases a FEniCS solver must be coupled to
 other types of software.  This is usually easy and convenient if the
 FEniCS solver is coded in Python and the other software is either
 written in Python or easily accessible from Python.</p>
-<p>Coupling of FEniCS solvers in Python with MATLAB, FORTRAN, C, or C++
+<p>Coupling of FEniCS solvers in Python with MATLAB, Fortran, C, or C++
 codes is possible, and in principle straightforward, but there might
 be a lot of technical details in practice. Many potential FEniCS users
 already have substantial pieces of software in other more traditional
@@ -92,7 +92,7 @@ is seldom the focal point of a computational scientist.
 We have therefore written this document to provide some examples and
 associated detailed explanations on how the mentioned tools can be used to
 combine FEniCS solvers in Python with other code written in MATLAB,
-FORTRAN, C, and C++. We believe that even if the examples are
+Fortran, C, and C++. We believe that even if the examples are
 short and limited in complexity, the couplings are technically
 complicated and broad enough to cover a range of different situations
 in the real world.</p>
@@ -102,7 +102,7 @@ case studies:</p>
 <div><ol class="arabic simple">
 <li><em>A flow problem with boundary conditions depending on a system of
 ODEs</em>. The ODE solver and the ODE system are implemented in
-FORTRAN, and we use F2PY to generate wrapper code such that
+Fortran, and we use F2PY to generate wrapper code such that
 the ODE solver is accessible from Python.</li>
 <li><em>A flow optimization problem</em>. The goal here is to compute the
 optimal placement, permeability and size of a porous medium within
@@ -121,9 +121,9 @@ as alternative ways for coupling C++ and Python codes.</li>
 </ol>
 </div></blockquote>
 <p>This tutorial is meant for FEniCS users. For introductions to FEniCS,
-see the gentle tutorial <a class="reference internal" href="._part0005_fenics-mixed.html#ref01">[Ref01]</a>, the paper
-<a class="reference internal" href="._part0005_fenics-mixed.html#ref02">[Ref02]</a>, or the more comprehensive book about the FEniCS
-project <a class="reference internal" href="._part0005_fenics-mixed.html#ref03">[Ref03]</a>.</p>
+see the gentle tutorial <a class="reference internal" href="fenics-mixed.html#ref01">[Ref01]</a>, the paper
+<a class="reference internal" href="fenics-mixed.html#ref02">[Ref02]</a>, or the more comprehensive book about the FEniCS
+project <a class="reference internal" href="fenics-mixed.html#ref03">[Ref03]</a>.</p>
 <p>The present tutorial is found on GitHub:
 <a class="reference external" href="https://github.com/hplgit/fenics-mixed">https://github.com/hplgit/fenics-mixed</a>. The following command
 downloads all the files:</p>
@@ -143,16 +143,16 @@ The code examples are tested with FEniCS version 1.2.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a></li>
+<li><a class="reference internal" href="#">Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</a></li>
 <li><a class="reference internal" href="#introduction">Introduction</a></li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
-                        title="previous chapter">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a></p>
+                        title="previous chapter">Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="._part0001_fenics-mixed.html"
-                        title="next chapter">FEniCS solver with boundary conditions in FORTRAN</a></p>
+                        title="next chapter">FEniCS solver with boundary conditions in Fortran</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -177,12 +177,12 @@ The code examples are tested with FEniCS version 1.2.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="._part0001_fenics-mixed.html" title="FEniCS solver with boundary conditions in FORTRAN"
+          <a href="._part0001_fenics-mixed.html" title="FEniCS solver with boundary conditions in Fortran"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB"
+          <a href="index.html" title="Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB"
              >previous</a> |</li>
-        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</a> &raquo;</li> 
+        <li><a href="index.html">Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

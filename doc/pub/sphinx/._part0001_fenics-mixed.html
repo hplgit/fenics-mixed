@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FEniCS solver with boundary conditions in FORTRAN &mdash; Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB</title>
+    <title>FEniCS solver with boundary conditions in Fortran &mdash; Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB</title>
     
     <link rel="stylesheet" href="_static/fenics.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,9 +25,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="index.html" />
+    <link rel="top" title="Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB" href="index.html" />
     <link rel="next" title="FEniCS solver with optimization in Octave" href="._part0002_fenics-mixed.html" />
-    <link rel="prev" title="Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB" href="._part0000_fenics-mixed.html" />
+    <link rel="prev" title="Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB" href="._part0000_fenics-mixed.html" />
 <!--[if lte IE 6]>
 <link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
 <![endif]-->
@@ -105,12 +105,12 @@
           <div class="body">
             
   <div class="section" id="fenics-solver-with-boundary-conditions-in-fortran">
-<h1>FEniCS solver with boundary conditions in FORTRAN<a class="headerlink" href="#fenics-solver-with-boundary-conditions-in-fortran" title="Permalink to this headline">¶</a></h1>
-<p>FORTRAN programs are usually easy to interface in Python
+<h1>FEniCS solver with boundary conditions in Fortran<a class="headerlink" href="#fenics-solver-with-boundary-conditions-in-fortran" title="Permalink to this headline">¶</a></h1>
+<p>Fortran programs are usually easy to interface in Python
 by using the wrapper code
 generator <a class="reference external" href="http://www.scipy.org/f2py">F2PY</a>.
-F2PY supports FORTRAN 77, FORTRAN 90, and even C (and thereby C++,
-see the section <a class="reference internal" href="._part0004_fenics-mixed.html#fext-pdeode-cpp"><em>FEniCS solver coupled with ODE solver in C++</em></a>). It is our experience
+F2PY supports Fortran 77, Fortran 90, and even C (and thereby C++,
+see the section <a class="reference internal" href="fenics-mixed.html#fext-pdeode-cpp"><em>FEniCS solver coupled with ODE solver in C++</em></a>). It is our experience
 that F2PY is much more straightforward to use than
 the other tools we describe for interfacing Python with compiled languages.
 F2PY is therefore a natural starting point for our examples.</p>
@@ -119,15 +119,15 @@ F2PY is therefore a natural starting point for our examples.</p>
 <p class="caption"><em>An illustration of a cerebral aneurysm</em></p>
 </div>
 <p>The present worked example involves solving the Navier-Stokes equations by
-a FEniCS solver, but calling up a FORTRAN 77 code for modeling the
+a FEniCS solver, but calling up a Fortran 77 code for modeling the
 boundary conditions.
 The physical problem concerns blood flow in a cerebral aneurysm. An
 aneurysm is a balloon-shaped deformation of a cerebral artery, see
-Figure <a class="reference internal" href="#fext-ex2-fig1"><em>An illustration of a cerebral aneurysm</em></a>.  Some aneurysms rupture and cause stroke, while
+Figure <a class="reference internal" href="fenics-mixed.html#fext-ex2-fig1"><em>An illustration of a cerebral aneurysm</em></a>.  Some aneurysms rupture and cause stroke, while
 other remain stable for long periods of time, and it is currently not
 possible to determine the rupture risk in a patient-specific manner.
 Computational studies have recently
-demonstrated that fluid dynamics simulations can be used to discriminate ruptured from non-ruptured aneurysms <a class="reference internal" href="._part0005_fenics-mixed.html#ref04">[Ref04]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref05">[Ref05]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref06">[Ref06]</a> <a class="reference internal" href="._part0005_fenics-mixed.html#ref07">[Ref07]</a>,
+demonstrated that fluid dynamics simulations can be used to discriminate ruptured from non-ruptured aneurysms <a class="reference internal" href="fenics-mixed.html#ref04">[Ref04]</a> <a class="reference internal" href="fenics-mixed.html#ref05">[Ref05]</a> <a class="reference internal" href="fenics-mixed.html#ref06">[Ref06]</a> <a class="reference internal" href="fenics-mixed.html#ref07">[Ref07]</a>,
 retrospectively, and have therefore demonstrated the potential of simulations to many clinicians.</p>
 <div class="figure" id="fext-ex2-fig2">
 <img alt="_images/aneurysm.png" src="_images/aneurysm.png" style="width: 400px;" />
@@ -180,7 +180,7 @@ this document, so we just refer the reader to the relatively short
 <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ns/NSSolver.py">NSSolver.py</a> file.</p>
 </div>
 <div class="section" id="the-fortran-code-for-modeling-boundary-conditions">
-<h2>The FORTRAN code for modeling boundary conditions<a class="headerlink" href="#the-fortran-code-for-modeling-boundary-conditions" title="Permalink to this headline">¶</a></h2>
+<h2>The Fortran code for modeling boundary conditions<a class="headerlink" href="#the-fortran-code-for-modeling-boundary-conditions" title="Permalink to this headline">¶</a></h2>
 <p>The <tt class="docutils literal"><span class="pre">NSSolver</span></tt> class sets Dirichlet condition for the pressure on
 inlet and outlet boundaries in terms of prescribed constants in a list
 <tt class="docutils literal"><span class="pre">P</span></tt> (one for each prescribed outlet or inlet). Our aim now is to use a
@@ -207,10 +207,10 @@ we can write</p>
 the new pressure outlet condition is <span class="math">\(P=P^{N}\)</span> for the next time step.
 <span class="math">\(P^0\)</span> is taken as <span class="math">\(P\)</span> at time <span class="math">\(t\)</span> (<span class="math">\(P\)</span> is the outlet pressure
 value at time <span class="math">\(t+\Delta t\)</span>).</p>
-<p>The computational model for <span class="math">\(P\)</span> is implemented in FORTRAN. (Our
+<p>The computational model for <span class="math">\(P\)</span> is implemented in Fortran. (Our
 specific model is a simple one; the problem setting is that another
 research group is continuously developing such models, and their software
-is in FORTRAN.) The solver in FORTRAN is implemented in a file
+is in Fortran.) The solver in Fortran is implemented in a file
 <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ns/f77/PMODEL.f">PMODEL.f</a> with the content</p>
 <div class="highlight-fortran"><div class="highlight"><pre>      <span class="k">SUBROUTINE </span><span class="nv">PMODEL</span><span class="p">(</span><span class="nv">P</span><span class="p">,</span> <span class="nv">P_1</span><span class="p">,</span> <span class="nv">R_D</span><span class="p">,</span> <span class="nv">Q</span><span class="p">,</span> <span class="nv">C</span><span class="p">,</span> <span class="nv">N</span><span class="p">,</span> <span class="nv">T</span><span class="p">)</span>
 <span class="nv">C</span>     <span class="nv">Integrate</span> <span class="nv">P</span> <span class="nv">in</span> <span class="nv">N</span> <span class="nv">steps</span> <span class="nv">from</span> <span class="mi">0</span> <span class="nv">to</span> <span class="nv">T</span><span class="p">,</span> <span class="nv">given</span> <span class="nv">start</span> <span class="k">value </span><span class="nv">P_1</span>
@@ -234,19 +234,19 @@ is in FORTRAN.) The solver in FORTRAN is implemented in a file
 with <tt class="docutils literal"><span class="pre">P(N)</span></tt> as the final value at that time.  We shall call <tt class="docutils literal"><span class="pre">PMODEL</span></tt>
 at every time step in the flow solver and let <tt class="docutils literal"><span class="pre">T</span></tt> correspond to the
 fluid solver time step <span class="math">\(\Delta t\)</span>.</p>
-<p>The subroutine is plain FORTRAN 77 except for some special comment
+<p>The subroutine is plain Fortran 77 except for some special comment
 lines starting with <tt class="docutils literal"><span class="pre">CF2PY</span></tt>. These are needed because in
-FORTRAN, subroutine arguments are both input and output,
+Fortran, subroutine arguments are both input and output,
 but in Python one normally takes all input as arguments to a function
 and <em>returns</em> all output arguments. This is technically not
-possible in FORTRAN (or C or C++). With the <tt class="docutils literal"><span class="pre">CF2PY</span></tt> comment lines
-we can help the F2PY translater to make the FORTRAN subroutine look
+possible in Fortran (or C or C++). With the <tt class="docutils literal"><span class="pre">CF2PY</span></tt> comment lines
+we can help the F2PY translater to make the Fortran subroutine look
 more &#8220;Pythonic&#8221; from the Python side. To this end, we need to specify
 what arguments that are input and output. All arguments are
 input by default, but here we still list them to have complete
 specification of every argument in this function. The output
 argument, to be returned to Python, <em>must</em> be specified, here <tt class="docutils literal"><span class="pre">P</span></tt>.</p>
-<p>Creating a shared library of the FORTRAN code that we can call from
+<p>Creating a shared library of the Fortran code that we can call from
 Python as an ordinary module is easy:</p>
 <div class="highlight-console"><div class="highlight"><pre><span class="go">Terminal&gt; F2PY -c -m bcmodelf77 ../PMODEL.f</span>
 </pre></div>
@@ -254,11 +254,11 @@ Python as an ordinary module is easy:</p>
 <p>Here, <tt class="docutils literal"><span class="pre">-m</span> <span class="pre">bcmodelf77</span></tt> tells F2PY that the module name is
 be <tt class="docutils literal"><span class="pre">bcmodelf77</span></tt>, the <tt class="docutils literal"><span class="pre">-c</span></tt> instructs F2PY to compile and create
 a shared library <tt class="docutils literal"><span class="pre">bcmodelf77.so</span></tt>, and <tt class="docutils literal"><span class="pre">PMODEL.f</span></tt> is the name of
-the FORTRAN file to analyze and compile. Our convention is to
-compile F2PY modules in a subdirectory of the FORTRAN code,
+the Fortran file to analyze and compile. Our convention is to
+compile F2PY modules in a subdirectory of the Fortran code,
 which explains why the file here has name <tt class="docutils literal"><span class="pre">../PMODEL.f</span></tt>.</p>
 <p>A little <a class="reference external" href="https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ns/f77/f2py/test.py">test code</a> can compare
-the FORTRAN ODE solver with a couple of manual lines in Python:</p>
+the Fortran ODE solver with a couple of manual lines in Python:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nose.tools</span> <span class="kn">as</span> <span class="nn">nt</span>
 
 <span class="k">def</span> <span class="nf">test_bcmodelf77</span><span class="p">():</span>
@@ -286,7 +286,7 @@ the FORTRAN ODE solver with a couple of manual lines in Python:</p>
 viewed from Python.  Also note that this test function is created as a
 nose unit test. Running <tt class="docutils literal"><span class="pre">nosetests</span></tt> in that directory finds all
 <tt class="docutils literal"><span class="pre">test_*</span></tt> functions in all files and executes these functions.</p>
-<p>Instead of calling the FORTRAN function directly with many parameters,
+<p>Instead of calling the Fortran function directly with many parameters,
 we wrap a class around the function such that the syntax of each call
 to compute <span class="math">\(P\)</span> becomes simpler. The idea is to let parameters that are
 constant through the fluid flow simulation be attributes in the class
@@ -307,14 +307,14 @@ explains this idea clearly:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pmodel</span> <span class="o">=</span> <span class="n">BCModel</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mf">0.127</span><span class="p">,</span> <span class="n">R_d</span><span class="o">=</span><span class="mf">5.43</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>and there after call the FORTRAN subroutine <tt class="docutils literal"><span class="pre">PMODEL</span></tt> by
+<p>and there after call the Fortran subroutine <tt class="docutils literal"><span class="pre">PMODEL</span></tt> by
 <tt class="docutils literal"><span class="pre">pmodel(P,</span> <span class="pre">Q)</span></tt>, i.e., with only the arguments that change
 from time step to time step in the fluid solver.</p>
 </div>
 <div class="section" id="coupling-the-python-fenics-solver-with-the-fortran-routine">
-<h2>Coupling the Python FEniCS solver with the FORTRAN routine<a class="headerlink" href="#coupling-the-python-fenics-solver-with-the-fortran-routine" title="Permalink to this headline">¶</a></h2>
+<h2>Coupling the Python FEniCS solver with the Fortran routine<a class="headerlink" href="#coupling-the-python-fenics-solver-with-the-fortran-routine" title="Permalink to this headline">¶</a></h2>
 <p>It remains to make the final glue between the FEniCS solver and the
-FORTRAN subroutine. In the FEniCS solver, we import the <tt class="docutils literal"><span class="pre">BCModel</span></tt>
+Fortran subroutine. In the FEniCS solver, we import the <tt class="docutils literal"><span class="pre">BCModel</span></tt>
 class and make a list of such objects, with one element for each
 outlet boundary where we want to use the ODE model. Then we invoke a
 time loop where new <span class="math">\(u\)</span> and <span class="math">\(p\)</span> are computed, then we compute the flux

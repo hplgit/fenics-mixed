@@ -1,12 +1,12 @@
 .. !split
 
-FEniCS solver with boundary conditions in FORTRAN
+FEniCS solver with boundary conditions in Fortran
 =================================================
 
-FORTRAN programs are usually easy to interface in Python
+Fortran programs are usually easy to interface in Python
 by using the wrapper code
 generator `F2PY <http://www.scipy.org/f2py>`_.
-F2PY supports FORTRAN 77, FORTRAN 90, and even C (and thereby C++,
+F2PY supports Fortran 77, Fortran 90, and even C (and thereby C++,
 see the section :ref:`fext:pdeode:cpp`). It is our experience
 that F2PY is much more straightforward to use than
 the other tools we describe for interfacing Python with compiled languages.
@@ -22,7 +22,7 @@ F2PY is therefore a natural starting point for our examples.
 
 
 The present worked example involves solving the Navier-Stokes equations by
-a FEniCS solver, but calling up a FORTRAN 77 code for modeling the
+a FEniCS solver, but calling up a Fortran 77 code for modeling the
 boundary conditions.
 The physical problem concerns blood flow in a cerebral aneurysm. An
 aneurysm is a balloon-shaped deformation of a cerebral artery, see
@@ -130,7 +130,7 @@ this document, so we just refer the reader to the relatively short
 .. @@@CODE src-fenics-mixed/ns/NSSolver.py fromto: advance_one_time_step@ufile
 
 
-The FORTRAN code for modeling boundary conditions
+The Fortran code for modeling boundary conditions
 -------------------------------------------------
 
 The ``NSSolver`` class sets Dirichlet condition for the pressure on
@@ -172,10 +172,10 @@ the new pressure outlet condition is :math:`P=P^{N}` for the next time step.
 :math:`P^0` is taken as :math:`P` at time :math:`t` (:math:`P` is the outlet pressure
 value at time :math:`t+\Delta t`).
 
-The computational model for :math:`P` is implemented in FORTRAN. (Our
+The computational model for :math:`P` is implemented in Fortran. (Our
 specific model is a simple one; the problem setting is that another
 research group is continuously developing such models, and their software
-is in FORTRAN.) The solver in FORTRAN is implemented in a file
+is in Fortran.) The solver in Fortran is implemented in a file
 `PMODEL.f <https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ns/f77/PMODEL.f>`_ with the content
 
 
@@ -203,13 +203,13 @@ with ``P(N)`` as the final value at that time.  We shall call ``PMODEL``
 at every time step in the flow solver and let ``T`` correspond to the
 fluid solver time step :math:`\Delta t`.
 
-The subroutine is plain FORTRAN 77 except for some special comment
+The subroutine is plain Fortran 77 except for some special comment
 lines starting with ``CF2PY``. These are needed because in
-FORTRAN, subroutine arguments are both input and output,
+Fortran, subroutine arguments are both input and output,
 but in Python one normally takes all input as arguments to a function
 and *returns* all output arguments. This is technically not
-possible in FORTRAN (or C or C++). With the ``CF2PY`` comment lines
-we can help the F2PY translater to make the FORTRAN subroutine look
+possible in Fortran (or C or C++). With the ``CF2PY`` comment lines
+we can help the F2PY translater to make the Fortran subroutine look
 more "Pythonic" from the Python side. To this end, we need to specify
 what arguments that are input and output. All arguments are
 input by default, but here we still list them to have complete
@@ -217,7 +217,7 @@ specification of every argument in this function. The output
 argument, to be returned to Python, *must* be specified, here ``P``.
 
 
-Creating a shared library of the FORTRAN code that we can call from
+Creating a shared library of the Fortran code that we can call from
 Python as an ordinary module is easy:
 
 
@@ -228,12 +228,12 @@ Python as an ordinary module is easy:
 Here, ``-m bcmodelf77`` tells F2PY that the module name is
 be ``bcmodelf77``, the ``-c`` instructs F2PY to compile and create
 a shared library ``bcmodelf77.so``, and ``PMODEL.f`` is the name of
-the FORTRAN file to analyze and compile. Our convention is to
-compile F2PY modules in a subdirectory of the FORTRAN code,
+the Fortran file to analyze and compile. Our convention is to
+compile F2PY modules in a subdirectory of the Fortran code,
 which explains why the file here has name ``../PMODEL.f``.
 
 A little `test code <https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed/ns/f77/f2py/test.py>`_ can compare
-the FORTRAN ODE solver with a couple of manual lines in Python:
+the Fortran ODE solver with a couple of manual lines in Python:
 
 
 .. code-block:: python
@@ -265,7 +265,7 @@ viewed from Python.  Also note that this test function is created as a
 nose unit test. Running ``nosetests`` in that directory finds all
 ``test_*`` functions in all files and executes these functions.
 
-Instead of calling the FORTRAN function directly with many parameters,
+Instead of calling the Fortran function directly with many parameters,
 we wrap a class around the function such that the syntax of each call
 to compute :math:`P` becomes simpler. The idea is to let parameters that are
 constant through the fluid flow simulation be attributes in the class
@@ -292,15 +292,15 @@ We can now set all constant parameters at once,
 
         pmodel = BCModel(C=0.127, R_d=5.43, N=2, T=0.01)
 
-and there after call the FORTRAN subroutine ``PMODEL`` by
+and there after call the Fortran subroutine ``PMODEL`` by
 ``pmodel(P, Q)``, i.e., with only the arguments that change
 from time step to time step in the fluid solver.
 
-Coupling the Python FEniCS solver with the FORTRAN routine
+Coupling the Python FEniCS solver with the Fortran routine
 ----------------------------------------------------------
 
 It remains to make the final glue between the FEniCS solver and the
-FORTRAN subroutine. In the FEniCS solver, we import the ``BCModel``
+Fortran subroutine. In the FEniCS solver, we import the ``BCModel``
 class and make a list of such objects, with one element for each
 outlet boundary where we want to use the ODE model. Then we invoke a
 time loop where new :math:`u` and :math:`p` are computed, then we compute the flux
