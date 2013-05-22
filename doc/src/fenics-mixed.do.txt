@@ -87,7 +87,7 @@ The code examples are tested with FEniCS version 1.2.
 
 FORTRAN programs are usually easy to interface in Python
 by using the wrapper code
-generator "F2PY": "http://www.scipy.org/f2py".
+generator "F2PY": "http://www.scipy.org/f2py" cite{f2py_paper,f2py}.
 F2PY supports FORTRAN 77, FORTRAN 90, and even C (and thereby C++,
 see Section ref{fext:pdeode:cpp}). It is our experience
 that F2PY is much more straightforward to use than
@@ -593,7 +593,7 @@ declarations look like the following string:
 @@@CODE src-fenics-mixed/probe/instant_test_probe.py fromto: additional_decl =@system_headers
 
 The `init` part containing `import_array` is always needed when NumPy
-arrays are involved.  Thereafter, we include various SWIG interface
+cite{NumPy} arrays are involved.  Thereafter, we include various SWIG interface
 files (ending in `.i`) that we need in DOLFIN-related code. We also
 need shared pointers for `dolfin::Function` and
 `dolfin::FunctionSpace`. In addition we need header files for
@@ -940,7 +940,8 @@ directory for details.
 
 ===== Wrapping with SWIG =====
 
-Next, we employ the tool "SWIG":"http://www.swig.org" to wrap the C++ class
+Next, we employ the tool "SWIG":"http://www.swig.org" cite{swig}
+to wrap the C++ class
 directly and make it available as a Python class.
 SWIG is also used in DOLFIN and Instant, as demonstrated
 in Section ref{fext:dolfin:cpp}.
@@ -1179,7 +1180,7 @@ Finally, the module is built using a "`setup.py`": "${src_path}/ODEFieldSolver/c
 
 
 !split
-======== Acknowledgment ======== 
+======== Acknowledgment ========
 The first author want to thank Alison L. Marsden,
 Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
 Example 2 and 3, and for hosting the first author during the summer
