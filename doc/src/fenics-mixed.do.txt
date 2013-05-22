@@ -5,7 +5,7 @@ src_path = 'http://hplgit.github.io/fenics-mixed/doc/src/src-fenics-mixed'
 src_path = 'https://github.com/hplgit/fenics-mixed/blob/master/doc/src/src-fenics-mixed'
 %>
 
-TITLE: Combining FEniCS with Your Favorite Software in C, C++, FORTRAN, or MATLAB
+TITLE: Combining FEniCS with Your Favorite Software in C, C++, Fortran, or MATLAB
 AUTHOR: Kent-Andre Mardal Email:kent-and@simula.no at Center for Biomedical Computing, Simula Research Laboratory and Department of Informatics, University of Oslo
 AUTHOR: Hans Petter Langtangen Email:hpl@simula.no at Center for Biomedical Computing, Simula Research Laboratory and Department of Informatics, University of Oslo
 DATE: today
@@ -23,7 +23,7 @@ other types of software.  This is usually easy and convenient if the
 FEniCS solver is coded in Python and the other software is either
 written in Python or easily accessible from Python.
 
-Coupling of FEniCS solvers in Python with MATLAB, FORTRAN, C, or C++
+Coupling of FEniCS solvers in Python with MATLAB, Fortran, C, or C++
 codes is possible, and in principle straightforward, but there might
 be a lot of technical details in practice. Many potential FEniCS users
 already have substantial pieces of software in other more traditional
@@ -35,7 +35,7 @@ is seldom the focal point of a computational scientist.
 We have therefore written this document to provide some examples and
 associated detailed explanations on how the mentioned tools can be used to
 combine FEniCS solvers in Python with other code written in MATLAB,
-FORTRAN, C, and C++. We believe that even if the examples are
+Fortran, C, and C++. We believe that even if the examples are
 short and limited in complexity, the couplings are technically
 complicated and broad enough to cover a range of different situations
 in the real world.
@@ -45,7 +45,7 @@ case studies:
 
   o *A flow problem with boundary conditions depending on a system of
     ODEs*. The ODE solver and the ODE system are implemented in
-    FORTRAN, and we use F2PY to generate wrapper code such that
+    Fortran, and we use F2PY to generate wrapper code such that
     the ODE solver is accessible from Python.
 
   o *A flow optimization problem*. The goal here is to compute the
@@ -83,12 +83,12 @@ The code examples are tested with FEniCS version 1.2.
 
 
 !split
-======= FEniCS solver with boundary conditions in FORTRAN  =======
+======= FEniCS solver with boundary conditions in Fortran  =======
 
-FORTRAN programs are usually easy to interface in Python
+Fortran programs are usually easy to interface in Python
 by using the wrapper code
 generator "F2PY": "http://www.scipy.org/f2py".
-F2PY supports FORTRAN 77, FORTRAN 90, and even C (and thereby C++,
+F2PY supports Fortran 77, Fortran 90, and even C (and thereby C++,
 see Section ref{fext:pdeode:cpp}). It is our experience
 that F2PY is much more straightforward to use than
 the other tools we describe for interfacing Python with compiled languages.
@@ -97,7 +97,7 @@ F2PY is therefore a natural starting point for our examples.
 FIGURE:[fig-fenics-mixed/Cerebral_aneurysm_NIH.jpg, width=400 frac=0.5] An illustration of a cerebral aneurysm. label{fext:ex2:fig1}
 
 The present worked example involves solving the Navier-Stokes equations by
-a FEniCS solver, but calling up a FORTRAN 77 code for modeling the
+a FEniCS solver, but calling up a Fortran 77 code for modeling the
 boundary conditions.
 The physical problem concerns blood flow in a cerebral aneurysm. An
 aneurysm is a balloon-shaped deformation of a cerebral artery, see
@@ -168,7 +168,7 @@ this document, so we just refer the reader to the relatively short
 #The `advance_one_timestep` function implements the Chorin scheme:
 #@@@CODE src-fenics-mixed/ns/NSSolver.py fromto: advance_one_time_step@ufile
 
-===== The FORTRAN code for modeling boundary conditions =====
+===== The Fortran code for modeling boundary conditions =====
 
 The `NSSolver` class sets Dirichlet condition for the pressure on
 inlet and outlet boundaries in terms of prescribed constants in a list
@@ -206,10 +206,10 @@ the new pressure outlet condition is $P=P^{N}$ for the next time step.
 $P^0$ is taken as $P$ at time $t$ ($P$ is the outlet pressure
 value at time $t+\Delta t$).
 
-The computational model for $P$ is implemented in FORTRAN. (Our
+The computational model for $P$ is implemented in Fortran. (Our
 specific model is a simple one; the problem setting is that another
 research group is continuously developing such models, and their software
-is in FORTRAN.) The solver in FORTRAN is implemented in a file
+is in Fortran.) The solver in Fortran is implemented in a file
 "`PMODEL.f`": "${src_path}/ns/f77/PMODEL.f" with the content
 
 @@@CODE src-fenics-mixed/ns/f77/PMODEL.f
@@ -219,13 +219,13 @@ with `P(N)` as the final value at that time.  We shall call `PMODEL`
 at every time step in the flow solver and let `T` correspond to the
 fluid solver time step $\Delta t$.
 
-The subroutine is plain FORTRAN 77 except for some special comment
+The subroutine is plain Fortran 77 except for some special comment
 lines starting with `CF2PY`. These are needed because in
-FORTRAN, subroutine arguments are both input and output,
+Fortran, subroutine arguments are both input and output,
 but in Python one normally takes all input as arguments to a function
 and *returns* all output arguments. This is technically not
-possible in FORTRAN (or C or C++). With the `CF2PY` comment lines
-we can help the F2PY translater to make the FORTRAN subroutine look
+possible in Fortran (or C or C++). With the `CF2PY` comment lines
+we can help the F2PY translater to make the Fortran subroutine look
 more "Pythonic" from the Python side. To this end, we need to specify
 what arguments that are input and output. All arguments are
 input by default, but here we still list them to have complete
@@ -233,7 +233,7 @@ specification of every argument in this function. The output
 argument, to be returned to Python, *must* be specified, here `P`.
 
 
-Creating a shared library of the FORTRAN code that we can call from
+Creating a shared library of the Fortran code that we can call from
 Python as an ordinary module is easy:
 
 !bc sys
@@ -242,12 +242,12 @@ Terminal> F2PY -c -m bcmodelf77 ../PMODEL.f
 Here, `-m bcmodelf77` tells F2PY that the module name is
 be `bcmodelf77`, the `-c` instructs F2PY to compile and create
 a shared library `bcmodelf77.so`, and `PMODEL.f` is the name of
-the FORTRAN file to analyze and compile. Our convention is to
-compile F2PY modules in a subdirectory of the FORTRAN code,
+the Fortran file to analyze and compile. Our convention is to
+compile F2PY modules in a subdirectory of the Fortran code,
 which explains why the file here has name `../PMODEL.f`.
 
 A little "test code": "${src_path}/ns/f77/f2py/test.py" can compare
-the FORTRAN ODE solver with a couple of manual lines in Python:
+the Fortran ODE solver with a couple of manual lines in Python:
 
 @@@CODE src-fenics-mixed/ns/f77/f2py/test.py
 Note that F2PY turns all upper case letters into lower case when
@@ -255,7 +255,7 @@ viewed from Python.  Also note that this test function is created as a
 nose unit test. Running `nosetests` in that directory finds all
 `test_*` functions in all files and executes these functions.
 
-Instead of calling the FORTRAN function directly with many parameters,
+Instead of calling the Fortran function directly with many parameters,
 we wrap a class around the function such that the syntax of each call
 to compute $P$ becomes simpler. The idea is to let parameters that are
 constant through the fluid flow simulation be attributes in the class
@@ -269,14 +269,14 @@ We can now set all constant parameters at once,
 !bc pycod
 pmodel = BCModel(C=0.127, R_d=5.43, N=2, T=0.01)
 !ec
-and there after call the FORTRAN subroutine `PMODEL` by
+and there after call the Fortran subroutine `PMODEL` by
 `pmodel(P, Q)`, i.e., with only the arguments that change
 from time step to time step in the fluid solver.
 
-===== Coupling the Python FEniCS solver with the FORTRAN routine =====
+===== Coupling the Python FEniCS solver with the Fortran routine =====
 
 It remains to make the final glue between the FEniCS solver and the
-FORTRAN subroutine. In the FEniCS solver, we import the `BCModel`
+Fortran subroutine. In the FEniCS solver, we import the `BCModel`
 class and make a list of such objects, with one element for each
 outlet boundary where we want to use the ODE model. Then we invoke a
 time loop where new $u$ and $p$ are computed, then we compute the flux
@@ -714,9 +714,9 @@ class ODEFieldSolver {
 
 ===== Wrapping with F2PY =====
 
-The easiest way to interface FORTRAN, C, and C++ code is to use F2PY.
-Although F2PY was made for interfacing FORTRAN and most of the documentation
-is written with FORTRAN codes in mind, it is convenient to interface
+The easiest way to interface Fortran, C, and C++ code is to use F2PY.
+Although F2PY was made for interfacing Fortran and most of the documentation
+is written with Fortran codes in mind, it is convenient to interface
 C and C++ too. Or more precisely, F2PY can interface a pure C API, not
 C++ classes. The idea is then to construct a set of C functions on top
 of the C++ classes for accessing high-level operations using the those classes.
@@ -745,24 +745,24 @@ The "complete code of the C API":
 
 @@@CODE src-fenics-mixed/ODEFieldSolver/f2py-cpp/capi2cpp.cpp
 
-=== Writing corresponding FORTRAN signatures ===
+=== Writing corresponding Fortran signatures ===
 
 The nice thing about F2PY is that it can automatically make a Python
 interface to this C code, where NumPy arrays can be passed to the
 functions taking plain C arrays as arguments. For this to work, F2PY
-needs a specification of all the C functions in terms of FORTRAN 90
+needs a specification of all the C functions in terms of Fortran 90
 module syntax. However, F2PY can generate this module for us if we
-specify the function signatures in plain FORTRAN 77. This is done as
+specify the function signatures in plain Fortran 77. This is done as
 follows:
 
 @@@CODE src-fenics-mixed/ODEFieldSolver/f2py-cpp/signatures_capi2cpp.f
 
 For each C function we
 
-  * write the corresponding FORTRAN subroutine or function header,
+  * write the corresponding Fortran subroutine or function header,
   * insert an F2PY-specific comment (`CF2PY`) that tells that the
     function is in C: `intent(c)`,
-  * specify that all variables are in C: `intent(c)` (FORTRAN treats
+  * specify that all variables are in C: `intent(c)` (Fortran treats
     all arguments as pointers, so the specification of C variables is
     strictly needed only for non-pointers),
   * specify if we want the Python interface to return one or more output
@@ -774,8 +774,8 @@ The `s` argument is needed for the function to avoid
 reallocating the returned array every time the function is call. Instead
 we reuse the storage provied in the `s` array.
 
-If the FORTRAN 77 signatures are in a file `signatures_capi2cpp.f` we
-can get F2PY to generate a FORTRAN 90 module in a file `ODEFieldSolvercpp.pyf`
+If the Fortran 77 signatures are in a file `signatures_capi2cpp.f` we
+can get F2PY to generate a Fortran 90 module in a file `ODEFieldSolvercpp.pyf`
 by the command
 
 !bc sys
@@ -823,13 +823,13 @@ end python module ODEFieldSolvercpp
 ! This file was auto-generated with f2py (version:2).
 ! See http://cens.ioc.ee/projects/f2pye/
 !ec
-Those who are familiar with FORTRAN 90 modules can write such
-code by hand instead of first writing FORTRAN 77 headers and letting
+Those who are familiar with Fortran 90 modules can write such
+code by hand instead of first writing Fortran 77 headers and letting
 F2PY generate the module.
 
 === Building the extension module ===
 
-With the aid of the FORTRAN 90 specification of the C functions, F2PY
+With the aid of the Fortran 90 specification of the C functions, F2PY
 can compile and link the extension module by a command like
 
 !bc sys
@@ -931,8 +931,8 @@ The pure C implementation goes as follows:
 
 @@@CODE src-fenics-mixed/ODEFieldSolver/f2py-c/c_version.c
 
-By writing the corresponding FORTRAN 77 signatures, F2PY can generate
-a FORTRAN 90 module specification of the extension module, and this
+By writing the corresponding Fortran 77 signatures, F2PY can generate
+a Fortran 90 module specification of the extension module, and this
 code can be compiled as explained above.
 We refer to the files in the "f2py-c": "${src_path}/ODEFieldSolver/f2py-c"
 directory for details.

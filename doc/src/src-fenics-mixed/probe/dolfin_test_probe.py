@@ -41,8 +41,9 @@ probe = probe_module.Probe(x, V)
 u0 = interpolate(Expression('x[0]'), V)
 # Fast evaluation of U0 at x:
 probe.eval(u0)
-print "The value at ", x, " is ", probe.get_probe(0)
-print "Number of probes: ", probe.value_size()
+print "The number of probes is ", probe.number_of_eval_calls()
+print "The value at ", x, " is ", probe.get_values(0)
+
 
 
 

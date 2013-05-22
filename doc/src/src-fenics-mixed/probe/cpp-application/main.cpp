@@ -22,8 +22,8 @@ int main(){
   Function u(V); 
   u.interpolate(u0); 
   probe.eval(u); 
-  std::cout <<" number of probes "<< probe.value_size() <<std::endl; 
-  std::cout <<" evaluation "<< probe.get_probe(0)[0] <<std::endl; 
+  std::cout <<" number of probes "<< probe.number_of_eval_calls() <<std::endl; 
+  std::cout <<" evaluation "<< probe.get_values(0)[0] <<std::endl; 
 }
 
 

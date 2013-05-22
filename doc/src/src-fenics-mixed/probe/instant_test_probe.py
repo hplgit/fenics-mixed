@@ -11,17 +11,17 @@ namespace dolfin
   class Probe
   {
   public:
-    Probe(const Array<double>& x, const FunctionSpace& V);
+    Probe(const Array<double>& point, const FunctionSpace& V);
     void eval(const Function& u);
+    std::vector<double> get_values(std::size_t component);
 
-    std::vector<double> get_probe(std::size_t i);
-    std::size_t value_size();
-    std::size_t number_of_evaluations();
-    std::vector<double> coordinates();
+    std::size_t num_components() {return value_size_loc;};
+    std::size_t number_of_eval_calls() {return _probes[0].size();};
+    std::vector<double> get_point();
     void erase(std::size_t i);
     void clear();
 
-   private:
+  private:
     std::vector<std::vector<double> > basis_matrix;
     std::vector<double> coefficients;
     double _x[3];
@@ -89,8 +89,8 @@ probe = compiled_module.Probe(x, V)
 # Just create some random data to be used for probing
 u0 = interpolate(Expression('x[0]'), V)
 probe.eval(u0)
-print "The number of probes is ", probe.value_size()
-print "The value at ", x, " is ", probe.get_probe(0)
+print "The number of probes is ", probe.number_of_eval_calls()
+print "The value at ", x, " is ", probe.get_values(0)
 
 
 

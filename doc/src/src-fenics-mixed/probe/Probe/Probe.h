@@ -6,10 +6,6 @@
 
 namespace dolfin
 {
-  class Function;
-  class FunctionSpace;
-  template<typename T> class Array;
-
   class Probe
   {
   public:
