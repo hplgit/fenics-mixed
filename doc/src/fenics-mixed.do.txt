@@ -593,7 +593,7 @@ declarations look like the following string:
 @@@CODE src-fenics-mixed/probe/instant_test_probe.py fromto: additional_decl =@system_headers
 
 The `init` part containing `import_array` is always needed when NumPy
-arrays are involved.  Thereafter, we include various SWIG interface
+cite{NumPy} arrays are involved.  Thereafter, we include various SWIG interface
 files (ending in `.i`) that we need in DOLFIN-related code. We also
 need shared pointers for `dolfin::Function` and
 `dolfin::FunctionSpace`. In addition we need header files for
@@ -1179,7 +1179,7 @@ Finally, the module is built using a "`setup.py`": "${src_path}/ODEFieldSolver/c
 
 
 !split
-======== Acknowledgment ======== 
+======== Acknowledgment ========
 The first author want to thank Alison L. Marsden,
 Weiguang Yang, and Mahdi Esmaily-Mohgadam for discussions and code for
 Example 2 and 3, and for hosting the first author during the summer
